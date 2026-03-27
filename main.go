@@ -12,6 +12,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
 
@@ -31,14 +33,18 @@ func main() {
 	finds := reg.FindAllString(contents, -1)
 	fmt.Println()
 
-	var managed_ids []string
+	var managed_ids = make(map[string]struct{})
 	for _, el := range finds {
 		res := strings.Split(el, "\": ")
 		if len(res) != 2 {
 			continue
 		}
 		managed_id, _ := strings.CutSuffix(res[1], ",")
-		managed_ids = append(managed_ids, managed_id)
+		managed_id = strings.ReplaceAll(managed_id, "\"", "")
+		_, ok := managed_ids[managed_id]
+		if !ok {
+			managed_ids[managed_id] = struct{}{}
+		}
 	}
 	fmt.Println(managed_ids)
 
@@ -47,9 +53,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	client := ssm.NewFromConfig(cfg)
+	ssm_client := ssm.NewFromConfig(cfg)
 
-	res, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
+	res, err := ssm_client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
 		Path:       aws.String("/"),
 		MaxResults: aws.Int32(10),
 		Recursive:  aws.Bool(true),
@@ -62,5 +68,25 @@ func main() {
 	fmt.Println("Found " + strconv.Itoa(len(res.Parameters)) + " parameters")
 	for _, el := range res.Parameters {
 		fmt.Println(*el.Name)
+	}
+
+	iam_client := iam.NewFromConfig(cfg)
+
+	res_iam, err := iam_client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
+		MaxItems: aws.Int32(500),
+		Scope:    types.PolicyScopeTypeLocal,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Found " + strconv.Itoa(len(res_iam.Policies)) + " policies")
+	for _, el := range res_iam.Policies {
+		_, ok := managed_ids[*el.Arn]
+		if !ok {
+			println("Unmanaged policy: " + *el.Arn)
+		} else {
+			println("Managed policy: " + *el.Arn)
+		}
 	}
 }
