@@ -1,0 +1,66 @@
+package main
+
+import (
+	"context"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"regexp"
+	"strconv"
+	"strings"
+
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
+)
+
+func main() {
+	var stateFile string
+	var region string
+	flag.StringVar(&stateFile, "statefile", "", "The statefile to parse")
+	flag.StringVar(&region, "region", "eu-west-1", "The AWS region to target")
+	flag.Parse()
+	reg := regexp.MustCompile(`\"id\": \".*\",?`)
+
+	contents_b, err := os.ReadFile(stateFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	contents := string(contents_b[:])
+	finds := reg.FindAllString(contents, -1)
+	fmt.Println()
+
+	var managed_ids []string
+	for _, el := range finds {
+		res := strings.Split(el, "\": ")
+		if len(res) != 2 {
+			continue
+		}
+		managed_id, _ := strings.CutSuffix(res[1], ",")
+		managed_ids = append(managed_ids, managed_id)
+	}
+	fmt.Println(managed_ids)
+
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client := ssm.NewFromConfig(cfg)
+
+	res, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
+		Path:       aws.String("/"),
+		MaxResults: aws.Int32(10),
+		Recursive:  aws.Bool(true),
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(len(res.Parameters))
+	fmt.Println("Found " + strconv.Itoa(len(res.Parameters)) + " parameters")
+	for _, el := range res.Parameters {
+		fmt.Println(*el.Name)
+	}
+}
