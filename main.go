@@ -72,6 +72,7 @@ func main() {
 
 	policies := aws.GetAllPoliciesArns(cfg)
 	parameters := aws.GetAllParametersNames(cfg)
+	route53_records := aws.GetAllRoute53RecordIds(cfg)
 
-	print(filter(managedIds, policies, parameters))
+	print(filter(managedIds, policies, parameters, route53_records))
 }
