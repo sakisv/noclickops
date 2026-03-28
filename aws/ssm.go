@@ -11,9 +11,9 @@ import (
 )
 
 func GetAllParametersNames(cfg aws.Config) []string {
-	ssm_client := ssm.NewFromConfig(cfg)
+	client := ssm.NewFromConfig(cfg)
 
-	res, err := ssm_client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
+	res, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
 		Path:       aws.String("/"),
 		MaxResults: aws.Int32(10),
 		Recursive:  aws.Bool(true),

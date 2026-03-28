@@ -12,9 +12,9 @@ import (
 )
 
 func GetAllPoliciesArns(cfg aws.Config) []string {
-	iam_client := iam.NewFromConfig(cfg)
+	client := iam.NewFromConfig(cfg)
 
-	res_iam, err := iam_client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
+	res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
 		MaxItems: aws.Int32(500),
 		Scope:    types.PolicyScopeTypeLocal,
 	})
@@ -24,7 +24,7 @@ func GetAllPoliciesArns(cfg aws.Config) []string {
 	}
 
 	var ids []string
-	for _, el := range res_iam.Policies {
+	for _, el := range res.Policies {
 		ids = append(ids, *el.Arn)
 	}
 	fmt.Println("Found " + strconv.Itoa(len(ids)) + " policies")
