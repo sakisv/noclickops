@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -40,20 +41,23 @@ func getManagedIds(statefile_path string) map[string]struct{} {
 	return managed_ids
 }
 
-func filter(managedIds map[string]struct{}, listsOfFoundIds ...[]string) []string {
-	var notFound []string
-	for _, list := range listsOfFoundIds {
-		for _, el := range list {
+func filter(managedIds map[string]struct{}, foundRecords map[string][]string) map[string][]string {
+	unmanagedResourceIds := make(map[string][]string)
+	for key, value := range foundRecords {
+		if len(value) == 0 {
+			continue
+		}
+		for _, el := range value {
 			_, found := managedIds[el]
 			if found {
 				println("Found " + el)
 			} else {
-				notFound = append(notFound, el)
+				unmanagedResourceIds[key] = append(unmanagedResourceIds[key], el)
 				println("Not found " + el)
 			}
 		}
 	}
-	return notFound
+	return unmanagedResourceIds
 }
 
 func main() {
@@ -70,9 +74,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	policies := aws.GetAllPoliciesArns(cfg)
-	parameters := aws.GetAllParametersNames(cfg)
-	route53_records := aws.GetAllRoute53RecordIds(cfg)
+	foundRecords := make(map[string][]string)
+	foundRecords["policies"] = aws.GetAllPoliciesArns(cfg)
+	foundRecords["ssm_params"] = aws.GetAllParametersNames(cfg)
+	foundRecords["route53_records"] = aws.GetAllRoute53RecordIds(cfg)
 
-	print(filter(managedIds, policies, parameters, route53_records))
+	unmanagedResourceIds := filter(managedIds, foundRecords)
+	json, err := json.Marshal(unmanagedResourceIds)
+	fmt.Println(string(json))
 }

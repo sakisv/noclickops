@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
@@ -43,6 +42,6 @@ func GetAllRoute53RecordIds(cfg aws.Config) []string {
 		}
 	}
 
-	fmt.Println("Found " + strconv.Itoa(len(ids)) + " route53 records")
+	//fmt.Println("Found " + strconv.Itoa(len(ids)) + " route53 records")
 	return ids
 }

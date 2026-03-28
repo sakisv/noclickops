@@ -2,9 +2,7 @@ package aws
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -27,6 +25,6 @@ func GetAllPoliciesArns(cfg aws.Config) []string {
 	for _, el := range res.Policies {
 		ids = append(ids, *el.Arn)
 	}
-	fmt.Println("Found " + strconv.Itoa(len(ids)) + " policies")
+	//fmt.Println("Found " + strconv.Itoa(len(ids)) + " policies")
 	return ids
 }
