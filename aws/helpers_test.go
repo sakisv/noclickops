@@ -3,6 +3,7 @@ package aws_test
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
@@ -28,4 +29,12 @@ type mockSSMClient struct {
 
 func (m *mockSSMClient) GetParametersByPath(ctx context.Context, params *ssm.GetParametersByPathInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersByPathOutput, error) {
 	return m.getParametersByPathFn(ctx, params, optFns...)
+}
+
+type mockIAMClient struct {
+	listPoliciesFn func(ctx context.Context, params *iam.ListPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListPoliciesOutput, error)
+}
+
+func (m *mockIAMClient) ListPolicies(ctx context.Context, params *iam.ListPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListPoliciesOutput, error) {
+	return m.listPoliciesFn(ctx, params, optFns...)
 }
