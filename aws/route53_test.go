@@ -12,8 +12,6 @@ import (
 	"github.com/noclickops/aws"
 )
 
-func ptr[T any](v T) *T { return &v }
-
 func TestGetAllRoute53RecordIds_NoZones(t *testing.T) {
 	mock := &mockRoute53Client{
 		listHostedZonesFn: func(ctx context.Context, params *route53.ListHostedZonesInput, optFns ...func(*route53.Options)) (*route53.ListHostedZonesOutput, error) {
