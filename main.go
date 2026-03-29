@@ -11,6 +11,9 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/route53"
+	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/noclickops/aws"
 )
 
@@ -75,9 +78,9 @@ func main() {
 	}
 
 	foundRecords := make(map[string][]string)
-	foundRecords["policies"] = aws.GetAllPoliciesArns(cfg)
-	foundRecords["ssm_params"] = aws.GetAllParametersNames(cfg)
-	foundRecords["route53_records"] = aws.GetAllRoute53RecordIds(cfg)
+	foundRecords["policies"] = aws.GetAllPoliciesArns(iam.NewFromConfig(cfg))
+	foundRecords["ssm_params"] = aws.GetAllParametersNames(ssm.NewFromConfig(cfg))
+	foundRecords["route53_records"] = aws.GetAllRoute53RecordIds(route53.NewFromConfig(cfg))
 
 	unmanagedResourceIds := filter(managedIds, foundRecords)
 	json, err := json.Marshal(unmanagedResourceIds)

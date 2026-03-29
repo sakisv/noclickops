@@ -9,9 +9,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 )
 
-func GetAllPoliciesArns(cfg aws.Config) []string {
-	client := iam.NewFromConfig(cfg)
+type IAMClient interface {
+	ListPolicies(ctx context.Context, params *iam.ListPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListPoliciesOutput, error)
+}
 
+func GetAllPoliciesArns(client IAMClient) []string {
 	res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
 		MaxItems: aws.Int32(500),
 		Scope:    types.PolicyScopeTypeLocal,
@@ -25,6 +27,5 @@ func GetAllPoliciesArns(cfg aws.Config) []string {
 	for _, el := range res.Policies {
 		ids = append(ids, *el.Arn)
 	}
-	//fmt.Println("Found " + strconv.Itoa(len(ids)) + " policies")
 	return ids
 }

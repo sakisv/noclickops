@@ -8,9 +8,11 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
 
-func GetAllParametersNames(cfg aws.Config) []string {
-	client := ssm.NewFromConfig(cfg)
+type SSMClient interface {
+	GetParametersByPath(ctx context.Context, params *ssm.GetParametersByPathInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersByPathOutput, error)
+}
 
+func GetAllParametersNames(client SSMClient) []string {
 	res, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
 		Path:       aws.String("/"),
 		MaxResults: aws.Int32(10),
@@ -24,6 +26,5 @@ func GetAllParametersNames(cfg aws.Config) []string {
 	for _, el := range res.Parameters {
 		ids = append(ids, *el.Name)
 	}
-	//fmt.Println("Found " + strconv.Itoa(len(ids)) + " parameters")
 	return ids
 }
