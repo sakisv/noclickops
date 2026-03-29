@@ -13,19 +13,30 @@ type IAMClient interface {
 	ListPolicies(ctx context.Context, params *iam.ListPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListPoliciesOutput, error)
 }
 
+const MAX_ITEMS int32 = 150
+
 func GetAllPoliciesArns(client IAMClient) []string {
-	res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
-		MaxItems: aws.Int32(500),
-		Scope:    types.PolicyScopeTypeLocal,
-	})
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	var ids []string
-	for _, el := range res.Policies {
-		ids = append(ids, *el.Arn)
+	var marker string
+	for {
+		res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
+			MaxItems: aws.Int32(MAX_ITEMS),
+			Scope:    types.PolicyScopeTypeLocal,
+			Marker:   &marker,
+		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, el := range res.Policies {
+			ids = append(ids, *el.Arn)
+		}
+
+		if !res.IsTruncated {
+			break
+		}
+		marker = *res.Marker
 	}
 	return ids
 }
