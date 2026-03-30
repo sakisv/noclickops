@@ -17,12 +17,12 @@ const MAX_ITEMS int32 = 150
 
 func GetAllPoliciesArns(client IAMClient) []string {
 	var ids []string
-	var marker string
+	var marker *string = nil
 	for {
 		res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
 			MaxItems: aws.Int32(MAX_ITEMS),
 			Scope:    types.PolicyScopeTypeLocal,
-			Marker:   &marker,
+			Marker:   marker,
 		})
 
 		if err != nil {
@@ -36,7 +36,7 @@ func GetAllPoliciesArns(client IAMClient) []string {
 		if !res.IsTruncated {
 			break
 		}
-		marker = *res.Marker
+		marker = res.Marker
 	}
 	return ids
 }
