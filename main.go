@@ -171,5 +171,4 @@ func main() {
 	unmanagedResourceIds := filter(managedIDs, foundRecords)
 	json, err := json.Marshal(unmanagedResourceIds)
 	fmt.Println(string(json))
-
 }

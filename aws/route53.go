@@ -26,7 +26,7 @@ func GetAllRoute53RecordIds(client Route53Client) []common.Resource {
 	var id string
 	for _, zone := range hostedZones.HostedZones {
 		zone_id := strings.Split(*zone.Id, "/")[2]
-		resources = append(resources, common.Resource{TerraformID: zone_id, ResourceType: "route53.zone"})
+		resources = append(resources, common.Resource{TerraformID: zone_id, ResourceType: common.Route53_zone})
 		if *zone.ResourceRecordSetCount == 0 {
 			continue
 		}
@@ -55,7 +55,7 @@ func GetAllRoute53RecordIds(client Route53Client) []common.Resource {
 					id = fmt.Sprintf("%v_%v_%v", zone_id, record_name, record.Type)
 				}
 
-				resources = append(resources, common.Resource{TerraformID: id, ResourceType: "route53.record"})
+				resources = append(resources, common.Resource{TerraformID: id, ResourceType: common.Route53_record})
 			}
 
 			if !listRecordSetsResponse.IsTruncated {

@@ -30,7 +30,7 @@ func GetAllPoliciesArns(client IAMClient) []common.Resource {
 			log.Fatal(err)
 		}
 		for _, el := range res.Policies {
-			resources = append(resources, common.Resource{TerraformID: *el.Arn, ResourceType: "iam.policy"})
+			resources = append(resources, common.Resource{TerraformID: *el.Arn, ResourceType: common.IAM_policy})
 		}
 
 		if !res.IsTruncated {

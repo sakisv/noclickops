@@ -40,8 +40,8 @@ func TestGetAllParametersNames(t *testing.T) {
 	}
 	ids := aws.GetAllParametersNames(mock)
 	expected := []common.Resource{
-		{TerraformID: "/some/parameter", ResourceType: "ssm.parameter"},
-		{TerraformID: "/some/other/parameter", ResourceType: "ssm.parameter"},
+		{TerraformID: "/some/parameter", ResourceType: common.SSM_parameter},
+		{TerraformID: "/some/other/parameter", ResourceType: common.SSM_parameter},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)

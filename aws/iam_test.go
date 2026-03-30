@@ -40,8 +40,8 @@ func TestListPolicies_PaginationFollowed(t *testing.T) {
 	}
 	ids := aws.GetAllPoliciesArns(mock)
 	expected := []common.Resource{
-		{TerraformID: "arn:policy_1", ResourceType: "iam.policy"},
-		{TerraformID: "arn:policy_2", ResourceType: "iam.policy"},
+		{TerraformID: "arn:policy_1", ResourceType: common.IAM_policy},
+		{TerraformID: "arn:policy_2", ResourceType: common.IAM_policy},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)

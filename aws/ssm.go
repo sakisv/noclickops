@@ -28,7 +28,7 @@ func GetAllParametersNames(client SSMClient) []common.Resource {
 			log.Fatal(err)
 		}
 		for _, el := range res.Parameters {
-			resources = append(resources, common.Resource{TerraformID: *el.Name, ResourceType: "ssm.parameter"})
+			resources = append(resources, common.Resource{TerraformID: *el.Name, ResourceType: common.SSM_parameter})
 		}
 
 		if res.NextToken == nil || *res.NextToken == "" {

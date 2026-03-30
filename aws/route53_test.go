@@ -38,7 +38,7 @@ func TestGetAllRoute53RecordIds_SkipsEmptyZones(t *testing.T) {
 	}
 	ids := aws.GetAllRoute53RecordIds(mock)
 	expected := []common.Resource{
-		{TerraformID: "Z123", ResourceType: "route53.zone"},
+		{TerraformID: "Z123", ResourceType: common.Route53_zone},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
@@ -65,8 +65,8 @@ func TestGetAllRoute53RecordIds_SimpleRecord(t *testing.T) {
 	}
 	ids := aws.GetAllRoute53RecordIds(mock)
 	expected := []common.Resource{
-		{TerraformID: "Z123", ResourceType: "route53.zone"},
-		{TerraformID: "Z123_www_A", ResourceType: "route53.record"},
+		{TerraformID: "Z123", ResourceType: common.Route53_zone},
+		{TerraformID: "Z123_www_A", ResourceType: common.Route53_record},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
@@ -93,8 +93,8 @@ func TestGetAllRoute53RecordIds_WithSetIdentifier(t *testing.T) {
 	}
 	ids := aws.GetAllRoute53RecordIds(mock)
 	expected := []common.Resource{
-		{TerraformID: "Z123", ResourceType: "route53.zone"},
-		{TerraformID: "Z123_www_A_primary", ResourceType: "route53.record"},
+		{TerraformID: "Z123", ResourceType: common.Route53_zone},
+		{TerraformID: "Z123_www_A_primary", ResourceType: common.Route53_record},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
@@ -137,9 +137,9 @@ func TestGetAllRoute53RecordIds_PaginationFollowed(t *testing.T) {
 	}
 	ids := aws.GetAllRoute53RecordIds(mock)
 	expected := []common.Resource{
-		{TerraformID: "Z123", ResourceType: "route53.zone"},
-		{TerraformID: "Z123_a_A", ResourceType: "route53.record"},
-		{TerraformID: "Z123_b_A", ResourceType: "route53.record"},
+		{TerraformID: "Z123", ResourceType: common.Route53_zone},
+		{TerraformID: "Z123_a_A", ResourceType: common.Route53_record},
+		{TerraformID: "Z123_b_A", ResourceType: common.Route53_record},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
