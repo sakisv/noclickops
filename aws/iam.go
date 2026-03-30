@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
+	"github.com/noclickops/common"
 )
 
 type IAMClient interface {
@@ -15,8 +16,8 @@ type IAMClient interface {
 
 const MAX_ITEMS int32 = 150
 
-func GetAllPoliciesArns(client IAMClient) []string {
-	var ids []string
+func GetAllPoliciesArns(client IAMClient) []common.Resource {
+	var resources []common.Resource
 	var marker *string = nil
 	for {
 		res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
@@ -28,9 +29,8 @@ func GetAllPoliciesArns(client IAMClient) []string {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		for _, el := range res.Policies {
-			ids = append(ids, *el.Arn)
+			resources = append(resources, common.Resource{TerraformID: *el.Arn, ResourceType: "iam.policy"})
 		}
 
 		if !res.IsTruncated {
@@ -38,5 +38,5 @@ func GetAllPoliciesArns(client IAMClient) []string {
 		}
 		marker = res.Marker
 	}
-	return ids
+	return resources
 }

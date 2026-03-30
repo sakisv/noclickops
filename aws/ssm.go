@@ -6,14 +6,15 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
+	"github.com/noclickops/common"
 )
 
 type SSMClient interface {
 	GetParametersByPath(ctx context.Context, params *ssm.GetParametersByPathInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersByPathOutput, error)
 }
 
-func GetAllParametersNames(client SSMClient) []string {
-	var ids []string
+func GetAllParametersNames(client SSMClient) []common.Resource {
+	var resources []common.Resource
 	var nextToken string
 	for {
 		res, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
@@ -27,7 +28,7 @@ func GetAllParametersNames(client SSMClient) []string {
 			log.Fatal(err)
 		}
 		for _, el := range res.Parameters {
-			ids = append(ids, *el.Name)
+			resources = append(resources, common.Resource{TerraformID: *el.Name, ResourceType: "ssm.parameter"})
 		}
 
 		if res.NextToken == nil || *res.NextToken == "" {
@@ -35,5 +36,5 @@ func GetAllParametersNames(client SSMClient) []string {
 		}
 		nextToken = *res.NextToken
 	}
-	return ids
+	return resources
 }

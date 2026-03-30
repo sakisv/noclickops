@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/route53/types"
+	"github.com/noclickops/common"
 )
 
 type Route53Client interface {
@@ -15,20 +16,21 @@ type Route53Client interface {
 	ListResourceRecordSets(ctx context.Context, params *route53.ListResourceRecordSetsInput, optFns ...func(*route53.Options)) (*route53.ListResourceRecordSetsOutput, error)
 }
 
-func GetAllRoute53RecordIds(client Route53Client) []string {
+func GetAllRoute53RecordIds(client Route53Client) []common.Resource {
 	hostedZones, err := client.ListHostedZones(context.TODO(), &route53.ListHostedZonesInput{})
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var ids []string
+	var resources []common.Resource
 	var id string
 	for _, zone := range hostedZones.HostedZones {
+		zone_id := strings.Split(*zone.Id, "/")[2]
+		resources = append(resources, common.Resource{TerraformID: zone_id, ResourceType: "route53.zone"})
 		if *zone.ResourceRecordSetCount == 0 {
 			continue
 		}
 
-		zone_id := strings.Split(*zone.Id, "/")[2]
 		var nextRecordName *string
 		var nextRecordIdentifier *string
 		var nextRecordType types.RRType
@@ -53,7 +55,7 @@ func GetAllRoute53RecordIds(client Route53Client) []string {
 					id = fmt.Sprintf("%v_%v_%v", zone_id, record_name, record.Type)
 				}
 
-				ids = append(ids, id)
+				resources = append(resources, common.Resource{TerraformID: id, ResourceType: "route53.record"})
 			}
 
 			if !listRecordSetsResponse.IsTruncated {
@@ -65,5 +67,5 @@ func GetAllRoute53RecordIds(client Route53Client) []string {
 		}
 	}
 
-	return ids
+	return resources
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 	"github.com/google/go-cmp/cmp"
 	"github.com/noclickops/aws"
+	"github.com/noclickops/common"
 )
 
 func TestGetAllParametersNames(t *testing.T) {
@@ -38,7 +39,10 @@ func TestGetAllParametersNames(t *testing.T) {
 		},
 	}
 	ids := aws.GetAllParametersNames(mock)
-	expected := []string{"/some/parameter", "/some/other/parameter"}
+	expected := []common.Resource{
+		{TerraformID: "/some/parameter", ResourceType: "ssm.parameter"},
+		{TerraformID: "/some/other/parameter", ResourceType: "ssm.parameter"},
+	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
 	}

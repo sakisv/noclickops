@@ -19,6 +19,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	claws "github.com/noclickops/aws"
+	"github.com/noclickops/common"
 )
 
 const STATEFILES_DIR = ".cache/noclickops/statefiles/"
@@ -52,14 +53,14 @@ func getManagedIDs(statefile_paths []string) map[string]struct{} {
 	return managed_ids
 }
 
-func filter(managedIds map[string]struct{}, foundRecords map[string][]string) map[string][]string {
-	unmanagedResourceIds := make(map[string][]string)
+func filter(managedIds map[string]struct{}, foundRecords map[string][]common.Resource) map[string][]common.Resource {
+	unmanagedResourceIds := make(map[string][]common.Resource)
 	for key, value := range foundRecords {
 		if len(value) == 0 {
 			continue
 		}
 		for _, el := range value {
-			_, found := managedIds[el]
+			_, found := managedIds[el.TerraformID]
 			if found {
 				//println("[DEBUG] Found " + el)
 			} else {
@@ -162,7 +163,7 @@ func main() {
 	managedIDs := getManagedIDs(downloaded_files)
 	defer delete_statefiles_dir()
 
-	foundRecords := make(map[string][]string)
+	foundRecords := make(map[string][]common.Resource)
 	foundRecords["policies"] = claws.GetAllPoliciesArns(iam.NewFromConfig(cfg))
 	foundRecords["ssm_params"] = claws.GetAllParametersNames(ssm.NewFromConfig(cfg))
 	foundRecords["route53_records"] = claws.GetAllRoute53RecordIds(route53.NewFromConfig(cfg))
