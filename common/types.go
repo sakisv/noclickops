@@ -7,6 +7,8 @@ const (
 	Route53_record
 	IAM_policy
 	SSM_parameter
+	EC2_securitygroup
+	EC2_securitygrouprule
 )
 
 type Resource struct {

@@ -3,6 +3,7 @@ package aws_test
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
@@ -37,4 +38,17 @@ type mockIAMClient struct {
 
 func (m *mockIAMClient) ListPolicies(ctx context.Context, params *iam.ListPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListPoliciesOutput, error) {
 	return m.listPoliciesFn(ctx, params, optFns...)
+}
+
+type mockEC2Client struct {
+	describeSecurityGroupsFn     func(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
+	describeSecurityGroupRulesFn func(ctx context.Context, params *ec2.DescribeSecurityGroupRulesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupRulesOutput, error)
+}
+
+func (m *mockEC2Client) DescribeSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error) {
+	return m.describeSecurityGroupsFn(ctx, params, optFns...)
+}
+
+func (m *mockEC2Client) DescribeSecurityGroupRules(ctx context.Context, params *ec2.DescribeSecurityGroupRulesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupRulesOutput, error) {
+	return m.describeSecurityGroupRulesFn(ctx, params, optFns...)
 }

@@ -14,6 +14,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -167,6 +168,8 @@ func main() {
 	foundRecords["policies"] = claws.GetAllPoliciesArns(iam.NewFromConfig(cfg))
 	foundRecords["ssm_params"] = claws.GetAllParametersNames(ssm.NewFromConfig(cfg))
 	foundRecords["route53_records"] = claws.GetAllRoute53RecordIds(route53.NewFromConfig(cfg))
+	foundRecords["ec2_security_groups"] = claws.GetAllSecurityGroups(ec2.NewFromConfig(cfg))
+	foundRecords["ec2_security_group_rules"] = claws.GetAllSecurityGroupRules(ec2.NewFromConfig(cfg))
 
 	unmanagedResourceIds := filter(managedIDs, foundRecords)
 	json, err := json.Marshal(unmanagedResourceIds)
