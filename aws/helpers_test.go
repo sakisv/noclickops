@@ -34,10 +34,18 @@ func (m *mockSSMClient) GetParametersByPath(ctx context.Context, params *ssm.Get
 
 type mockIAMClient struct {
 	listPoliciesFn func(ctx context.Context, params *iam.ListPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListPoliciesOutput, error)
+	listUsersFn    func(ctx context.Context, params *iam.ListUsersInput, optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error)
+	listGroupsFn   func(ctx context.Context, params *iam.ListGroupsInput, optFns ...func(*iam.Options)) (*iam.ListGroupsOutput, error)
 }
 
 func (m *mockIAMClient) ListPolicies(ctx context.Context, params *iam.ListPoliciesInput, optFns ...func(*iam.Options)) (*iam.ListPoliciesOutput, error) {
 	return m.listPoliciesFn(ctx, params, optFns...)
+}
+func (m *mockIAMClient) ListUsers(ctx context.Context, params *iam.ListUsersInput, optFns ...func(*iam.Options)) (*iam.ListUsersOutput, error) {
+	return m.listUsersFn(ctx, params, optFns...)
+}
+func (m *mockIAMClient) ListGroups(ctx context.Context, params *iam.ListGroupsInput, optFns ...func(*iam.Options)) (*iam.ListGroupsOutput, error) {
+	return m.listGroupsFn(ctx, params, optFns...)
 }
 
 type mockEC2Client struct {

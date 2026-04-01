@@ -165,7 +165,9 @@ func main() {
 	defer delete_statefiles_dir()
 
 	foundRecords := make(map[string][]common.Resource)
-	foundRecords["policies"] = claws.GetAllPoliciesArns(iam.NewFromConfig(cfg))
+	foundRecords["iam_policies"] = claws.GetAllPoliciesArns(iam.NewFromConfig(cfg))
+	foundRecords["iam_users"] = claws.GetAllIAMUsers(iam.NewFromConfig(cfg))
+	foundRecords["iam_groups"] = claws.GetAllIAMGroups(iam.NewFromConfig(cfg))
 	foundRecords["ssm_params"] = claws.GetAllParametersNames(ssm.NewFromConfig(cfg))
 	foundRecords["route53_records"] = claws.GetAllRoute53RecordIds(route53.NewFromConfig(cfg))
 	foundRecords["ec2_security_groups"] = claws.GetAllSecurityGroups(ec2.NewFromConfig(cfg))

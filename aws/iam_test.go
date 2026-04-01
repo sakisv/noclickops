@@ -50,3 +50,79 @@ func TestListPolicies_PaginationFollowed(t *testing.T) {
 		t.Errorf("expected 2 calls to ListPolicies, got %d", callCount)
 	}
 }
+
+func TestGetAllIAMUsers_PaginationFollowed(t *testing.T) {
+	callCount := 0
+	mock := &mockIAMClient{
+		listUsersFn: func(_ context.Context, params *iam.ListUsersInput, _ ...func(*iam.Options)) (*iam.ListUsersOutput, error) {
+			callCount++
+			if callCount == 1 {
+				return &iam.ListUsersOutput{
+					IsTruncated: true,
+					Marker:      ptr("next"),
+					Users: []types.User{
+						{UserName: ptr("user_1")},
+					},
+				}, nil
+			}
+			if params.Marker == nil || *params.Marker != "next" {
+				return nil, fmt.Errorf("wrong Marker, expected 'next' got '%v'", params.Marker)
+			}
+			return &iam.ListUsersOutput{
+				IsTruncated: false,
+				Users: []types.User{
+					{UserName: ptr("user_2")},
+				},
+			}, nil
+		},
+	}
+	got := aws.GetAllIAMUsers(mock)
+	expected := []common.Resource{
+		{TerraformID: "user_1", ResourceType: common.IAM_user},
+		{TerraformID: "user_2", ResourceType: common.IAM_user},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("expected %v, got %v", expected, got)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls to ListUsers, got %d", callCount)
+	}
+}
+
+func TestGetAllIAMGroups_PaginationFollowed(t *testing.T) {
+	callCount := 0
+	mock := &mockIAMClient{
+		listGroupsFn: func(_ context.Context, params *iam.ListGroupsInput, _ ...func(*iam.Options)) (*iam.ListGroupsOutput, error) {
+			callCount++
+			if callCount == 1 {
+				return &iam.ListGroupsOutput{
+					IsTruncated: true,
+					Marker:      ptr("next"),
+					Groups: []types.Group{
+						{GroupName: ptr("group_1")},
+					},
+				}, nil
+			}
+			if params.Marker == nil || *params.Marker != "next" {
+				return nil, fmt.Errorf("wrong Marker, expected 'next' got '%v'", params.Marker)
+			}
+			return &iam.ListGroupsOutput{
+				IsTruncated: false,
+				Groups: []types.Group{
+					{GroupName: ptr("group_2")},
+				},
+			}, nil
+		},
+	}
+	got := aws.GetAllIAMGroups(mock)
+	expected := []common.Resource{
+		{TerraformID: "group_1", ResourceType: common.IAM_group},
+		{TerraformID: "group_2", ResourceType: common.IAM_group},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("expected %v, got %v", expected, got)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls to ListGroups, got %d", callCount)
+	}
+}
