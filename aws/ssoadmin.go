@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/service/ssoadmin"
+	"github.com/aws/aws-sdk-go-v2/service/ssoadmin/types"
 	"github.com/noclickops/common"
 )
 
@@ -32,8 +33,8 @@ func getSSOInstanceArn(client SSOAdminClient) string {
 	return *instances[0].InstanceArn
 }
 
-func GetAllSSOInstances(client SSOAdminClient) []common.Resource {
-	var resources []common.Resource
+func GetAllSSOInstances(client SSOAdminClient) []types.InstanceMetadata {
+	var resources []types.InstanceMetadata
 	var nextToken *string = nil
 	for {
 		res, err := client.ListInstances(context.TODO(), &ssoadmin.ListInstancesInput{
@@ -44,7 +45,7 @@ func GetAllSSOInstances(client SSOAdminClient) []common.Resource {
 			log.Fatal(err)
 		}
 		for _, el := range res.Instances {
-			resources = append(resources, common.Resource{TerraformID: *el.IdentityStoreId, ResourceType: common.SSOAdmin_identitystoreinstance})
+			resources = append(resources, el)
 		}
 
 		if res.NextToken == nil {
