@@ -11,6 +11,9 @@ const (
 	SSM_parameter
 	EC2_securitygroup
 	EC2_securitygrouprule
+	SSOAdmin_identitystoreinstance
+	IdentityStore_user
+	IdentityStore_group
 )
 
 type Resource struct {
