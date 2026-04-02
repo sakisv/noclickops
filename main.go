@@ -187,6 +187,8 @@ func main() {
 	foundRecords["identity_store_users"] = claws.GetAllIdentityStoreUsers(identitystore.NewFromConfig(cfg), ssoadmin.NewFromConfig(cfg))
 	println("Retrieving identity store groups")
 	foundRecords["identity_store_groups"] = claws.GetAllIdentityStoreGroups(identitystore.NewFromConfig(cfg), ssoadmin.NewFromConfig(cfg))
+	println("Retrieving permission sets")
+	foundRecords["ssoadmin_permission_sets"] = claws.GetAllPermissionSets(ssoadmin.NewFromConfig(cfg))
 
 	unmanagedResourceIds := filter(managedIDs, foundRecords)
 	json, err := json.Marshal(unmanagedResourceIds)

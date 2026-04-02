@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/service/ssoadmin"
@@ -11,6 +12,7 @@ import (
 
 type SSOAdminClient interface {
 	ListInstances(ctx context.Context, params *ssoadmin.ListInstancesInput, optFns ...func(*ssoadmin.Options)) (*ssoadmin.ListInstancesOutput, error)
+	ListPermissionSets(ctx context.Context, params *ssoadmin.ListPermissionSetsInput, optFns ...func(*ssoadmin.Options)) (*ssoadmin.ListPermissionSetsOutput, error)
 }
 
 func getSSOInstanceId(client SSOAdminClient) string {
@@ -53,6 +55,36 @@ func GetAllSSOInstances(client SSOAdminClient) []types.InstanceMetadata {
 		}
 		nextToken = res.NextToken
 	}
+	return resources
+}
 
+func GetAllPermissionSets(client SSOAdminClient) []common.Resource {
+	var resources []common.Resource
+	var nextToken *string = nil
+
+	instance_arn := getSSOInstanceArn(client)
+	if instance_arn == "" {
+		return resources
+	}
+
+	for {
+		res, err := client.ListPermissionSets(context.TODO(), &ssoadmin.ListPermissionSetsInput{
+			InstanceArn: &instance_arn,
+			NextToken:   nextToken,
+		})
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, el := range res.PermissionSets {
+			tf_id := fmt.Sprintf("%v,%v", el, instance_arn)
+			resources = append(resources, common.Resource{TerraformID: tf_id, ResourceType: common.SSOAdmin_permissionset})
+		}
+
+		if res.NextToken == nil {
+			break
+		}
+		nextToken = res.NextToken
+	}
 	return resources
 }

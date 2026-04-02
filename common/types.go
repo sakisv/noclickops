@@ -12,6 +12,8 @@ const (
 	EC2_securitygroup
 	EC2_securitygrouprule
 	SSOAdmin_identitystoreinstance
+	SSOAdmin_permissionset
+	SSOAdmin_accountassignments
 	IdentityStore_user
 	IdentityStore_group
 )
