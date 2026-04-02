@@ -51,7 +51,6 @@ func GetAllSecurityGroupRules(client EC2Client) []common.Resource {
 		}
 
 		for _, el := range res.SecurityGroupRules {
-			println(*el.SecurityGroupRuleId)
 			rule_type := "ingress"
 			if *el.IsEgress {
 				rule_type = "egress"
