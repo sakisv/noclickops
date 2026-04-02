@@ -12,6 +12,26 @@ type SSOAdminClient interface {
 	ListInstances(ctx context.Context, params *ssoadmin.ListInstancesInput, optFns ...func(*ssoadmin.Options)) (*ssoadmin.ListInstancesOutput, error)
 }
 
+func getSSOInstanceId(client SSOAdminClient) string {
+	instances := GetAllSSOInstances(client)
+	if len(instances) != 1 {
+		println("Found more than 1 SSO Instances, returning")
+		return ""
+	}
+
+	return *instances[0].IdentityStoreId
+}
+
+func getSSOInstanceArn(client SSOAdminClient) string {
+	instances := GetAllSSOInstances(client)
+	if len(instances) != 1 {
+		println("Found more than 1 SSO Instances, returning")
+		return ""
+	}
+
+	return *instances[0].InstanceArn
+}
+
 func GetAllSSOInstances(client SSOAdminClient) []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil

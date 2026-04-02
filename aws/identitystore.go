@@ -9,16 +9,6 @@ import (
 	"github.com/noclickops/common"
 )
 
-func getSSOInstanceId(client SSOAdminClient) string {
-	instances := GetAllSSOInstances(client)
-	if len(instances) != 1 {
-		println("Found more than 1 SSO Instances, returning")
-		return ""
-	}
-
-	return instances[0].TerraformID
-}
-
 type IdentityStoreClient interface {
 	ListUsers(ctx context.Context, params *identitystore.ListUsersInput, optFns ...func(*identitystore.Options)) (*identitystore.ListUsersOutput, error)
 	ListGroups(ctx context.Context, params *identitystore.ListGroupsInput, optFns ...func(*identitystore.Options)) (*identitystore.ListGroupsOutput, error)
