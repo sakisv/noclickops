@@ -11,6 +11,7 @@ const (
 	SSM_parameter
 	EC2_securitygroup
 	EC2_securitygrouprule
+	EKS_cluster
 	SSOAdmin_identitystoreinstance
 	SSOAdmin_permissionset
 	SSOAdmin_accountassignments

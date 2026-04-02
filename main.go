@@ -15,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/identitystore"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
@@ -189,6 +190,8 @@ func main() {
 	foundRecords["identity_store_groups"] = claws.GetAllIdentityStoreGroups(identitystore.NewFromConfig(cfg), ssoadmin.NewFromConfig(cfg))
 	println("Retrieving permission sets")
 	foundRecords["ssoadmin_permission_sets"] = claws.GetAllPermissionSets(ssoadmin.NewFromConfig(cfg))
+	println("Retrieving EKS clusters")
+	foundRecords["eks_clusters"] = claws.GetAllEKSClusters(eks.NewFromConfig(cfg))
 
 	unmanagedResourceIds := filter(managedIDs, foundRecords)
 	json, err := json.Marshal(unmanagedResourceIds)
