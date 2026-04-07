@@ -22,13 +22,16 @@ func main() {
 
 	println("Downloading statefiles from s3")
 	s3_cfg := generateStatefileBucketConfig(opts.s3BucketRegion)
-	downloaded_files := download_statefiles_from_s3(opts.s3Bucket, s3_cfg)
+	downloaded_files := download_statefiles_from_s3(opts.s3Bucket, opts.forceDownload, s3_cfg)
 	if opts.stateFile != "" {
 		downloaded_files = append(downloaded_files, opts.stateFile)
 	}
+
 	println("Scanning statefiles for terraform ids")
 	managedIDs := getManagedIDs(downloaded_files)
-	defer delete_statefiles_dir()
+	if opts.removeDownloadedStatefiles {
+		defer delete_statefiles_dir()
+	}
 
 	foundRecords := make(map[string][]common.Resource)
 	println("Retrieving IAM policies")

@@ -9,11 +9,13 @@ import (
 )
 
 type options struct {
-	stateFile      string
-	regions        string
-	s3Bucket       string
-	s3BucketRegion string
-	regionsList    []string
+	stateFile                  string
+	removeDownloadedStatefiles bool
+	forceDownload              bool
+	regions                    string
+	s3Bucket                   string
+	s3BucketRegion             string
+	regionsList                []string
 }
 
 func (opts *options) validate() error {
@@ -33,6 +35,10 @@ func (opts *options) validate() error {
 		if !isValidRegion(opts.s3BucketRegion) {
 			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", opts.s3BucketRegion))
 		}
+	}
+
+	if opts.forceDownload && opts.s3Bucket == "" {
+		errs = append(errs, "'force-download' must be used alongside an 's3-bucket'")
 	}
 
 	regions := strings.Split(opts.regions, ",")
@@ -74,6 +80,8 @@ func parseFlags() options {
 	flag.StringVar(&opts.s3Bucket, "s3-bucket", "", "Download statefile(s) from this s3 bucket")
 	flag.StringVar(&opts.s3BucketRegion, "s3-bucket-region", "", "The bucket's region. Cannot be 'all'")
 	flag.StringVar(&opts.regions, "regions", "all", "Comma-separated list of regions to check, or 'all'")
+	flag.BoolVar(&opts.removeDownloadedStatefiles, "remove-downloaded-statefiles", false, "If specified, any downloaded statefiles will be deleted at the end")
+	flag.BoolVar(&opts.forceDownload, "force-download", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
 	flag.Parse()
 
 	err := opts.validate()

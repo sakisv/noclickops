@@ -31,7 +31,7 @@ func delete_statefiles_dir() error {
 	return os.RemoveAll(target_dir)
 }
 
-func download_statefiles_from_s3(bucket string, cfg aws.Config) []string {
+func download_statefiles_from_s3(bucket string, forceDownload bool, cfg aws.Config) []string {
 	client := s3.NewFromConfig(cfg)
 	var files []string
 	res, err := client.ListObjectsV2(context.TODO(), &s3.ListObjectsV2Input{
@@ -43,8 +43,18 @@ func download_statefiles_from_s3(bucket string, cfg aws.Config) []string {
 	statefiles_dir := createRemoteStatefilesDir()
 
 	for _, object := range res.Contents {
-		filename := strings.ReplaceAll(*object.Key, "/", "~~")
+		if strings.HasSuffix(*object.Key, "/") {
+			continue
+		}
+		filename := strings.ReplaceAll(*object.Key, "/", ".")
 		full_path := path.Join(statefiles_dir, filename)
+
+		_, err := os.Stat(full_path)
+		fileExists := err == nil
+		if fileExists && !forceDownload {
+			continue
+		}
+
 		//println("[DEBUG] Downloading " + *object.Key + " into " + full_path)
 
 		getObjectResp, err := client.GetObject(context.TODO(), &s3.GetObjectInput{
