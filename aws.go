@@ -86,6 +86,7 @@ func generatePerRegionConfigs(regions []string) []aws.Config {
 		}
 
 		cfg.Region = r
+		configs = append(configs, cfg)
 	}
 
 	return configs
