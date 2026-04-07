@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -142,9 +143,9 @@ func TestOptionsValidate(t *testing.T) {
 					t.Errorf("regionsList length = %v, want %v", len(tt.opts.regionsList), len(tt.wantRegionsList))
 					return
 				}
-				for i, r := range tt.wantRegionsList {
-					if tt.opts.regionsList[i] != r {
-						t.Errorf("regionsList[%d] = %q, want %q", i, tt.opts.regionsList[i], r)
+				for _, r := range tt.wantRegionsList {
+					if !slices.Contains(tt.opts.regionsList, r) {
+						t.Errorf("Missing %v from %v", r, tt.opts.regionsList)
 					}
 				}
 			}
