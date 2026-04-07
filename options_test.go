@@ -30,26 +30,55 @@ func TestIsValidRegion(t *testing.T) {
 }
 
 func TestOptionsValidate(t *testing.T) {
+	// overwrite VALID_REGIONS to make it easier to write tests
+	VALID_REGIONS = map[string]string{
+		"eu-west-1": "Europe (Ireland)",
+		"us-east-1": "US East (N. Virginia)",
+		"us-east-2": "US East (Ohio)",
+	}
+
 	tests := []struct {
-		name        string
-		opts        options
-		wantErr     bool
-		errContains string
+		name            string
+		opts            options
+		wantErr         bool
+		errContains     string
+		wantRegionsList []string
 	}{
 		{
-			name:    "valid with statefile only",
-			opts:    options{stateFile: "state.tfstate", regions: "all"},
-			wantErr: false,
+			name:            "valid with statefile only regions all",
+			opts:            options{stateFile: "state.tfstate", regions: "all"},
+			wantErr:         false,
+			wantRegionsList: []string{"eu-west-1", "us-east-1", "us-east-2"},
 		},
 		{
-			name:    "valid with s3 bucket",
-			opts:    options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
-			wantErr: false,
+			name:            "valid with s3 bucket",
+			opts:            options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
+			wantErr:         false,
+			wantRegionsList: []string{"eu-west-1", "us-east-1", "us-east-2"},
 		},
 		{
-			name:    "valid with s3 bucket and specific regions",
-			opts:    options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "us-east-1,eu-west-1"},
-			wantErr: false,
+			name:            "valid with s3 bucket and specific regions",
+			opts:            options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "us-east-1,eu-west-1"},
+			wantErr:         false,
+			wantRegionsList: []string{"us-east-1", "eu-west-1"},
+		},
+		{
+			name:            "multiple valid regions populates regionsList",
+			opts:            options{stateFile: "state.tfstate", regions: "us-east-1,eu-west-1"},
+			wantErr:         false,
+			wantRegionsList: []string{"us-east-1", "eu-west-1"},
+		},
+		{
+			name:            "regions with extra whitespace are trimmed",
+			opts:            options{stateFile: "state.tfstate", regions: " us-east-1 , eu-west-1 "},
+			wantErr:         false,
+			wantRegionsList: []string{"us-east-1", "eu-west-1"},
+		},
+		{
+			name:            "regions are lowercased",
+			opts:            options{stateFile: "state.tfstate", regions: "US-EAST-1,EU-WEST-1"},
+			wantErr:         false,
+			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:        "neither statefile nor s3 bucket",
@@ -82,11 +111,6 @@ func TestOptionsValidate(t *testing.T) {
 			errContains: "'bad-region' is not a valid region",
 		},
 		{
-			name:    "multiple valid regions",
-			opts:    options{stateFile: "state.tfstate", regions: "us-east-1,eu-west-1,ap-southeast-1"},
-			wantErr: false,
-		},
-		{
 			name:        "multiple errors reported together",
 			opts:        options{regions: "bad-region"},
 			wantErr:     true,
@@ -110,6 +134,24 @@ func TestOptionsValidate(t *testing.T) {
 			if tt.wantErr && tt.errContains != "" {
 				if !strings.Contains(err.Error(), tt.errContains) {
 					t.Errorf("validate() error = %q, want it to contain %q", err.Error(), tt.errContains)
+				}
+				return
+			}
+			if tt.wantRegionsList != nil {
+				if len(tt.opts.regionsList) != len(tt.wantRegionsList) {
+					t.Errorf("regionsList length = %v, want %v", len(tt.opts.regionsList), len(tt.wantRegionsList))
+					return
+				}
+				for i, r := range tt.wantRegionsList {
+					if tt.opts.regionsList[i] != r {
+						t.Errorf("regionsList[%d] = %q, want %q", i, tt.opts.regionsList[i], r)
+					}
+				}
+			}
+			// When regions == "all", regionsList should be populated with all known regions
+			if tt.opts.regions == "all" && !tt.wantErr {
+				if len(tt.opts.regionsList) == 0 {
+					t.Errorf("regionsList should be populated when regions is 'all'")
 				}
 			}
 		})

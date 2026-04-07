@@ -42,7 +42,14 @@ func (opts *options) validate() error {
 			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", r))
 			continue
 		}
-		opts.regionsList = append(opts.regionsList, r)
+
+		// if any of the regions is "all" then we overwrite what we currently have and break
+		if r == "all" {
+			opts.regionsList = getAllRegions()
+			break
+		} else {
+			opts.regionsList = append(opts.regionsList, r)
+		}
 	}
 
 	if len(errs) > 0 {

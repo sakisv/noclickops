@@ -54,6 +54,15 @@ var VALID_REGIONS = map[string]string{
 	"eusc-de-east-1": "AWS European Sovereign Cloud (Germany)",
 }
 
+func getAllRegions() []string {
+	keys := make([]string, 0, len(VALID_REGIONS))
+	for k := range VALID_REGIONS {
+		keys = append(keys, k)
+	}
+
+	return keys
+}
+
 func getFullPathToHomeTarget(to string) string {
 	homedir, _ := os.UserHomeDir()
 	return path.Join(homedir, to)
