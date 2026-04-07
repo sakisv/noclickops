@@ -19,10 +19,10 @@ import (
 func main() {
 	opts := parseFlags()
 
-	configs := generatePerRegionConfigs(opts.regions)
+	configs := generatePerRegionConfigs(opts.regionsList)
 
 	println("Downloading statefiles from s3")
-	s3_cfg := configs[0]
+	s3_cfg := generateStatefileBucketConfig(opts.s3BucketRegion)
 	if _, ok := VALID_REGIONS[strings.ToLower(strings.TrimSpace(opts.s3BucketRegion))]; ok {
 		s3_cfg.Region = strings.ToLower(strings.TrimSpace(opts.s3BucketRegion))
 	}

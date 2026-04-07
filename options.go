@@ -13,6 +13,7 @@ type options struct {
 	regions        string
 	s3Bucket       string
 	s3BucketRegion string
+	regionsList    []string
 }
 
 func (opts *options) validate() error {
@@ -36,9 +37,12 @@ func (opts *options) validate() error {
 
 	regions := strings.Split(opts.regions, ",")
 	for _, region := range regions {
-		if !isValidRegion(region) {
-			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", region))
+		r := strings.ToLower(strings.TrimSpace(region))
+		if !isValidRegion(r) {
+			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", r))
+			continue
 		}
+		opts.regionsList = append(opts.regionsList, r)
 	}
 
 	if len(errs) > 0 {

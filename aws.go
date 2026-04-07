@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path"
-	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -60,20 +59,24 @@ func getFullPathToHomeTarget(to string) string {
 	return path.Join(homedir, to)
 }
 
-func generatePerRegionConfigs(regions string) []aws.Config {
-	regions_slice := strings.Split(regions, ",")
+func generateStatefileBucketConfig(region string) aws.Config {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatal(err)
+	}
+	cfg.Region = region
+	return cfg
+}
+
+func generatePerRegionConfigs(regions []string) []aws.Config {
 	var configs []aws.Config
-	for _, r := range regions_slice {
+	for _, r := range regions {
 		cfg, err := config.LoadDefaultConfig(context.TODO())
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		lr := strings.TrimSpace(strings.ToLower(r))
-		if _, ok := VALID_REGIONS[lr]; ok {
-			cfg.Region = lr
-			configs = append(configs, cfg)
-		}
+		cfg.Region = r
 	}
 
 	return configs
