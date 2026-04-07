@@ -3,7 +3,9 @@ package main
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"log"
+	"strings"
 )
 
 type options struct {
@@ -14,26 +16,53 @@ type options struct {
 }
 
 func (opts *options) validate() error {
-	err := ""
+	var errs []string
 
 	if opts.stateFile == "" && opts.s3Bucket == "" {
-		err = "At least one of 's3_bucket' or 'statefile' must be provided"
+		errs = append(errs, "At least one of 's3-bucket' or 'statefile' must be provided")
 	}
 
-	if err != "" {
-		err += "\nUse -h / --help"
-		return errors.New(err)
+	if opts.s3Bucket != "" {
+		if opts.s3BucketRegion == "" {
+			errs = append(errs, "s3-bucket-region must be provided if s3-bucket is defined")
+		}
+		if opts.s3BucketRegion == "all" {
+			errs = append(errs, "s3-bucket-region cannot be 'all'")
+		}
+		if !isValidRegion(opts.s3BucketRegion) {
+			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", opts.s3BucketRegion))
+		}
+	}
+
+	regions := strings.Split(opts.regions, ",")
+	for _, region := range regions {
+		if !isValidRegion(region) {
+			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", region))
+		}
+	}
+
+	if len(errs) > 0 {
+		errs = append(errs, "Use -h / --help")
+		return errors.New(strings.Join(errs, "\n"))
 	}
 	return nil
+}
+
+func isValidRegion(region string) bool {
+	if region == "all" {
+		return true
+	}
+	_, found := VALID_REGIONS[region]
+	return found
 }
 
 func parseFlags() options {
 	var opts options
 
 	flag.StringVar(&opts.stateFile, "statefile", "", "The statefile to parse")
-	flag.StringVar(&opts.s3Bucket, "s3_bucket", "", "Download statefile(s) from this s3 bucket")
-	flag.StringVar(&opts.s3BucketRegion, "s3_bucket_region", "", "The bucket's region")
-	flag.StringVar(&opts.regions, "regions", "all", "Comma-separated list of regions to check")
+	flag.StringVar(&opts.s3Bucket, "s3-bucket", "", "Download statefile(s) from this s3 bucket")
+	flag.StringVar(&opts.s3BucketRegion, "s3-bucket-region", "", "The bucket's region. Cannot be 'all'")
+	flag.StringVar(&opts.regions, "regions", "all", "Comma-separated list of regions to check, or 'all'")
 	flag.Parse()
 
 	err := opts.validate()
