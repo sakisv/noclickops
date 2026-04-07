@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
@@ -23,9 +22,6 @@ func main() {
 
 	println("Downloading statefiles from s3")
 	s3_cfg := generateStatefileBucketConfig(opts.s3BucketRegion)
-	if _, ok := VALID_REGIONS[strings.ToLower(strings.TrimSpace(opts.s3BucketRegion))]; ok {
-		s3_cfg.Region = strings.ToLower(strings.TrimSpace(opts.s3BucketRegion))
-	}
 	downloaded_files := download_statefiles_from_s3(opts.s3Bucket, s3_cfg)
 	if opts.stateFile != "" {
 		downloaded_files = append(downloaded_files, opts.stateFile)
