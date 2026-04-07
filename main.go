@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"strings"
 
@@ -18,32 +17,18 @@ import (
 )
 
 func main() {
-	var stateFile string
-	var regions string
-	var s3_bucket string
-	var s3_bucket_region string
-	flag.StringVar(&stateFile, "statefile", "", "The statefile to parse")
-	flag.StringVar(&s3_bucket, "s3_bucket", "", "Download statefile(s) from this s3 bucket")
-	flag.StringVar(&s3_bucket_region, "s3_bucket_region", "", "The bucket's region")
-	flag.StringVar(&regions, "regions", "eu-west-1,eu-west-2", "Comma-separated list of regions to check")
-	flag.Parse()
+	opts := parseFlags()
 
-	if stateFile == "" && s3_bucket == "" {
-		fmt.Println("At least one of s3_bucket or statefile must be provided")
-		fmt.Println("Use -h / --help")
-		return
-	}
-
-	configs := generatePerRegionConfigs(regions)
+	configs := generatePerRegionConfigs(opts.regions)
 
 	println("Downloading statefiles from s3")
 	s3_cfg := configs[0]
-	if _, ok := VALID_REGIONS[strings.ToLower(strings.TrimSpace(s3_bucket_region))]; ok {
-		s3_cfg.Region = strings.ToLower(strings.TrimSpace(s3_bucket_region))
+	if _, ok := VALID_REGIONS[strings.ToLower(strings.TrimSpace(opts.s3BucketRegion))]; ok {
+		s3_cfg.Region = strings.ToLower(strings.TrimSpace(opts.s3BucketRegion))
 	}
-	downloaded_files := download_statefiles_from_s3(s3_bucket, s3_cfg)
-	if stateFile != "" {
-		downloaded_files = append(downloaded_files, stateFile)
+	downloaded_files := download_statefiles_from_s3(opts.s3Bucket, s3_cfg)
+	if opts.stateFile != "" {
+		downloaded_files = append(downloaded_files, opts.stateFile)
 	}
 	println("Scanning statefiles for terraform ids")
 	managedIDs := getManagedIDs(downloaded_files)
