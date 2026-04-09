@@ -24,7 +24,7 @@ type NoClickopsIAMClient struct {
 func NewIAMClientFromConfigs(cfg []awssdk.Config) NoClickopsIAMClient {
 	clopsClient := NoClickopsIAMClient{}
 	clopsClient.Meta = common.ClientMeta{
-		Regional:    false,
+		Global:      true,
 		ServiceName: "iam",
 	}
 	if len(cfg) == 0 {

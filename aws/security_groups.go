@@ -24,7 +24,7 @@ type NoClickopsEC2Client struct {
 func NewEC2ClientFromConfigs(cfg []awssdk.Config) NoClickopsEC2Client {
 	clopsClient := NoClickopsEC2Client{}
 	clopsClient.Meta = common.ClientMeta{
-		Regional:    true,
+		Global:      false,
 		ServiceName: "ec2",
 	}
 	if len(cfg) == 0 {

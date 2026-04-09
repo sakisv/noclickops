@@ -23,7 +23,7 @@ type NoClickopsIdentityStoreClient struct {
 func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config) NoClickopsIdentityStoreClient {
 	clopsClient := NoClickopsIdentityStoreClient{}
 	clopsClient.Meta = common.ClientMeta{
-		Regional:    false,
+		Global:      true,
 		ServiceName: "identitystore",
 	}
 	if len(cfg) == 0 {

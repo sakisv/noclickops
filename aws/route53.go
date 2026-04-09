@@ -25,7 +25,7 @@ type NoClickopsRoute53Client struct {
 func NewRoute53ClientFromConfigs(cfg []awssdk.Config) NoClickopsRoute53Client {
 	clopsClient := NoClickopsRoute53Client{}
 	clopsClient.Meta = common.ClientMeta{
-		Regional:    false,
+		Global:      true,
 		ServiceName: "route53",
 	}
 	if len(cfg) == 0 {

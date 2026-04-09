@@ -21,7 +21,7 @@ type NoClickopsEKSClient struct {
 func NewEKSClientFromConfigs(cfg []awssdk.Config) NoClickopsEKSClient {
 	clopsClient := NoClickopsEKSClient{}
 	clopsClient.Meta = common.ClientMeta{
-		Regional:    true,
+		Global:      false,
 		ServiceName: "eks",
 	}
 	if len(cfg) == 0 {

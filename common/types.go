@@ -25,6 +25,6 @@ type Resource struct {
 }
 
 type ClientMeta struct {
-	Regional    bool
+	Global      bool
 	ServiceName string
 }

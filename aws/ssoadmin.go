@@ -24,7 +24,7 @@ type NoClickopsSSOAdminClient struct {
 func NewSSOAdminClientFromConfigs(cfg []awssdk.Config) NoClickopsSSOAdminClient {
 	clopsClient := NoClickopsSSOAdminClient{}
 	clopsClient.Meta = common.ClientMeta{
-		Regional:    false,
+		Global:      true,
 		ServiceName: "ssoadmin",
 	}
 	if len(cfg) == 0 {

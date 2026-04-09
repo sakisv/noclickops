@@ -21,7 +21,7 @@ type NoClickopsSSMClient struct {
 func NewSSMClientFromConfigs(cfg []awssdk.Config) NoClickopsSSMClient {
 	clopsClient := NoClickopsSSMClient{}
 	clopsClient.Meta = common.ClientMeta{
-		Regional:    true,
+		Global:      false,
 		ServiceName: "ssm",
 	}
 	if len(cfg) == 0 {
