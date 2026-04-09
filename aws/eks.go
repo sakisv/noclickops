@@ -24,11 +24,11 @@ func NewEKSClientFromConfigs(cfg []awssdk.Config) NoClickopsEKSClient {
 		Regional:    true,
 		ServiceName: "eks",
 	}
+	if len(cfg) == 0 {
+		panic("Cannot create client without config")
+	}
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, eks.NewFromConfig(cfg))
-		if clopsClient.Meta.Regional == false {
-			break
-		}
 	}
 	return clopsClient
 }

@@ -27,12 +27,10 @@ func NewIAMClientFromConfigs(cfg []awssdk.Config) NoClickopsIAMClient {
 		Regional:    false,
 		ServiceName: "iam",
 	}
-	for _, cfg := range cfg {
-		clopsClient.Client = append(clopsClient.Client, iam.NewFromConfig(cfg))
-		if clopsClient.Meta.Regional == false {
-			break
-		}
+	if len(cfg) == 0 {
+		panic("Cannot create client without config")
 	}
+	clopsClient.Client = append(clopsClient.Client, iam.NewFromConfig(cfg[0]))
 	return clopsClient
 }
 

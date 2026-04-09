@@ -28,12 +28,10 @@ func NewRoute53ClientFromConfigs(cfg []awssdk.Config) NoClickopsRoute53Client {
 		Regional:    false,
 		ServiceName: "route53",
 	}
-	for _, cfg := range cfg {
-		clopsClient.Client = append(clopsClient.Client, route53.NewFromConfig(cfg))
-		if clopsClient.Meta.Regional == false {
-			break
-		}
+	if len(cfg) == 0 {
+		panic("Cannot create client without config")
 	}
+	clopsClient.Client = append(clopsClient.Client, route53.NewFromConfig(cfg[0]))
 	return clopsClient
 }
 

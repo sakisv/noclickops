@@ -24,11 +24,11 @@ func NewSSMClientFromConfigs(cfg []awssdk.Config) NoClickopsSSMClient {
 		Regional:    true,
 		ServiceName: "ssm",
 	}
+	if len(cfg) == 0 {
+		panic("Cannot create client without config")
+	}
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, ssm.NewFromConfig(cfg))
-		if clopsClient.Meta.Regional == false {
-			break
-		}
 	}
 	return clopsClient
 }

@@ -26,12 +26,10 @@ func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config) NoClickopsIdentitySt
 		Regional:    false,
 		ServiceName: "identitystore",
 	}
-	for _, cfg := range cfg {
-		clopsClient.Client = append(clopsClient.Client, identitystore.NewFromConfig(cfg))
-		if clopsClient.Meta.Regional == false {
-			break
-		}
+	if len(cfg) == 0 {
+		panic("Cannot create client without config")
 	}
+	clopsClient.Client = append(clopsClient.Client, identitystore.NewFromConfig(cfg[0]))
 	return clopsClient
 }
 

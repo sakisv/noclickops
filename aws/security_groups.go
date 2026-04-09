@@ -27,11 +27,11 @@ func NewEC2ClientFromConfigs(cfg []awssdk.Config) NoClickopsEC2Client {
 		Regional:    true,
 		ServiceName: "ec2",
 	}
+	if len(cfg) == 0 {
+		panic("Cannot create client without config")
+	}
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, ec2.NewFromConfig(cfg))
-		if clopsClient.Meta.Regional == false {
-			break
-		}
 	}
 	return clopsClient
 }
