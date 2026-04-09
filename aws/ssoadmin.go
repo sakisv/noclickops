@@ -18,22 +18,20 @@ type SSOAdminClient interface {
 
 type NoClickopsSSOAdminClient struct {
 	Client []SSOAdminClient
-	Meta   common.ClientMeta
+	common.ClientMeta
 }
 
-func NewSSOAdminClientFromConfigs(cfg []awssdk.Config) NoClickopsSSOAdminClient {
+func NewSSOAdminClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsSSOAdminClient {
 	clopsClient := NoClickopsSSOAdminClient{}
-	clopsClient.Meta = common.ClientMeta{
-		Global:      true,
-		ServiceName: "ssoadmin",
-	}
-	if len(cfg) == 0 {
-		panic("Cannot create client without config")
-	}
+	clopsClient.ClientMeta = meta
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, ssoadmin.NewFromConfig(cfg))
 	}
 	return clopsClient
+}
+
+func (clops *NoClickopsSSOAdminClient) GetAllResources() []common.Resource {
+	return clops.GetAllPermissionSets()
 }
 
 func (clops *NoClickopsSSOAdminClient) getSSOInstanceId() string {

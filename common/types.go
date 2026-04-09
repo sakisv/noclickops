@@ -19,6 +19,18 @@ const (
 	IdentityStore_group
 )
 
+type AWSService int
+
+const (
+	Route53 AWSService = iota
+	IAM
+	EKS
+	SSM
+	SecurityGroups
+	SSOAdmin
+	IdentityStore
+)
+
 type Resource struct {
 	TerraformID  string
 	ResourceType ResourceType
@@ -27,4 +39,11 @@ type Resource struct {
 type ClientMeta struct {
 	Global      bool
 	ServiceName string
+}
+
+func (m ClientMeta) GetServiceName() string { return m.ServiceName }
+
+type ResourceFetcher interface {
+	GetAllResources() []Resource
+	GetServiceName() string
 }

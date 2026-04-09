@@ -15,22 +15,20 @@ type SSMClient interface {
 
 type NoClickopsSSMClient struct {
 	Client []SSMClient
-	Meta   common.ClientMeta
+	common.ClientMeta
 }
 
-func NewSSMClientFromConfigs(cfg []awssdk.Config) NoClickopsSSMClient {
+func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsSSMClient {
 	clopsClient := NoClickopsSSMClient{}
-	clopsClient.Meta = common.ClientMeta{
-		Global:      false,
-		ServiceName: "ssm",
-	}
-	if len(cfg) == 0 {
-		panic("Cannot create client without config")
-	}
+	clopsClient.ClientMeta = meta
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, ssm.NewFromConfig(cfg))
 	}
 	return clopsClient
+}
+
+func (clops *NoClickopsSSMClient) GetAllResources() []common.Resource {
+	return clops.GetAllParametersNames()
 }
 
 func (clops *NoClickopsSSMClient) GetAllParametersNames() []common.Resource {

@@ -16,21 +16,24 @@ type IdentityStoreClient interface {
 }
 
 type NoClickopsIdentityStoreClient struct {
-	Client []IdentityStoreClient
-	Meta   common.ClientMeta
+	Client         []IdentityStoreClient
+	SSOAdminClient *NoClickopsSSOAdminClient
+	common.ClientMeta
 }
 
-func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config) NoClickopsIdentityStoreClient {
+func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta, ssoClient *NoClickopsSSOAdminClient) NoClickopsIdentityStoreClient {
 	clopsClient := NoClickopsIdentityStoreClient{}
-	clopsClient.Meta = common.ClientMeta{
-		Global:      true,
-		ServiceName: "identitystore",
-	}
-	if len(cfg) == 0 {
-		panic("Cannot create client without config")
-	}
+	clopsClient.ClientMeta = meta
+	clopsClient.SSOAdminClient = ssoClient
 	clopsClient.Client = append(clopsClient.Client, identitystore.NewFromConfig(cfg[0]))
 	return clopsClient
+}
+
+func (clops *NoClickopsIdentityStoreClient) GetAllResources() []common.Resource {
+	var resources []common.Resource
+	resources = append(resources, clops.GetAllIdentityStoreUsers(clops.SSOAdminClient)...)
+	resources = append(resources, clops.GetAllIdentityStoreGroups(clops.SSOAdminClient)...)
+	return resources
 }
 
 func (clops *NoClickopsIdentityStoreClient) GetAllIdentityStoreUsers(ssoadmin_client *NoClickopsSSOAdminClient) []common.Resource {

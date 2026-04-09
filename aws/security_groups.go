@@ -18,22 +18,23 @@ type EC2Client interface {
 
 type NoClickopsEC2Client struct {
 	Client []EC2Client
-	Meta   common.ClientMeta
+	common.ClientMeta
 }
 
-func NewEC2ClientFromConfigs(cfg []awssdk.Config) NoClickopsEC2Client {
+func NewEC2ClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsEC2Client {
 	clopsClient := NoClickopsEC2Client{}
-	clopsClient.Meta = common.ClientMeta{
-		Global:      false,
-		ServiceName: "ec2",
-	}
-	if len(cfg) == 0 {
-		panic("Cannot create client without config")
-	}
+	clopsClient.ClientMeta = meta
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, ec2.NewFromConfig(cfg))
 	}
 	return clopsClient
+}
+
+func (clops *NoClickopsEC2Client) GetAllResources() []common.Resource {
+	var resources []common.Resource
+	resources = append(resources, clops.GetAllSecurityGroups()...)
+	resources = append(resources, clops.GetAllSecurityGroupRules()...)
+	return resources
 }
 
 func (clops *NoClickopsEC2Client) GetAllSecurityGroups() []common.Resource {

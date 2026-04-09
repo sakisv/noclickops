@@ -19,20 +19,18 @@ type Route53Client interface {
 
 type NoClickopsRoute53Client struct {
 	Client []Route53Client
-	Meta   common.ClientMeta
+	common.ClientMeta
 }
 
-func NewRoute53ClientFromConfigs(cfg []awssdk.Config) NoClickopsRoute53Client {
+func NewRoute53ClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsRoute53Client {
 	clopsClient := NoClickopsRoute53Client{}
-	clopsClient.Meta = common.ClientMeta{
-		Global:      true,
-		ServiceName: "route53",
-	}
-	if len(cfg) == 0 {
-		panic("Cannot create client without config")
-	}
+	clopsClient.ClientMeta = meta
 	clopsClient.Client = append(clopsClient.Client, route53.NewFromConfig(cfg[0]))
 	return clopsClient
+}
+
+func (clops *NoClickopsRoute53Client) GetAllResources() []common.Resource {
+	return clops.GetAllRoute53RecordIds()
 }
 
 func (clops *NoClickopsRoute53Client) GetAllRoute53RecordIds() []common.Resource {

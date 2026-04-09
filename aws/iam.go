@@ -18,23 +18,26 @@ type IAMClient interface {
 
 type NoClickopsIAMClient struct {
 	Client []IAMClient
-	Meta   common.ClientMeta
+	common.ClientMeta
 }
 
-func NewIAMClientFromConfigs(cfg []awssdk.Config) NoClickopsIAMClient {
+func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsIAMClient {
 	clopsClient := NoClickopsIAMClient{}
-	clopsClient.Meta = common.ClientMeta{
-		Global:      true,
-		ServiceName: "iam",
-	}
-	if len(cfg) == 0 {
-		panic("Cannot create client without config")
-	}
+	clopsClient.ClientMeta = meta
 	clopsClient.Client = append(clopsClient.Client, iam.NewFromConfig(cfg[0]))
 	return clopsClient
 }
 
 const MAX_ITEMS int32 = 150
+
+func (clops *NoClickopsIAMClient) GetAllResources() []common.Resource {
+	var resources []common.Resource
+
+	resources = append(resources, clops.GetAllIAMUsers()...)
+	resources = append(resources, clops.GetAllIAMGroups()...)
+	resources = append(resources, clops.GetAllPoliciesArns()...)
+	return resources
+}
 
 func (clops *NoClickopsIAMClient) GetAllPoliciesArns() []common.Resource {
 	var resources []common.Resource

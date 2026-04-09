@@ -15,22 +15,20 @@ type EKSClient interface {
 
 type NoClickopsEKSClient struct {
 	Client []EKSClient
-	Meta   common.ClientMeta
+	common.ClientMeta
 }
 
-func NewEKSClientFromConfigs(cfg []awssdk.Config) NoClickopsEKSClient {
+func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsEKSClient {
 	clopsClient := NoClickopsEKSClient{}
-	clopsClient.Meta = common.ClientMeta{
-		Global:      false,
-		ServiceName: "eks",
-	}
-	if len(cfg) == 0 {
-		panic("Cannot create client without config")
-	}
+	clopsClient.ClientMeta = meta
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, eks.NewFromConfig(cfg))
 	}
 	return clopsClient
+}
+
+func (clops *NoClickopsEKSClient) GetAllResources() []common.Resource {
+	return clops.GetAllEKSClusters()
 }
 
 func (clops *NoClickopsEKSClient) GetAllEKSClusters() []common.Resource {
