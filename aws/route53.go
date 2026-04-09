@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
 	"github.com/aws/aws-sdk-go-v2/service/route53/types"
 	"github.com/noclickops/common"
@@ -16,7 +17,28 @@ type Route53Client interface {
 	ListResourceRecordSets(ctx context.Context, params *route53.ListResourceRecordSetsInput, optFns ...func(*route53.Options)) (*route53.ListResourceRecordSetsOutput, error)
 }
 
-func GetAllRoute53RecordIds(client Route53Client) []common.Resource {
+type NoClickopsRoute53Client struct {
+	Client []Route53Client
+	Meta   common.ClientMeta
+}
+
+func NewRoute53ClientFromConfigs(cfg []awssdk.Config) NoClickopsRoute53Client {
+	clopsClient := NoClickopsRoute53Client{}
+	clopsClient.Meta = common.ClientMeta{
+		Regional:    false,
+		ServiceName: "route53",
+	}
+	for _, cfg := range cfg {
+		clopsClient.Client = append(clopsClient.Client, route53.NewFromConfig(cfg))
+		if clopsClient.Meta.Regional == false {
+			break
+		}
+	}
+	return clopsClient
+}
+
+func (clops *NoClickopsRoute53Client) GetAllRoute53RecordIds() []common.Resource {
+	client := clops.Client[0]
 	hostedZones, err := client.ListHostedZones(context.TODO(), &route53.ListHostedZonesInput{})
 	if err != nil {
 		log.Fatal(err)

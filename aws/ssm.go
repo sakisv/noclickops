@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/noclickops/common"
 )
@@ -13,9 +14,30 @@ type SSMClient interface {
 	GetParametersByPath(ctx context.Context, params *ssm.GetParametersByPathInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersByPathOutput, error)
 }
 
-func GetAllParametersNames(client SSMClient) []common.Resource {
+type NoClickopsSSMClient struct {
+	Client []SSMClient
+	Meta   common.ClientMeta
+}
+
+func NewSSMClientFromConfigs(cfg []awssdk.Config) NoClickopsSSMClient {
+	clopsClient := NoClickopsSSMClient{}
+	clopsClient.Meta = common.ClientMeta{
+		Regional:    true,
+		ServiceName: "ssm",
+	}
+	for _, cfg := range cfg {
+		clopsClient.Client = append(clopsClient.Client, ssm.NewFromConfig(cfg))
+		if clopsClient.Meta.Regional == false {
+			break
+		}
+	}
+	return clopsClient
+}
+
+func (clops *NoClickopsSSMClient) GetAllParametersNames() []common.Resource {
 	var resources []common.Resource
 	var nextToken string
+	client := clops.Client[0]
 	for {
 		res, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
 			Path:       aws.String("/"),

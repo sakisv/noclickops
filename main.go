@@ -4,13 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/eks"
-	"github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/aws/aws-sdk-go-v2/service/identitystore"
-	"github.com/aws/aws-sdk-go-v2/service/route53"
-	"github.com/aws/aws-sdk-go-v2/service/ssm"
-	"github.com/aws/aws-sdk-go-v2/service/ssoadmin"
 	claws "github.com/noclickops/aws"
 	"github.com/noclickops/common"
 )
@@ -34,28 +27,40 @@ func main() {
 	}
 
 	foundRecords := make(map[string][]common.Resource)
+	iamclient := claws.NewIAMClientFromConfigs(configs)
 	println("Retrieving IAM policies")
-	foundRecords["iam_policies"] = claws.GetAllPoliciesArns(iam.NewFromConfig(configs[0]))
+	foundRecords["iam_policies"] = iamclient.GetAllPoliciesArns()
 	println("Retrieving IAM users")
-	foundRecords["iam_users"] = claws.GetAllIAMUsers(iam.NewFromConfig(configs[0]))
+	foundRecords["iam_users"] = iamclient.GetAllIAMUsers()
 	println("Retrieving IAM groups")
-	foundRecords["iam_groups"] = claws.GetAllIAMGroups(iam.NewFromConfig(configs[0]))
+	foundRecords["iam_groups"] = iamclient.GetAllIAMGroups()
+
+	ssmclient := claws.NewSSMClientFromConfigs(configs)
 	println("Retrieving SSM params")
-	foundRecords["ssm_params"] = claws.GetAllParametersNames(ssm.NewFromConfig(configs[0]))
+	foundRecords["ssm_params"] = ssmclient.GetAllParametersNames()
+
+	route53client := claws.NewRoute53ClientFromConfigs(configs)
 	println("Retrieving route53 records")
-	foundRecords["route53_records"] = claws.GetAllRoute53RecordIds(route53.NewFromConfig(configs[0]))
+	foundRecords["route53_records"] = route53client.GetAllRoute53RecordIds()
+
+	ec2client := claws.NewEC2ClientFromConfigs(configs)
 	println("Retrieving security groups")
-	foundRecords["ec2_security_groups"] = claws.GetAllSecurityGroups(ec2.NewFromConfig(configs[0]))
+	foundRecords["ec2_security_groups"] = ec2client.GetAllSecurityGroups()
 	println("Retrieving security group rules")
-	foundRecords["ec2_security_group_rules"] = claws.GetAllSecurityGroupRules(ec2.NewFromConfig(configs[0]))
+	foundRecords["ec2_security_group_rules"] = ec2client.GetAllSecurityGroupRules()
+
+	ssoadminclient := claws.NewSSOAdminClientFromConfigs(configs)
+	identitystoreclient := claws.NewIdentityStoreClientFromConfigs(configs)
 	println("Retrieving identity store users")
-	foundRecords["identity_store_users"] = claws.GetAllIdentityStoreUsers(identitystore.NewFromConfig(configs[0]), ssoadmin.NewFromConfig(configs[0]))
+	foundRecords["identity_store_users"] = identitystoreclient.GetAllIdentityStoreUsers(&ssoadminclient)
 	println("Retrieving identity store groups")
-	foundRecords["identity_store_groups"] = claws.GetAllIdentityStoreGroups(identitystore.NewFromConfig(configs[0]), ssoadmin.NewFromConfig(configs[0]))
+	foundRecords["identity_store_groups"] = identitystoreclient.GetAllIdentityStoreGroups(&ssoadminclient)
 	println("Retrieving permission sets")
-	foundRecords["ssoadmin_permission_sets"] = claws.GetAllPermissionSets(ssoadmin.NewFromConfig(configs[0]))
+	foundRecords["ssoadmin_permission_sets"] = ssoadminclient.GetAllPermissionSets()
+
+	eksclient := claws.NewEKSClientFromConfigs(configs)
 	println("Retrieving EKS clusters")
-	foundRecords["eks_clusters"] = claws.GetAllEKSClusters(eks.NewFromConfig(configs[0]))
+	foundRecords["eks_clusters"] = eksclient.GetAllEKSClusters()
 
 	unmanagedResourceIds := filter(managedIDs, foundRecords)
 	json, _ := json.Marshal(unmanagedResourceIds)

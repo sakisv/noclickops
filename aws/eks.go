@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/noclickops/common"
 )
@@ -12,10 +13,31 @@ type EKSClient interface {
 	ListClusters(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error)
 }
 
-func GetAllEKSClusters(client EKSClient) []common.Resource {
+type NoClickopsEKSClient struct {
+	Client []EKSClient
+	Meta   common.ClientMeta
+}
+
+func NewEKSClientFromConfigs(cfg []awssdk.Config) NoClickopsEKSClient {
+	clopsClient := NoClickopsEKSClient{}
+	clopsClient.Meta = common.ClientMeta{
+		Regional:    true,
+		ServiceName: "eks",
+	}
+	for _, cfg := range cfg {
+		clopsClient.Client = append(clopsClient.Client, eks.NewFromConfig(cfg))
+		if clopsClient.Meta.Regional == false {
+			break
+		}
+	}
+	return clopsClient
+}
+
+func (clops *NoClickopsEKSClient) GetAllEKSClusters() []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
 	var include = []string{"all"}
+	client := clops.Client[0]
 
 	for {
 		res, err := client.ListClusters(context.TODO(), &eks.ListClustersInput{

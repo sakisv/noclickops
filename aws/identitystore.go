@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/identitystore"
 	"github.com/noclickops/common"
 )
@@ -14,11 +15,32 @@ type IdentityStoreClient interface {
 	ListGroups(ctx context.Context, params *identitystore.ListGroupsInput, optFns ...func(*identitystore.Options)) (*identitystore.ListGroupsOutput, error)
 }
 
-func GetAllIdentityStoreUsers(client IdentityStoreClient, ssoadmin_client SSOAdminClient) []common.Resource {
+type NoClickopsIdentityStoreClient struct {
+	Client []IdentityStoreClient
+	Meta   common.ClientMeta
+}
+
+func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config) NoClickopsIdentityStoreClient {
+	clopsClient := NoClickopsIdentityStoreClient{}
+	clopsClient.Meta = common.ClientMeta{
+		Regional:    false,
+		ServiceName: "identitystore",
+	}
+	for _, cfg := range cfg {
+		clopsClient.Client = append(clopsClient.Client, identitystore.NewFromConfig(cfg))
+		if clopsClient.Meta.Regional == false {
+			break
+		}
+	}
+	return clopsClient
+}
+
+func (clops *NoClickopsIdentityStoreClient) GetAllIdentityStoreUsers(ssoadmin_client *NoClickopsSSOAdminClient) []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
+	client := clops.Client[0]
 
-	instance_id := getSSOInstanceId(ssoadmin_client)
+	instance_id := ssoadmin_client.getSSOInstanceId()
 	if instance_id == "" {
 		return resources
 	}
@@ -45,11 +67,12 @@ func GetAllIdentityStoreUsers(client IdentityStoreClient, ssoadmin_client SSOAdm
 	return resources
 }
 
-func GetAllIdentityStoreGroups(client IdentityStoreClient, ssoadmin_client SSOAdminClient) []common.Resource {
+func (clops *NoClickopsIdentityStoreClient) GetAllIdentityStoreGroups(ssoadmin_client *NoClickopsSSOAdminClient) []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
+	client := clops.Client[0]
 
-	instance_id := getSSOInstanceId(ssoadmin_client)
+	instance_id := ssoadmin_client.getSSOInstanceId()
 	if instance_id == "" {
 		return resources
 	}

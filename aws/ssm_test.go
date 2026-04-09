@@ -38,7 +38,10 @@ func TestGetAllParametersNames(t *testing.T) {
 
 		},
 	}
-	ids := aws.GetAllParametersNames(mock)
+	client := aws.NoClickopsSSMClient{
+		Client: []aws.SSMClient{mock},
+	}
+	ids := client.GetAllParametersNames()
 	expected := []common.Resource{
 		{TerraformID: "/some/parameter", ResourceType: common.SSM_parameter},
 		{TerraformID: "/some/other/parameter", ResourceType: common.SSM_parameter},

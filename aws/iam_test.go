@@ -14,6 +14,7 @@ import (
 
 func TestListPolicies_PaginationFollowed(t *testing.T) {
 	callCount := 0
+
 	mock := &mockIAMClient{
 		listPoliciesFn: func(_ context.Context, params *iam.ListPoliciesInput, _ ...func(*iam.Options)) (*iam.ListPoliciesOutput, error) {
 			callCount++
@@ -38,7 +39,10 @@ func TestListPolicies_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	ids := aws.GetAllPoliciesArns(mock)
+	client := aws.NoClickopsIAMClient{
+		Client: []aws.IAMClient{mock},
+	}
+	ids := client.GetAllPoliciesArns()
 	expected := []common.Resource{
 		{TerraformID: "arn:policy_1", ResourceType: common.IAM_policy},
 		{TerraformID: "arn:policy_2", ResourceType: common.IAM_policy},
@@ -76,7 +80,10 @@ func TestGetAllIAMUsers_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	got := aws.GetAllIAMUsers(mock)
+	client := aws.NoClickopsIAMClient{
+		Client: []aws.IAMClient{mock},
+	}
+	got := client.GetAllIAMUsers()
 	expected := []common.Resource{
 		{TerraformID: "user_1", ResourceType: common.IAM_user},
 		{TerraformID: "user_2", ResourceType: common.IAM_user},
@@ -114,7 +121,10 @@ func TestGetAllIAMGroups_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	got := aws.GetAllIAMGroups(mock)
+	client := aws.NoClickopsIAMClient{
+		Client: []aws.IAMClient{mock},
+	}
+	got := client.GetAllIAMGroups()
 	expected := []common.Resource{
 		{TerraformID: "group_1", ResourceType: common.IAM_group},
 		{TerraformID: "group_2", ResourceType: common.IAM_group},

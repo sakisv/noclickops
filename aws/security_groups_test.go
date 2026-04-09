@@ -31,7 +31,10 @@ func TestGetAllSecurityGroups_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	got := aws.GetAllSecurityGroups(mock)
+	client := aws.NoClickopsEC2Client{
+		Client: []aws.EC2Client{mock},
+	}
+	got := client.GetAllSecurityGroups()
 	expected := []common.Resource{
 		{TerraformID: "sg-1", ResourceType: common.EC2_securitygroup},
 		{TerraformID: "sg-2", ResourceType: common.EC2_securitygroup},
@@ -83,7 +86,10 @@ func TestGetAllSecurityGroupRules_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	got := aws.GetAllSecurityGroupRules(mock)
+	client := aws.NoClickopsEC2Client{
+		Client: []aws.EC2Client{mock},
+	}
+	got := client.GetAllSecurityGroupRules()
 	expected := []common.Resource{
 		{TerraformID: "sg-aaa_ingress_tcp_80_80_10.0.0.0/8", ResourceType: common.EC2_securitygrouprule},
 		{TerraformID: "sg-bbb_egress_tcp_443_443_::/0", ResourceType: common.EC2_securitygrouprule},

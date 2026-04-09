@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
 	"github.com/noclickops/common"
@@ -16,11 +17,32 @@ type IAMClient interface {
 	ListGroups(ctx context.Context, params *iam.ListGroupsInput, optFns ...func(*iam.Options)) (*iam.ListGroupsOutput, error)
 }
 
+type NoClickopsIAMClient struct {
+	Client []IAMClient
+	Meta   common.ClientMeta
+}
+
+func NewIAMClientFromConfigs(cfg []awssdk.Config) NoClickopsIAMClient {
+	clopsClient := NoClickopsIAMClient{}
+	clopsClient.Meta = common.ClientMeta{
+		Regional:    false,
+		ServiceName: "iam",
+	}
+	for _, cfg := range cfg {
+		clopsClient.Client = append(clopsClient.Client, iam.NewFromConfig(cfg))
+		if clopsClient.Meta.Regional == false {
+			break
+		}
+	}
+	return clopsClient
+}
+
 const MAX_ITEMS int32 = 150
 
-func GetAllPoliciesArns(client IAMClient) []common.Resource {
+func (clops *NoClickopsIAMClient) GetAllPoliciesArns() []common.Resource {
 	var resources []common.Resource
 	var marker *string = nil
+	client := clops.Client[0]
 	for {
 		res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
 			MaxItems: aws.Int32(MAX_ITEMS),
@@ -43,9 +65,10 @@ func GetAllPoliciesArns(client IAMClient) []common.Resource {
 	return resources
 }
 
-func GetAllIAMUsers(client IAMClient) []common.Resource {
+func (clops *NoClickopsIAMClient) GetAllIAMUsers() []common.Resource {
 	var resources []common.Resource
 	var marker *string = nil
+	client := clops.Client[0]
 	for {
 		res, err := client.ListUsers(context.TODO(), &iam.ListUsersInput{
 			MaxItems: aws.Int32(MAX_ITEMS),
@@ -67,9 +90,10 @@ func GetAllIAMUsers(client IAMClient) []common.Resource {
 	return resources
 }
 
-func GetAllIAMGroups(client IAMClient) []common.Resource {
+func (clops *NoClickopsIAMClient) GetAllIAMGroups() []common.Resource {
 	var resources []common.Resource
 	var marker *string = nil
+	client := clops.Client[0]
 	for {
 		res, err := client.ListGroups(context.TODO(), &iam.ListGroupsInput{
 			MaxItems: aws.Int32(MAX_ITEMS),

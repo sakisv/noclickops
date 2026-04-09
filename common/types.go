@@ -23,3 +23,8 @@ type Resource struct {
 	TerraformID  string
 	ResourceType ResourceType
 }
+
+type ClientMeta struct {
+	Regional    bool
+	ServiceName string
+}

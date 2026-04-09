@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssoadmin"
 	"github.com/aws/aws-sdk-go-v2/service/ssoadmin/types"
 	"github.com/noclickops/common"
@@ -15,8 +16,28 @@ type SSOAdminClient interface {
 	ListPermissionSets(ctx context.Context, params *ssoadmin.ListPermissionSetsInput, optFns ...func(*ssoadmin.Options)) (*ssoadmin.ListPermissionSetsOutput, error)
 }
 
-func getSSOInstanceId(client SSOAdminClient) string {
-	instances := GetAllSSOInstances(client)
+type NoClickopsSSOAdminClient struct {
+	Client []SSOAdminClient
+	Meta   common.ClientMeta
+}
+
+func NewSSOAdminClientFromConfigs(cfg []awssdk.Config) NoClickopsSSOAdminClient {
+	clopsClient := NoClickopsSSOAdminClient{}
+	clopsClient.Meta = common.ClientMeta{
+		Regional:    false,
+		ServiceName: "ssoadmin",
+	}
+	for _, cfg := range cfg {
+		clopsClient.Client = append(clopsClient.Client, ssoadmin.NewFromConfig(cfg))
+		if clopsClient.Meta.Regional == false {
+			break
+		}
+	}
+	return clopsClient
+}
+
+func (clops *NoClickopsSSOAdminClient) getSSOInstanceId() string {
+	instances := clops.GetAllSSOInstances()
 	if len(instances) != 1 {
 		println("Found more than 1 SSO Instances, returning")
 		return ""
@@ -25,8 +46,8 @@ func getSSOInstanceId(client SSOAdminClient) string {
 	return *instances[0].IdentityStoreId
 }
 
-func getSSOInstanceArn(client SSOAdminClient) string {
-	instances := GetAllSSOInstances(client)
+func (clops *NoClickopsSSOAdminClient) getSSOInstanceArn() string {
+	instances := clops.GetAllSSOInstances()
 	if len(instances) != 1 {
 		println("Found more than 1 SSO Instances, returning")
 		return ""
@@ -35,9 +56,10 @@ func getSSOInstanceArn(client SSOAdminClient) string {
 	return *instances[0].InstanceArn
 }
 
-func GetAllSSOInstances(client SSOAdminClient) []types.InstanceMetadata {
+func (clops *NoClickopsSSOAdminClient) GetAllSSOInstances() []types.InstanceMetadata {
 	var resources []types.InstanceMetadata
 	var nextToken *string = nil
+	client := clops.Client[0]
 	for {
 		res, err := client.ListInstances(context.TODO(), &ssoadmin.ListInstancesInput{
 			NextToken: nextToken,
@@ -58,11 +80,12 @@ func GetAllSSOInstances(client SSOAdminClient) []types.InstanceMetadata {
 	return resources
 }
 
-func GetAllPermissionSets(client SSOAdminClient) []common.Resource {
+func (clops *NoClickopsSSOAdminClient) GetAllPermissionSets() []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
+	client := clops.Client[0]
 
-	instance_arn := getSSOInstanceArn(client)
+	instance_arn := clops.getSSOInstanceArn()
 	if instance_arn == "" {
 		return resources
 	}
