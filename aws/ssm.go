@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 	"github.com/noclickops/common"
@@ -40,10 +39,10 @@ func (clops *NoClickopsSSMClient) GetAllParametersNames() []common.Resource {
 	client := clops.Client[0]
 	for {
 		res, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
-			Path:       aws.String("/"),
-			MaxResults: aws.Int32(10),
-			Recursive:  aws.Bool(true),
-			NextToken:  aws.String(nextToken),
+			Path:       awssdk.String("/"),
+			MaxResults: awssdk.Int32(10),
+			Recursive:  awssdk.Bool(true),
+			NextToken:  awssdk.String(nextToken),
 		})
 
 		if err != nil {

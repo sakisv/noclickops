@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/iam/types"
@@ -45,7 +44,7 @@ func (clops *NoClickopsIAMClient) GetAllPoliciesArns() []common.Resource {
 	client := clops.Client[0]
 	for {
 		res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
-			MaxItems: aws.Int32(MAX_ITEMS),
+			MaxItems: awssdk.Int32(MAX_ITEMS),
 			Scope:    types.PolicyScopeTypeLocal,
 			Marker:   marker,
 		})
@@ -71,7 +70,7 @@ func (clops *NoClickopsIAMClient) GetAllIAMUsers() []common.Resource {
 	client := clops.Client[0]
 	for {
 		res, err := client.ListUsers(context.TODO(), &iam.ListUsersInput{
-			MaxItems: aws.Int32(MAX_ITEMS),
+			MaxItems: awssdk.Int32(MAX_ITEMS),
 			Marker:   marker,
 		})
 
@@ -96,7 +95,7 @@ func (clops *NoClickopsIAMClient) GetAllIAMGroups() []common.Resource {
 	client := clops.Client[0]
 	for {
 		res, err := client.ListGroups(context.TODO(), &iam.ListGroupsInput{
-			MaxItems: aws.Int32(MAX_ITEMS),
+			MaxItems: awssdk.Int32(MAX_ITEMS),
 			Marker:   marker,
 		})
 
