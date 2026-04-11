@@ -32,16 +32,16 @@ const (
 )
 
 type Resource struct {
-	TerraformID  string
-	ResourceType ResourceType
+	TerraformID  string       `json:"terraform_id"`
+	ResourceType ResourceType `json:"resource_type"`
 }
 
-type ClientMeta struct {
+type ServiceMeta struct {
 	Global      bool
 	ServiceName string
 }
 
-func (m ClientMeta) GetServiceName() string { return m.ServiceName }
+func (m ServiceMeta) GetServiceName() string { return m.ServiceName }
 
 type ResourceFetcher interface {
 	GetAllResources() []Resource

@@ -15,12 +15,12 @@ type SSMClient interface {
 
 type NoClickopsSSMClient struct {
 	Client []SSMClient
-	common.ClientMeta
+	common.ServiceMeta
 }
 
-func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsSSMClient {
+func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsSSMClient {
 	clopsClient := NoClickopsSSMClient{}
-	clopsClient.ClientMeta = meta
+	clopsClient.ServiceMeta = meta
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, ssm.NewFromConfig(cfg))
 	}

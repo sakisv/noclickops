@@ -18,12 +18,12 @@ type SSOAdminClient interface {
 
 type NoClickopsSSOAdminClient struct {
 	Client []SSOAdminClient
-	common.ClientMeta
+	common.ServiceMeta
 }
 
-func NewSSOAdminClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsSSOAdminClient {
+func NewSSOAdminClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsSSOAdminClient {
 	clopsClient := NoClickopsSSOAdminClient{}
-	clopsClient.ClientMeta = meta
+	clopsClient.ServiceMeta = meta
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, ssoadmin.NewFromConfig(cfg))
 	}

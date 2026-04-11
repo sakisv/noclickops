@@ -5,7 +5,7 @@ import (
 	"github.com/noclickops/common"
 )
 
-var SERVICES = map[common.AWSService]common.ClientMeta{
+var SERVICES = map[common.AWSService]common.ServiceMeta{
 	common.IAM:     {Global: true, ServiceName: "iam"},
 	common.Route53: {Global: true, ServiceName: "route53"},
 

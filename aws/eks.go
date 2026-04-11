@@ -15,12 +15,12 @@ type EKSClient interface {
 
 type NoClickopsEKSClient struct {
 	Client []EKSClient
-	common.ClientMeta
+	common.ServiceMeta
 }
 
-func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsEKSClient {
+func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsEKSClient {
 	clopsClient := NoClickopsEKSClient{}
-	clopsClient.ClientMeta = meta
+	clopsClient.ServiceMeta = meta
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, eks.NewFromConfig(cfg))
 	}

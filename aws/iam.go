@@ -18,12 +18,12 @@ type IAMClient interface {
 
 type NoClickopsIAMClient struct {
 	Client []IAMClient
-	common.ClientMeta
+	common.ServiceMeta
 }
 
-func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsIAMClient {
+func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsIAMClient {
 	clopsClient := NoClickopsIAMClient{}
-	clopsClient.ClientMeta = meta
+	clopsClient.ServiceMeta = meta
 	clopsClient.Client = append(clopsClient.Client, iam.NewFromConfig(cfg[0]))
 	return clopsClient
 }

@@ -18,12 +18,12 @@ type IdentityStoreClient interface {
 type NoClickopsIdentityStoreClient struct {
 	Client         []IdentityStoreClient
 	SSOAdminClient *NoClickopsSSOAdminClient
-	common.ClientMeta
+	common.ServiceMeta
 }
 
-func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta, ssoClient *NoClickopsSSOAdminClient) NoClickopsIdentityStoreClient {
+func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta, ssoClient *NoClickopsSSOAdminClient) NoClickopsIdentityStoreClient {
 	clopsClient := NoClickopsIdentityStoreClient{}
-	clopsClient.ClientMeta = meta
+	clopsClient.ServiceMeta = meta
 	clopsClient.SSOAdminClient = ssoClient
 	clopsClient.Client = append(clopsClient.Client, identitystore.NewFromConfig(cfg[0]))
 	return clopsClient

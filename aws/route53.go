@@ -19,12 +19,12 @@ type Route53Client interface {
 
 type NoClickopsRoute53Client struct {
 	Client []Route53Client
-	common.ClientMeta
+	common.ServiceMeta
 }
 
-func NewRoute53ClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsRoute53Client {
+func NewRoute53ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsRoute53Client {
 	clopsClient := NoClickopsRoute53Client{}
-	clopsClient.ClientMeta = meta
+	clopsClient.ServiceMeta = meta
 	clopsClient.Client = append(clopsClient.Client, route53.NewFromConfig(cfg[0]))
 	return clopsClient
 }

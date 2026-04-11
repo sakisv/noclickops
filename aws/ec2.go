@@ -18,12 +18,12 @@ type EC2Client interface {
 
 type NoClickopsEC2Client struct {
 	Client []EC2Client
-	common.ClientMeta
+	common.ServiceMeta
 }
 
-func NewEC2ClientFromConfigs(cfg []awssdk.Config, meta common.ClientMeta) NoClickopsEC2Client {
+func NewEC2ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsEC2Client {
 	clopsClient := NoClickopsEC2Client{}
-	clopsClient.ClientMeta = meta
+	clopsClient.ServiceMeta = meta
 	for _, cfg := range cfg {
 		clopsClient.Client = append(clopsClient.Client, ec2.NewFromConfig(cfg))
 	}
