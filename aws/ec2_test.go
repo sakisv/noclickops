@@ -31,8 +31,8 @@ func TestGetAllSecurityGroups_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoClickopsEC2Client{
-		Client: []aws.EC2Client{mock},
+	client := aws.NoClickopsEC2Service{
+		Clients: []aws.NoClickopsEC2RegionalClient{{Client: mock}},
 	}
 	got := client.GetAllSecurityGroups()
 	expected := []common.Resource{
@@ -86,8 +86,8 @@ func TestGetAllSecurityGroupRules_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoClickopsEC2Client{
-		Client: []aws.EC2Client{mock},
+	client := aws.NoClickopsEC2Service{
+		Clients: []aws.NoClickopsEC2RegionalClient{{Client: mock}},
 	}
 	got := client.GetAllSecurityGroupRules()
 	expected := []common.Resource{

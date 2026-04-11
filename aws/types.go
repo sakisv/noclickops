@@ -5,6 +5,10 @@ import (
 	"github.com/noclickops/common"
 )
 
+type ClientMeta struct {
+	Region string
+}
+
 var SERVICES = map[common.AWSService]common.ServiceMeta{
 	common.IAM:     {Global: true, ServiceName: "iam"},
 	common.Route53: {Global: true, ServiceName: "route53"},

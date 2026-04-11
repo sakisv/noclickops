@@ -13,47 +13,54 @@ type EKSClient interface {
 	ListClusters(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error)
 }
 
-type NoClickopsEKSClient struct {
-	Client []EKSClient
+type NoClickopsEKSRegionalClient struct {
+	Client EKSClient
+	ClientMeta
+}
+
+type NoClickopsEKSService struct {
+	Clients []NoClickopsEKSRegionalClient
 	common.ServiceMeta
 }
 
-func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsEKSClient {
-	clopsClient := NoClickopsEKSClient{}
-	clopsClient.ServiceMeta = meta
-	for _, cfg := range cfg {
-		clopsClient.Client = append(clopsClient.Client, eks.NewFromConfig(cfg))
-	}
-	return clopsClient
-}
-
-func (clops *NoClickopsEKSClient) GetAllResources() []common.Resource {
-	return clops.GetAllEKSClusters()
-}
-
-func (clops *NoClickopsEKSClient) GetAllEKSClusters() []common.Resource {
-	var resources []common.Resource
-	var nextToken *string = nil
-	var include = []string{"all"}
-	client := clops.Client[0]
-
-	for {
-		res, err := client.ListClusters(context.TODO(), &eks.ListClustersInput{
-			Include:   include,
-			NextToken: nextToken,
+func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsEKSService {
+	service := NoClickopsEKSService{ServiceMeta: meta}
+	for _, c := range cfg {
+		service.Clients = append(service.Clients, NoClickopsEKSRegionalClient{
+			Client:     eks.NewFromConfig(c),
+			ClientMeta: ClientMeta{Region: c.Region},
 		})
-		if err != nil {
-			log.Fatal(err)
-		}
+	}
+	return service
+}
 
-		for _, el := range res.Clusters {
-			resources = append(resources, common.Resource{TerraformID: el, ResourceType: common.EKS_cluster})
-		}
+func (s *NoClickopsEKSService) GetAllResources() []common.Resource {
+	return s.GetAllEKSClusters()
+}
 
-		if res.NextToken == nil {
-			break
+func (s *NoClickopsEKSService) GetAllEKSClusters() []common.Resource {
+	var resources []common.Resource
+	for _, rc := range s.Clients {
+		var nextToken *string = nil
+		var include = []string{"all"}
+		for {
+			res, err := rc.Client.ListClusters(context.TODO(), &eks.ListClustersInput{
+				Include:   include,
+				NextToken: nextToken,
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for _, el := range res.Clusters {
+				resources = append(resources, common.Resource{TerraformID: el, ResourceType: common.EKS_cluster})
+			}
+
+			if res.NextToken == nil {
+				break
+			}
+			nextToken = res.NextToken
 		}
-		nextToken = res.NextToken
 	}
 	return resources
 }

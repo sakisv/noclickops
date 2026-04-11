@@ -13,47 +13,55 @@ type SSMClient interface {
 	GetParametersByPath(ctx context.Context, params *ssm.GetParametersByPathInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersByPathOutput, error)
 }
 
-type NoClickopsSSMClient struct {
-	Client []SSMClient
+type NoClickopsSSMRegionalClient struct {
+	Client SSMClient
+	ClientMeta
+}
+
+type NoClickopsSSMService struct {
+	Clients []NoClickopsSSMRegionalClient
 	common.ServiceMeta
 }
 
-func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsSSMClient {
-	clopsClient := NoClickopsSSMClient{}
-	clopsClient.ServiceMeta = meta
-	for _, cfg := range cfg {
-		clopsClient.Client = append(clopsClient.Client, ssm.NewFromConfig(cfg))
-	}
-	return clopsClient
-}
-
-func (clops *NoClickopsSSMClient) GetAllResources() []common.Resource {
-	return clops.GetAllParametersNames()
-}
-
-func (clops *NoClickopsSSMClient) GetAllParametersNames() []common.Resource {
-	var resources []common.Resource
-	var nextToken string
-	client := clops.Client[0]
-	for {
-		res, err := client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
-			Path:       awssdk.String("/"),
-			MaxResults: awssdk.Int32(10),
-			Recursive:  awssdk.Bool(true),
-			NextToken:  awssdk.String(nextToken),
+func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsSSMService {
+	service := NoClickopsSSMService{ServiceMeta: meta}
+	for _, c := range cfg {
+		service.Clients = append(service.Clients, NoClickopsSSMRegionalClient{
+			Client:     ssm.NewFromConfig(c),
+			ClientMeta: ClientMeta{Region: c.Region},
 		})
+	}
+	return service
+}
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, el := range res.Parameters {
-			resources = append(resources, common.Resource{TerraformID: *el.Name, ResourceType: common.SSM_parameter})
-		}
+func (s *NoClickopsSSMService) GetAllResources() []common.Resource {
+	return s.GetAllParametersNames()
+}
 
-		if res.NextToken == nil || *res.NextToken == "" {
-			break
+func (s *NoClickopsSSMService) GetAllParametersNames() []common.Resource {
+	var resources []common.Resource
+	for _, rc := range s.Clients {
+		var nextToken string
+		for {
+			res, err := rc.Client.GetParametersByPath(context.TODO(), &ssm.GetParametersByPathInput{
+				Path:       awssdk.String("/"),
+				MaxResults: awssdk.Int32(10),
+				Recursive:  awssdk.Bool(true),
+				NextToken:  awssdk.String(nextToken),
+			})
+
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, el := range res.Parameters {
+				resources = append(resources, common.Resource{TerraformID: *el.Name, ResourceType: common.SSM_parameter})
+			}
+
+			if res.NextToken == nil || *res.NextToken == "" {
+				break
+			}
+			nextToken = *res.NextToken
 		}
-		nextToken = *res.NextToken
 	}
 	return resources
 }

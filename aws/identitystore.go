@@ -15,31 +15,37 @@ type IdentityStoreClient interface {
 	ListGroups(ctx context.Context, params *identitystore.ListGroupsInput, optFns ...func(*identitystore.Options)) (*identitystore.ListGroupsOutput, error)
 }
 
-type NoClickopsIdentityStoreClient struct {
-	Client         []IdentityStoreClient
-	SSOAdminClient *NoClickopsSSOAdminClient
+type NoClickopsIdentityStoreRegionalClient struct {
+	Client IdentityStoreClient
+	ClientMeta
+}
+
+type NoClickopsIdentityStoreService struct {
+	Clients        []NoClickopsIdentityStoreRegionalClient
+	SSOAdminClient *NoClickopsSSOAdminService
 	common.ServiceMeta
 }
 
-func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta, ssoClient *NoClickopsSSOAdminClient) NoClickopsIdentityStoreClient {
-	clopsClient := NoClickopsIdentityStoreClient{}
-	clopsClient.ServiceMeta = meta
-	clopsClient.SSOAdminClient = ssoClient
-	clopsClient.Client = append(clopsClient.Client, identitystore.NewFromConfig(cfg[0]))
-	return clopsClient
+func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta, ssoClient *NoClickopsSSOAdminService) NoClickopsIdentityStoreService {
+	service := NoClickopsIdentityStoreService{ServiceMeta: meta, SSOAdminClient: ssoClient}
+	service.Clients = append(service.Clients, NoClickopsIdentityStoreRegionalClient{
+		Client:     identitystore.NewFromConfig(cfg[0]),
+		ClientMeta: ClientMeta{Region: cfg[0].Region},
+	})
+	return service
 }
 
-func (clops *NoClickopsIdentityStoreClient) GetAllResources() []common.Resource {
+func (s *NoClickopsIdentityStoreService) GetAllResources() []common.Resource {
 	var resources []common.Resource
-	resources = append(resources, clops.GetAllIdentityStoreUsers(clops.SSOAdminClient)...)
-	resources = append(resources, clops.GetAllIdentityStoreGroups(clops.SSOAdminClient)...)
+	resources = append(resources, s.GetAllIdentityStoreUsers(s.SSOAdminClient)...)
+	resources = append(resources, s.GetAllIdentityStoreGroups(s.SSOAdminClient)...)
 	return resources
 }
 
-func (clops *NoClickopsIdentityStoreClient) GetAllIdentityStoreUsers(ssoadmin_client *NoClickopsSSOAdminClient) []common.Resource {
+func (s *NoClickopsIdentityStoreService) GetAllIdentityStoreUsers(ssoadmin_client *NoClickopsSSOAdminService) []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
-	client := clops.Client[0]
+	client := s.Clients[0].Client
 
 	instance_id := ssoadmin_client.getSSOInstanceId()
 	if instance_id == "" {
@@ -68,10 +74,10 @@ func (clops *NoClickopsIdentityStoreClient) GetAllIdentityStoreUsers(ssoadmin_cl
 	return resources
 }
 
-func (clops *NoClickopsIdentityStoreClient) GetAllIdentityStoreGroups(ssoadmin_client *NoClickopsSSOAdminClient) []common.Resource {
+func (s *NoClickopsIdentityStoreService) GetAllIdentityStoreGroups(ssoadmin_client *NoClickopsSSOAdminService) []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
-	client := clops.Client[0]
+	client := s.Clients[0].Client
 
 	instance_id := ssoadmin_client.getSSOInstanceId()
 	if instance_id == "" {

@@ -16,101 +16,112 @@ type IAMClient interface {
 	ListGroups(ctx context.Context, params *iam.ListGroupsInput, optFns ...func(*iam.Options)) (*iam.ListGroupsOutput, error)
 }
 
-type NoClickopsIAMClient struct {
-	Client []IAMClient
+type NoClickopsIAMRegionalClient struct {
+	Client IAMClient
+	ClientMeta
+}
+
+type NoClickopsIAMService struct {
+	Clients []NoClickopsIAMRegionalClient
 	common.ServiceMeta
 }
 
-func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsIAMClient {
-	clopsClient := NoClickopsIAMClient{}
-	clopsClient.ServiceMeta = meta
-	clopsClient.Client = append(clopsClient.Client, iam.NewFromConfig(cfg[0]))
-	return clopsClient
+func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsIAMService {
+	service := NoClickopsIAMService{ServiceMeta: meta}
+	for _, c := range cfg {
+		service.Clients = append(service.Clients, NoClickopsIAMRegionalClient{
+			Client:     iam.NewFromConfig(c),
+			ClientMeta: ClientMeta{Region: c.Region},
+		})
+	}
+	return service
 }
 
 const MAX_ITEMS int32 = 150
 
-func (clops *NoClickopsIAMClient) GetAllResources() []common.Resource {
+func (s *NoClickopsIAMService) GetAllResources() []common.Resource {
 	var resources []common.Resource
-
-	resources = append(resources, clops.GetAllIAMUsers()...)
-	resources = append(resources, clops.GetAllIAMGroups()...)
-	resources = append(resources, clops.GetAllPoliciesArns()...)
+	resources = append(resources, s.GetAllIAMUsers()...)
+	resources = append(resources, s.GetAllIAMGroups()...)
+	resources = append(resources, s.GetAllPoliciesArns()...)
 	return resources
 }
 
-func (clops *NoClickopsIAMClient) GetAllPoliciesArns() []common.Resource {
+func (s *NoClickopsIAMService) GetAllPoliciesArns() []common.Resource {
 	var resources []common.Resource
-	var marker *string = nil
-	client := clops.Client[0]
-	for {
-		res, err := client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
-			MaxItems: awssdk.Int32(MAX_ITEMS),
-			Scope:    types.PolicyScopeTypeLocal,
-			Marker:   marker,
-		})
+	for _, rc := range s.Clients {
+		var marker *string = nil
+		for {
+			res, err := rc.Client.ListPolicies(context.TODO(), &iam.ListPoliciesInput{
+				MaxItems: awssdk.Int32(MAX_ITEMS),
+				Scope:    types.PolicyScopeTypeLocal,
+				Marker:   marker,
+			})
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, el := range res.Policies {
-			resources = append(resources, common.Resource{TerraformID: *el.Arn, ResourceType: common.IAM_policy})
-		}
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, el := range res.Policies {
+				resources = append(resources, common.Resource{TerraformID: *el.Arn, ResourceType: common.IAM_policy})
+			}
 
-		if !res.IsTruncated {
-			break
+			if !res.IsTruncated {
+				break
+			}
+			marker = res.Marker
 		}
-		marker = res.Marker
 	}
 	return resources
 }
 
-func (clops *NoClickopsIAMClient) GetAllIAMUsers() []common.Resource {
+func (s *NoClickopsIAMService) GetAllIAMUsers() []common.Resource {
 	var resources []common.Resource
-	var marker *string = nil
-	client := clops.Client[0]
-	for {
-		res, err := client.ListUsers(context.TODO(), &iam.ListUsersInput{
-			MaxItems: awssdk.Int32(MAX_ITEMS),
-			Marker:   marker,
-		})
+	for _, rc := range s.Clients {
+		var marker *string = nil
+		for {
+			res, err := rc.Client.ListUsers(context.TODO(), &iam.ListUsersInput{
+				MaxItems: awssdk.Int32(MAX_ITEMS),
+				Marker:   marker,
+			})
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, el := range res.Users {
-			resources = append(resources, common.Resource{TerraformID: *el.UserName, ResourceType: common.IAM_user})
-		}
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, el := range res.Users {
+				resources = append(resources, common.Resource{TerraformID: *el.UserName, ResourceType: common.IAM_user})
+			}
 
-		if !res.IsTruncated {
-			break
+			if !res.IsTruncated {
+				break
+			}
+			marker = res.Marker
 		}
-		marker = res.Marker
 	}
 	return resources
 }
 
-func (clops *NoClickopsIAMClient) GetAllIAMGroups() []common.Resource {
+func (s *NoClickopsIAMService) GetAllIAMGroups() []common.Resource {
 	var resources []common.Resource
-	var marker *string = nil
-	client := clops.Client[0]
-	for {
-		res, err := client.ListGroups(context.TODO(), &iam.ListGroupsInput{
-			MaxItems: awssdk.Int32(MAX_ITEMS),
-			Marker:   marker,
-		})
+	for _, rc := range s.Clients {
+		var marker *string = nil
+		for {
+			res, err := rc.Client.ListGroups(context.TODO(), &iam.ListGroupsInput{
+				MaxItems: awssdk.Int32(MAX_ITEMS),
+				Marker:   marker,
+			})
 
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, el := range res.Groups {
-			resources = append(resources, common.Resource{TerraformID: *el.GroupName, ResourceType: common.IAM_group})
-		}
+			if err != nil {
+				log.Fatal(err)
+			}
+			for _, el := range res.Groups {
+				resources = append(resources, common.Resource{TerraformID: *el.GroupName, ResourceType: common.IAM_group})
+			}
 
-		if !res.IsTruncated {
-			break
+			if !res.IsTruncated {
+				break
+			}
+			marker = res.Marker
 		}
-		marker = res.Marker
 	}
 	return resources
 }
