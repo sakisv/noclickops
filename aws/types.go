@@ -9,7 +9,7 @@ type ClientMeta struct {
 	Region string
 }
 
-var SERVICES = map[common.AWSService]common.ServiceMeta{
+var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.IAM:     {Global: true, ServiceName: "iam"},
 	common.Route53: {Global: true, ServiceName: "route53"},
 
@@ -20,7 +20,7 @@ var SERVICES = map[common.AWSService]common.ServiceMeta{
 	common.SecurityGroups: {Global: false, ServiceName: "securitygroups"},
 }
 
-func NewClientFromConfigs(service common.AWSService, configs []aws.Config) common.ResourceFetcher {
+func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config) common.NoclickopsService {
 	if len(configs) == 0 {
 		panic("Cannot create clients without config")
 	}
@@ -32,27 +32,27 @@ func NewClientFromConfigs(service common.AWSService, configs []aws.Config) commo
 
 	switch service {
 	case common.IAM:
-		c := NewIAMClientFromConfigs(configs, meta)
+		c := NewIAMServiceFromConfigs(configs, meta)
 		return &c
 	case common.Route53:
-		c := NewRoute53ClientFromConfigs(configs, meta)
+		c := NewRoute53ServiceFromConfigs(configs, meta)
 		return &c
 	case common.EKS:
-		c := NewEKSClientFromConfigs(configs, meta)
+		c := NewEKSServiceFromConfigs(configs, meta)
 		return &c
 	case common.SSM:
-		c := NewSSMClientFromConfigs(configs, meta)
+		c := NewSSMServiceFromConfigs(configs, meta)
 		return &c
 	case common.SSOAdmin:
-		c := NewSSOAdminClientFromConfigs(configs, meta)
+		c := NewSSOAdminServiceFromConfigs(configs, meta)
 		return &c
 	case common.SecurityGroups:
-		c := NewEC2ClientFromConfigs(configs, meta)
+		c := NewEC2ServiceFromConfigs(configs, meta)
 		return &c
 	case common.IdentityStore:
 		ssoMeta := SERVICES[common.SSOAdmin]
-		ssoClient := NewSSOAdminClientFromConfigs(configs[:1], ssoMeta)
-		c := NewIdentityStoreClientFromConfigs(configs, meta, &ssoClient)
+		ssoClient := NewSSOAdminServiceFromConfigs(configs[:1], ssoMeta)
+		c := NewIdentityStoreServiceFromConfigs(configs, meta, &ssoClient)
 		return &c
 	}
 	panic("unknown service")

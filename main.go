@@ -26,25 +26,25 @@ func main() {
 		defer delete_statefiles_dir()
 	}
 
-	iamclient := claws.NewClientFromConfigs(common.IAM, configs)
+	iamclient := claws.NewNoclickopsServiceFromConfigs(common.IAM, configs)
 	foundRecords := make(map[string][]common.Resource)
 	foundRecords[iamclient.GetServiceName()] = iamclient.GetAllResources()
 
-	ssmclient := claws.NewClientFromConfigs(common.SSM, configs)
+	ssmclient := claws.NewNoclickopsServiceFromConfigs(common.SSM, configs)
 	foundRecords[ssmclient.GetServiceName()] = ssmclient.GetAllResources()
 
-	route53client := claws.NewClientFromConfigs(common.Route53, configs)
+	route53client := claws.NewNoclickopsServiceFromConfigs(common.Route53, configs)
 	foundRecords[route53client.GetServiceName()] = route53client.GetAllResources()
 
-	ec2client := claws.NewClientFromConfigs(common.SecurityGroups, configs)
+	ec2client := claws.NewNoclickopsServiceFromConfigs(common.SecurityGroups, configs)
 	foundRecords[ec2client.GetServiceName()] = ec2client.GetAllResources()
 
-	ssoadminclient := claws.NewClientFromConfigs(common.SSOAdmin, configs)
-	identitystoreclient := claws.NewClientFromConfigs(common.IdentityStore, configs)
+	ssoadminclient := claws.NewNoclickopsServiceFromConfigs(common.SSOAdmin, configs)
+	identitystoreclient := claws.NewNoclickopsServiceFromConfigs(common.IdentityStore, configs)
 	foundRecords[identitystoreclient.GetServiceName()] = identitystoreclient.GetAllResources()
 	foundRecords[ssoadminclient.GetServiceName()] = ssoadminclient.GetAllResources()
 
-	eksclient := claws.NewClientFromConfigs(common.EKS, configs)
+	eksclient := claws.NewNoclickopsServiceFromConfigs(common.EKS, configs)
 	foundRecords[ec2client.GetServiceName()] = eksclient.GetAllResources()
 
 	unmanagedResourceIds := filter(managedIDs, foundRecords)

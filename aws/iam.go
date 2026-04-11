@@ -26,7 +26,7 @@ type NoclickopsIAMService struct {
 	common.ServiceMeta
 }
 
-func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsIAMService {
+func NewIAMServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsIAMService {
 	service := NoclickopsIAMService{ServiceMeta: meta}
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsIAMClient{

@@ -19,10 +19,10 @@ const (
 	IdentityStore_group
 )
 
-type AWSService int
+type AWSServiceName int
 
 const (
-	Route53 AWSService = iota
+	Route53 AWSServiceName = iota
 	IAM
 	EKS
 	SSM
@@ -43,7 +43,7 @@ type ServiceMeta struct {
 
 func (m ServiceMeta) GetServiceName() string { return m.ServiceName }
 
-type ResourceFetcher interface {
+type NoclickopsService interface {
 	GetAllResources() []Resource
 	GetServiceName() string
 }

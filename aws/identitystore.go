@@ -26,7 +26,7 @@ type NoclickopsIdentityStoreService struct {
 	common.ServiceMeta
 }
 
-func NewIdentityStoreClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta, ssoClient *NoclickopsSSOAdminService) NoclickopsIdentityStoreService {
+func NewIdentityStoreServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta, ssoClient *NoclickopsSSOAdminService) NoclickopsIdentityStoreService {
 	service := NoclickopsIdentityStoreService{ServiceMeta: meta, SSOAdminClient: ssoClient}
 	service.Clients = append(service.Clients, NoclickopsIdentityStoreClient{
 		Client:     identitystore.NewFromConfig(cfg[0]),

@@ -26,7 +26,7 @@ type NoclickopsEC2Service struct {
 	common.ServiceMeta
 }
 
-func NewEC2ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsEC2Service {
+func NewEC2ServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsEC2Service {
 	service := NoclickopsEC2Service{ServiceMeta: meta}
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsEC2Client{

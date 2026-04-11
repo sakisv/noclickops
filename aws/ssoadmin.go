@@ -26,7 +26,7 @@ type NoclickopsSSOAdminService struct {
 	common.ServiceMeta
 }
 
-func NewSSOAdminClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsSSOAdminService {
+func NewSSOAdminServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsSSOAdminService {
 	service := NoclickopsSSOAdminService{ServiceMeta: meta}
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsSSOAdminClient{

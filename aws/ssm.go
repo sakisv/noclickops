@@ -23,7 +23,7 @@ type NoclickopsSSMService struct {
 	common.ServiceMeta
 }
 
-func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsSSMService {
+func NewSSMServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsSSMService {
 	service := NoclickopsSSMService{ServiceMeta: meta}
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsSSMClient{

@@ -27,7 +27,7 @@ type NoclickopsRoute53Service struct {
 	common.ServiceMeta
 }
 
-func NewRoute53ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsRoute53Service {
+func NewRoute53ServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsRoute53Service {
 	service := NoclickopsRoute53Service{ServiceMeta: meta}
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsRoute53Client{

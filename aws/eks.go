@@ -23,7 +23,7 @@ type NoclickopsEKSService struct {
 	common.ServiceMeta
 }
 
-func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsEKSService {
+func NewEKSServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsEKSService {
 	service := NoclickopsEKSService{ServiceMeta: meta}
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsEKSClient{
