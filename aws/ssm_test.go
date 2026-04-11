@@ -12,6 +12,18 @@ import (
 	"github.com/noclickops/common"
 )
 
+func getMockedSSMService(mock *mockSSMClient) aws.NoclickopsSSMService {
+	return aws.NoclickopsSSMService{
+		Clients: []aws.NoclickopsSSMClient{
+			{
+				Client:     mock,
+				ClientMeta: aws.ClientMeta{Region: "eu-west-1"},
+			},
+		},
+		ServiceMeta: common.ServiceMeta{Global: false, ServiceName: "ssm"},
+	}
+}
+
 func TestGetAllParametersNames(t *testing.T) {
 	callCount := 0
 	mock := &mockSSMClient{
@@ -38,13 +50,11 @@ func TestGetAllParametersNames(t *testing.T) {
 
 		},
 	}
-	client := aws.NoclickopsSSMService{
-		Clients: []aws.NoclickopsSSMClient{{Client: mock}},
-	}
+	client := getMockedSSMService(mock)
 	ids := client.GetAllParametersNames()
 	expected := []common.Resource{
-		{TerraformID: "/some/parameter", ResourceType: common.SSM_parameter},
-		{TerraformID: "/some/other/parameter", ResourceType: common.SSM_parameter},
+		{TerraformID: "/some/parameter", ResourceType: common.SSM_parameter, Region: "eu-west-1"},
+		{TerraformID: "/some/other/parameter", ResourceType: common.SSM_parameter, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)

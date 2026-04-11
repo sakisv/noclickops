@@ -12,6 +12,18 @@ import (
 	"github.com/noclickops/common"
 )
 
+func getMockedIAMService(mock *mockIAMClient) aws.NoclickopsIAMService {
+	return aws.NoclickopsIAMService{
+		Clients: []aws.NoclickopsIAMClient{
+			{
+				Client:     mock,
+				ClientMeta: aws.ClientMeta{Region: "global"},
+			},
+		},
+		ServiceMeta: common.ServiceMeta{Global: true, ServiceName: "ec2"},
+	}
+}
+
 func TestListPolicies_PaginationFollowed(t *testing.T) {
 	callCount := 0
 
@@ -39,13 +51,11 @@ func TestListPolicies_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoclickopsIAMService{
-		Clients: []aws.NoclickopsIAMClient{{Client: mock}},
-	}
+	client := getMockedIAMService(mock)
 	ids := client.GetAllPoliciesArns()
 	expected := []common.Resource{
-		{TerraformID: "arn:policy_1", ResourceType: common.IAM_policy},
-		{TerraformID: "arn:policy_2", ResourceType: common.IAM_policy},
+		{TerraformID: "arn:policy_1", ResourceType: common.IAM_policy, Region: "global"},
+		{TerraformID: "arn:policy_2", ResourceType: common.IAM_policy, Region: "global"},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
@@ -80,13 +90,11 @@ func TestGetAllIAMUsers_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoclickopsIAMService{
-		Clients: []aws.NoclickopsIAMClient{{Client: mock}},
-	}
+	client := getMockedIAMService(mock)
 	got := client.GetAllIAMUsers()
 	expected := []common.Resource{
-		{TerraformID: "user_1", ResourceType: common.IAM_user},
-		{TerraformID: "user_2", ResourceType: common.IAM_user},
+		{TerraformID: "user_1", ResourceType: common.IAM_user, Region: "global"},
+		{TerraformID: "user_2", ResourceType: common.IAM_user, Region: "global"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)
@@ -121,13 +129,11 @@ func TestGetAllIAMGroups_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoclickopsIAMService{
-		Clients: []aws.NoclickopsIAMClient{{Client: mock}},
-	}
+	client := getMockedIAMService(mock)
 	got := client.GetAllIAMGroups()
 	expected := []common.Resource{
-		{TerraformID: "group_1", ResourceType: common.IAM_group},
-		{TerraformID: "group_2", ResourceType: common.IAM_group},
+		{TerraformID: "group_1", ResourceType: common.IAM_group, Region: "global"},
+		{TerraformID: "group_2", ResourceType: common.IAM_group, Region: "global"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)

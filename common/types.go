@@ -34,6 +34,7 @@ const (
 type Resource struct {
 	TerraformID  string       `json:"terraform_id"`
 	ResourceType ResourceType `json:"resource_type"`
+	Region       string       `json:"region"`
 }
 
 type ServiceMeta struct {

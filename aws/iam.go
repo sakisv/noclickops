@@ -31,7 +31,7 @@ func NewIAMServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) Nocl
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsIAMClient{
 			Client:     iam.NewFromConfig(c),
-			ClientMeta: ClientMeta{Region: c.Region},
+			ClientMeta: ClientMeta{Region: "global"},
 		})
 	}
 	return service
@@ -62,7 +62,7 @@ func (s *NoclickopsIAMService) GetAllPoliciesArns() []common.Resource {
 				log.Fatal(err)
 			}
 			for _, el := range res.Policies {
-				resources = append(resources, common.Resource{TerraformID: *el.Arn, ResourceType: common.IAM_policy})
+				resources = append(resources, common.Resource{TerraformID: *el.Arn, ResourceType: common.IAM_policy, Region: rc.Region})
 			}
 
 			if !res.IsTruncated {
@@ -88,7 +88,7 @@ func (s *NoclickopsIAMService) GetAllIAMUsers() []common.Resource {
 				log.Fatal(err)
 			}
 			for _, el := range res.Users {
-				resources = append(resources, common.Resource{TerraformID: *el.UserName, ResourceType: common.IAM_user})
+				resources = append(resources, common.Resource{TerraformID: *el.UserName, ResourceType: common.IAM_user, Region: rc.Region})
 			}
 
 			if !res.IsTruncated {
@@ -114,7 +114,7 @@ func (s *NoclickopsIAMService) GetAllIAMGroups() []common.Resource {
 				log.Fatal(err)
 			}
 			for _, el := range res.Groups {
-				resources = append(resources, common.Resource{TerraformID: *el.GroupName, ResourceType: common.IAM_group})
+				resources = append(resources, common.Resource{TerraformID: *el.GroupName, ResourceType: common.IAM_group, Region: rc.Region})
 			}
 
 			if !res.IsTruncated {

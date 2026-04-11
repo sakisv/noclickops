@@ -53,7 +53,7 @@ func (s *NoclickopsEKSService) GetAllEKSClusters() []common.Resource {
 			}
 
 			for _, el := range res.Clusters {
-				resources = append(resources, common.Resource{TerraformID: el, ResourceType: common.EKS_cluster})
+				resources = append(resources, common.Resource{TerraformID: el, ResourceType: common.EKS_cluster, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {

@@ -32,7 +32,7 @@ func NewRoute53ServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) 
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsRoute53Client{
 			Client:     route53.NewFromConfig(c),
-			ClientMeta: ClientMeta{Region: c.Region},
+			ClientMeta: ClientMeta{Region: "global"},
 		})
 	}
 	return service
@@ -54,7 +54,7 @@ func (s *NoclickopsRoute53Service) GetAllRoute53RecordIds() []common.Resource {
 		var id string
 		for _, zone := range hostedZones.HostedZones {
 			zone_id := strings.Split(*zone.Id, "/")[2]
-			resources = append(resources, common.Resource{TerraformID: zone_id, ResourceType: common.Route53_zone})
+			resources = append(resources, common.Resource{TerraformID: zone_id, ResourceType: common.Route53_zone, Region: rc.Region})
 			if *zone.ResourceRecordSetCount == 0 {
 				continue
 			}
@@ -83,7 +83,7 @@ func (s *NoclickopsRoute53Service) GetAllRoute53RecordIds() []common.Resource {
 						id = fmt.Sprintf("%v_%v_%v", zone_id, record_name, record.Type)
 					}
 
-					resources = append(resources, common.Resource{TerraformID: id, ResourceType: common.Route53_record})
+					resources = append(resources, common.Resource{TerraformID: id, ResourceType: common.Route53_record, Region: rc.Region})
 				}
 
 				if !listRecordSetsResponse.IsTruncated {
