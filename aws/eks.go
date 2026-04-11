@@ -13,20 +13,20 @@ type EKSClient interface {
 	ListClusters(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error)
 }
 
-type NoClickopsEKSRegionalClient struct {
+type NoclickopsEKSClient struct {
 	Client EKSClient
 	ClientMeta
 }
 
-type NoClickopsEKSService struct {
-	Clients []NoClickopsEKSRegionalClient
+type NoclickopsEKSService struct {
+	Clients []NoclickopsEKSClient
 	common.ServiceMeta
 }
 
-func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsEKSService {
-	service := NoClickopsEKSService{ServiceMeta: meta}
+func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsEKSService {
+	service := NoclickopsEKSService{ServiceMeta: meta}
 	for _, c := range cfg {
-		service.Clients = append(service.Clients, NoClickopsEKSRegionalClient{
+		service.Clients = append(service.Clients, NoclickopsEKSClient{
 			Client:     eks.NewFromConfig(c),
 			ClientMeta: ClientMeta{Region: c.Region},
 		})
@@ -34,11 +34,11 @@ func NewEKSClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoCli
 	return service
 }
 
-func (s *NoClickopsEKSService) GetAllResources() []common.Resource {
+func (s *NoclickopsEKSService) GetAllResources() []common.Resource {
 	return s.GetAllEKSClusters()
 }
 
-func (s *NoClickopsEKSService) GetAllEKSClusters() []common.Resource {
+func (s *NoclickopsEKSService) GetAllEKSClusters() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		var nextToken *string = nil

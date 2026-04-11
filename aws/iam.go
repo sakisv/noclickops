@@ -16,20 +16,20 @@ type IAMClient interface {
 	ListGroups(ctx context.Context, params *iam.ListGroupsInput, optFns ...func(*iam.Options)) (*iam.ListGroupsOutput, error)
 }
 
-type NoClickopsIAMRegionalClient struct {
+type NoclickopsIAMClient struct {
 	Client IAMClient
 	ClientMeta
 }
 
-type NoClickopsIAMService struct {
-	Clients []NoClickopsIAMRegionalClient
+type NoclickopsIAMService struct {
+	Clients []NoclickopsIAMClient
 	common.ServiceMeta
 }
 
-func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsIAMService {
-	service := NoClickopsIAMService{ServiceMeta: meta}
+func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsIAMService {
+	service := NoclickopsIAMService{ServiceMeta: meta}
 	for _, c := range cfg {
-		service.Clients = append(service.Clients, NoClickopsIAMRegionalClient{
+		service.Clients = append(service.Clients, NoclickopsIAMClient{
 			Client:     iam.NewFromConfig(c),
 			ClientMeta: ClientMeta{Region: c.Region},
 		})
@@ -39,7 +39,7 @@ func NewIAMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoCli
 
 const MAX_ITEMS int32 = 150
 
-func (s *NoClickopsIAMService) GetAllResources() []common.Resource {
+func (s *NoclickopsIAMService) GetAllResources() []common.Resource {
 	var resources []common.Resource
 	resources = append(resources, s.GetAllIAMUsers()...)
 	resources = append(resources, s.GetAllIAMGroups()...)
@@ -47,7 +47,7 @@ func (s *NoClickopsIAMService) GetAllResources() []common.Resource {
 	return resources
 }
 
-func (s *NoClickopsIAMService) GetAllPoliciesArns() []common.Resource {
+func (s *NoclickopsIAMService) GetAllPoliciesArns() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		var marker *string = nil
@@ -74,7 +74,7 @@ func (s *NoClickopsIAMService) GetAllPoliciesArns() []common.Resource {
 	return resources
 }
 
-func (s *NoClickopsIAMService) GetAllIAMUsers() []common.Resource {
+func (s *NoclickopsIAMService) GetAllIAMUsers() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		var marker *string = nil
@@ -100,7 +100,7 @@ func (s *NoClickopsIAMService) GetAllIAMUsers() []common.Resource {
 	return resources
 }
 
-func (s *NoClickopsIAMService) GetAllIAMGroups() []common.Resource {
+func (s *NoclickopsIAMService) GetAllIAMGroups() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		var marker *string = nil

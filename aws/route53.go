@@ -17,20 +17,20 @@ type Route53Client interface {
 	ListResourceRecordSets(ctx context.Context, params *route53.ListResourceRecordSetsInput, optFns ...func(*route53.Options)) (*route53.ListResourceRecordSetsOutput, error)
 }
 
-type NoClickopsRoute53RegionalClient struct {
+type NoclickopsRoute53Client struct {
 	Client Route53Client
 	ClientMeta
 }
 
-type NoClickopsRoute53Service struct {
-	Clients []NoClickopsRoute53RegionalClient
+type NoclickopsRoute53Service struct {
+	Clients []NoclickopsRoute53Client
 	common.ServiceMeta
 }
 
-func NewRoute53ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsRoute53Service {
-	service := NoClickopsRoute53Service{ServiceMeta: meta}
+func NewRoute53ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsRoute53Service {
+	service := NoclickopsRoute53Service{ServiceMeta: meta}
 	for _, c := range cfg {
-		service.Clients = append(service.Clients, NoClickopsRoute53RegionalClient{
+		service.Clients = append(service.Clients, NoclickopsRoute53Client{
 			Client:     route53.NewFromConfig(c),
 			ClientMeta: ClientMeta{Region: c.Region},
 		})
@@ -38,11 +38,11 @@ func NewRoute53ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) N
 	return service
 }
 
-func (s *NoClickopsRoute53Service) GetAllResources() []common.Resource {
+func (s *NoclickopsRoute53Service) GetAllResources() []common.Resource {
 	return s.GetAllRoute53RecordIds()
 }
 
-func (s *NoClickopsRoute53Service) GetAllRoute53RecordIds() []common.Resource {
+func (s *NoclickopsRoute53Service) GetAllRoute53RecordIds() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		client := rc.Client

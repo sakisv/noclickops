@@ -38,8 +38,8 @@ func TestGetAllParametersNames(t *testing.T) {
 
 		},
 	}
-	client := aws.NoClickopsSSMService{
-		Clients: []aws.NoClickopsSSMRegionalClient{{Client: mock}},
+	client := aws.NoclickopsSSMService{
+		Clients: []aws.NoclickopsSSMClient{{Client: mock}},
 	}
 	ids := client.GetAllParametersNames()
 	expected := []common.Resource{

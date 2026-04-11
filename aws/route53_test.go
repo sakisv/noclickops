@@ -19,8 +19,8 @@ func TestGetAllRoute53RecordIds_NoZones(t *testing.T) {
 			return &route53.ListHostedZonesOutput{HostedZones: []types.HostedZone{}}, nil
 		},
 	}
-	client := aws.NoClickopsRoute53Service{
-		Clients: []aws.NoClickopsRoute53RegionalClient{{Client: mock}},
+	client := aws.NoclickopsRoute53Service{
+		Clients: []aws.NoclickopsRoute53Client{{Client: mock}},
 	}
 	ids := client.GetAllRoute53RecordIds()
 	if len(ids) != 0 {
@@ -39,8 +39,8 @@ func TestGetAllRoute53RecordIds_SkipsEmptyZones(t *testing.T) {
 		},
 		// listResourceRecordSetsFn intentionally nil — should never be called
 	}
-	client := aws.NoClickopsRoute53Service{
-		Clients: []aws.NoClickopsRoute53RegionalClient{{Client: mock}},
+	client := aws.NoclickopsRoute53Service{
+		Clients: []aws.NoclickopsRoute53Client{{Client: mock}},
 	}
 	ids := client.GetAllRoute53RecordIds()
 	expected := []common.Resource{
@@ -69,8 +69,8 @@ func TestGetAllRoute53RecordIds_SimpleRecord(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoClickopsRoute53Service{
-		Clients: []aws.NoClickopsRoute53RegionalClient{{Client: mock}},
+	client := aws.NoclickopsRoute53Service{
+		Clients: []aws.NoclickopsRoute53Client{{Client: mock}},
 	}
 	ids := client.GetAllRoute53RecordIds()
 	expected := []common.Resource{
@@ -100,8 +100,8 @@ func TestGetAllRoute53RecordIds_WithSetIdentifier(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoClickopsRoute53Service{
-		Clients: []aws.NoClickopsRoute53RegionalClient{{Client: mock}},
+	client := aws.NoclickopsRoute53Service{
+		Clients: []aws.NoclickopsRoute53Client{{Client: mock}},
 	}
 	ids := client.GetAllRoute53RecordIds()
 	expected := []common.Resource{
@@ -147,8 +147,8 @@ func TestGetAllRoute53RecordIds_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoClickopsRoute53Service{
-		Clients: []aws.NoClickopsRoute53RegionalClient{{Client: mock}},
+	client := aws.NoclickopsRoute53Service{
+		Clients: []aws.NoclickopsRoute53Client{{Client: mock}},
 	}
 	ids := client.GetAllRoute53RecordIds()
 	expected := []common.Resource{

@@ -39,8 +39,8 @@ func TestListPolicies_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoClickopsIAMService{
-		Clients: []aws.NoClickopsIAMRegionalClient{{Client: mock}},
+	client := aws.NoclickopsIAMService{
+		Clients: []aws.NoclickopsIAMClient{{Client: mock}},
 	}
 	ids := client.GetAllPoliciesArns()
 	expected := []common.Resource{
@@ -80,8 +80,8 @@ func TestGetAllIAMUsers_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoClickopsIAMService{
-		Clients: []aws.NoClickopsIAMRegionalClient{{Client: mock}},
+	client := aws.NoclickopsIAMService{
+		Clients: []aws.NoclickopsIAMClient{{Client: mock}},
 	}
 	got := client.GetAllIAMUsers()
 	expected := []common.Resource{
@@ -121,8 +121,8 @@ func TestGetAllIAMGroups_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	client := aws.NoClickopsIAMService{
-		Clients: []aws.NoClickopsIAMRegionalClient{{Client: mock}},
+	client := aws.NoclickopsIAMService{
+		Clients: []aws.NoclickopsIAMClient{{Client: mock}},
 	}
 	got := client.GetAllIAMGroups()
 	expected := []common.Resource{

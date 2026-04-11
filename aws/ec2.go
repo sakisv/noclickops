@@ -16,20 +16,20 @@ type EC2Client interface {
 	DescribeSecurityGroupRules(ctx context.Context, params *ec2.DescribeSecurityGroupRulesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupRulesOutput, error)
 }
 
-type NoClickopsEC2RegionalClient struct {
+type NoclickopsEC2Client struct {
 	Client EC2Client
 	ClientMeta
 }
 
-type NoClickopsEC2Service struct {
-	Clients []NoClickopsEC2RegionalClient
+type NoclickopsEC2Service struct {
+	Clients []NoclickopsEC2Client
 	common.ServiceMeta
 }
 
-func NewEC2ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsEC2Service {
-	service := NoClickopsEC2Service{ServiceMeta: meta}
+func NewEC2ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsEC2Service {
+	service := NoclickopsEC2Service{ServiceMeta: meta}
 	for _, c := range cfg {
-		service.Clients = append(service.Clients, NoClickopsEC2RegionalClient{
+		service.Clients = append(service.Clients, NoclickopsEC2Client{
 			Client:     ec2.NewFromConfig(c),
 			ClientMeta: ClientMeta{Region: c.Region},
 		})
@@ -37,14 +37,14 @@ func NewEC2ClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoCli
 	return service
 }
 
-func (s *NoClickopsEC2Service) GetAllResources() []common.Resource {
+func (s *NoclickopsEC2Service) GetAllResources() []common.Resource {
 	var resources []common.Resource
 	resources = append(resources, s.GetAllSecurityGroups()...)
 	resources = append(resources, s.GetAllSecurityGroupRules()...)
 	return resources
 }
 
-func (s *NoClickopsEC2Service) GetAllSecurityGroups() []common.Resource {
+func (s *NoclickopsEC2Service) GetAllSecurityGroups() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		var nextToken *string = nil
@@ -69,7 +69,7 @@ func (s *NoClickopsEC2Service) GetAllSecurityGroups() []common.Resource {
 	return resources
 }
 
-func (s *NoClickopsEC2Service) GetAllSecurityGroupRules() []common.Resource {
+func (s *NoclickopsEC2Service) GetAllSecurityGroupRules() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		var nextToken *string = nil

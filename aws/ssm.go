@@ -13,20 +13,20 @@ type SSMClient interface {
 	GetParametersByPath(ctx context.Context, params *ssm.GetParametersByPathInput, optFns ...func(*ssm.Options)) (*ssm.GetParametersByPathOutput, error)
 }
 
-type NoClickopsSSMRegionalClient struct {
+type NoclickopsSSMClient struct {
 	Client SSMClient
 	ClientMeta
 }
 
-type NoClickopsSSMService struct {
-	Clients []NoClickopsSSMRegionalClient
+type NoclickopsSSMService struct {
+	Clients []NoclickopsSSMClient
 	common.ServiceMeta
 }
 
-func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsSSMService {
-	service := NoClickopsSSMService{ServiceMeta: meta}
+func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsSSMService {
+	service := NoclickopsSSMService{ServiceMeta: meta}
 	for _, c := range cfg {
-		service.Clients = append(service.Clients, NoClickopsSSMRegionalClient{
+		service.Clients = append(service.Clients, NoclickopsSSMClient{
 			Client:     ssm.NewFromConfig(c),
 			ClientMeta: ClientMeta{Region: c.Region},
 		})
@@ -34,11 +34,11 @@ func NewSSMClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoCli
 	return service
 }
 
-func (s *NoClickopsSSMService) GetAllResources() []common.Resource {
+func (s *NoclickopsSSMService) GetAllResources() []common.Resource {
 	return s.GetAllParametersNames()
 }
 
-func (s *NoClickopsSSMService) GetAllParametersNames() []common.Resource {
+func (s *NoclickopsSSMService) GetAllParametersNames() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		var nextToken string

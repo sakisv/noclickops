@@ -16,20 +16,20 @@ type SSOAdminClient interface {
 	ListPermissionSets(ctx context.Context, params *ssoadmin.ListPermissionSetsInput, optFns ...func(*ssoadmin.Options)) (*ssoadmin.ListPermissionSetsOutput, error)
 }
 
-type NoClickopsSSOAdminRegionalClient struct {
+type NoclickopsSSOAdminClient struct {
 	Client SSOAdminClient
 	ClientMeta
 }
 
-type NoClickopsSSOAdminService struct {
-	Clients []NoClickopsSSOAdminRegionalClient
+type NoclickopsSSOAdminService struct {
+	Clients []NoclickopsSSOAdminClient
 	common.ServiceMeta
 }
 
-func NewSSOAdminClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoClickopsSSOAdminService {
-	service := NoClickopsSSOAdminService{ServiceMeta: meta}
+func NewSSOAdminClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsSSOAdminService {
+	service := NoclickopsSSOAdminService{ServiceMeta: meta}
 	for _, c := range cfg {
-		service.Clients = append(service.Clients, NoClickopsSSOAdminRegionalClient{
+		service.Clients = append(service.Clients, NoclickopsSSOAdminClient{
 			Client:     ssoadmin.NewFromConfig(c),
 			ClientMeta: ClientMeta{Region: c.Region},
 		})
@@ -37,11 +37,11 @@ func NewSSOAdminClientFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) 
 	return service
 }
 
-func (s *NoClickopsSSOAdminService) GetAllResources() []common.Resource {
+func (s *NoclickopsSSOAdminService) GetAllResources() []common.Resource {
 	return s.GetAllPermissionSets()
 }
 
-func (s *NoClickopsSSOAdminService) getSSOInstanceId() string {
+func (s *NoclickopsSSOAdminService) getSSOInstanceId() string {
 	instances := s.GetAllSSOInstances()
 	if len(instances) == 1 {
 		return *instances[0].IdentityStoreId
@@ -49,7 +49,7 @@ func (s *NoClickopsSSOAdminService) getSSOInstanceId() string {
 	return ""
 }
 
-func (s *NoClickopsSSOAdminService) getSSOInstanceArn() string {
+func (s *NoclickopsSSOAdminService) getSSOInstanceArn() string {
 	instances := s.GetAllSSOInstances()
 	if len(instances) == 1 {
 		return *instances[0].InstanceArn
@@ -57,7 +57,7 @@ func (s *NoClickopsSSOAdminService) getSSOInstanceArn() string {
 	return ""
 }
 
-func (s *NoClickopsSSOAdminService) GetAllSSOInstances() []types.InstanceMetadata {
+func (s *NoclickopsSSOAdminService) GetAllSSOInstances() []types.InstanceMetadata {
 	var resources []types.InstanceMetadata
 	var nextToken *string = nil
 	client := s.Clients[0].Client
@@ -81,7 +81,7 @@ func (s *NoClickopsSSOAdminService) GetAllSSOInstances() []types.InstanceMetadat
 	return resources
 }
 
-func (s *NoClickopsSSOAdminService) GetAllPermissionSets() []common.Resource {
+func (s *NoclickopsSSOAdminService) GetAllPermissionSets() []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
 	client := s.Clients[0].Client
