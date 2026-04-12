@@ -1,7 +1,10 @@
 package common
 
+import "strings"
+
 type ResourceType int
 
+//go:generate stringer -type=ResourceType
 const (
 	Route53_zone ResourceType = iota
 	Route53_record
@@ -18,6 +21,10 @@ const (
 	IdentityStore_user
 	IdentityStore_group
 )
+
+func (r ResourceType) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + strings.ToLower(r.String()) + `"`), nil
+}
 
 type AWSServiceName int
 
