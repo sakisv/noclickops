@@ -13,9 +13,13 @@ func main() {
 
 	configs := generatePerRegionConfigs(opts.regionsList)
 
-	println("Downloading statefiles from s3")
-	s3_cfg := generateStatefileBucketConfig(opts.s3BucketRegion)
-	downloaded_files := download_statefiles_from_s3(opts.s3Bucket, opts.forceDownload, s3_cfg)
+	var downloaded_files []string
+	if opts.s3Bucket != "" {
+		println("Downloading statefiles from s3")
+		s3_cfg := generateStatefileBucketConfig(opts.s3BucketRegion)
+		downloaded_files = download_statefiles_from_s3(opts.s3Bucket, opts.forceDownload, s3_cfg)
+
+	}
 	if opts.stateFile != "" {
 		downloaded_files = append(downloaded_files, opts.stateFile)
 	}
