@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/noclickops/common"
 )
@@ -12,28 +13,54 @@ type EKSClient interface {
 	ListClusters(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error)
 }
 
-func GetAllEKSClusters(client EKSClient) []common.Resource {
-	var resources []common.Resource
-	var nextToken *string = nil
-	var include = []string{"all"}
+type NoclickopsEKSClient struct {
+	Client EKSClient
+	ClientMeta
+}
 
-	for {
-		res, err := client.ListClusters(context.TODO(), &eks.ListClustersInput{
-			Include:   include,
-			NextToken: nextToken,
+type NoclickopsEKSService struct {
+	Clients []NoclickopsEKSClient
+	common.ServiceMeta
+}
+
+func NewEKSServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsEKSService {
+	service := NoclickopsEKSService{ServiceMeta: meta}
+	for _, c := range cfg {
+		service.Clients = append(service.Clients, NoclickopsEKSClient{
+			Client:     eks.NewFromConfig(c),
+			ClientMeta: ClientMeta{Region: c.Region},
 		})
-		if err != nil {
-			log.Fatal(err)
-		}
+	}
+	return service
+}
 
-		for _, el := range res.Clusters {
-			resources = append(resources, common.Resource{TerraformID: el, ResourceType: common.EKS_cluster})
-		}
+func (s *NoclickopsEKSService) GetAllResources() []common.Resource {
+	return s.GetAllEKSClusters()
+}
 
-		if res.NextToken == nil {
-			break
+func (s *NoclickopsEKSService) GetAllEKSClusters() []common.Resource {
+	var resources []common.Resource
+	for _, rc := range s.Clients {
+		var nextToken *string = nil
+		var include = []string{"all"}
+		for {
+			res, err := rc.Client.ListClusters(context.TODO(), &eks.ListClustersInput{
+				Include:   include,
+				NextToken: nextToken,
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for _, el := range res.Clusters {
+				resources = append(resources, common.Resource{TerraformID: el, ResourceType: common.EKS_cluster, Region: rc.Region})
+			}
+
+			if res.NextToken == nil {
+				break
+			}
+			nextToken = res.NextToken
 		}
-		nextToken = res.NextToken
 	}
 	return resources
 }

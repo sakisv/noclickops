@@ -13,13 +13,28 @@ import (
 	"github.com/noclickops/common"
 )
 
+func getMockedRoute53Service(mock *mockRoute53Client) aws.NoclickopsRoute53Service {
+	return aws.NoclickopsRoute53Service{
+		Clients: []aws.NoclickopsRoute53Client{
+			{
+				Client:     mock,
+				ClientMeta: aws.ClientMeta{Region: "global"},
+			},
+		},
+		ServiceMeta: common.ServiceMeta{Global: true, ServiceName: "route53"},
+	}
+}
+
 func TestGetAllRoute53RecordIds_NoZones(t *testing.T) {
 	mock := &mockRoute53Client{
 		listHostedZonesFn: func(ctx context.Context, params *route53.ListHostedZonesInput, optFns ...func(*route53.Options)) (*route53.ListHostedZonesOutput, error) {
 			return &route53.ListHostedZonesOutput{HostedZones: []types.HostedZone{}}, nil
 		},
 	}
-	ids := aws.GetAllRoute53RecordIds(mock)
+	client := aws.NoclickopsRoute53Service{
+		Clients: []aws.NoclickopsRoute53Client{{Client: mock}},
+	}
+	ids := client.GetAllRoute53RecordIds()
 	if len(ids) != 0 {
 		t.Errorf("expected empty, got %v", ids)
 	}
@@ -36,9 +51,10 @@ func TestGetAllRoute53RecordIds_SkipsEmptyZones(t *testing.T) {
 		},
 		// listResourceRecordSetsFn intentionally nil — should never be called
 	}
-	ids := aws.GetAllRoute53RecordIds(mock)
+	client := getMockedRoute53Service(mock)
+	ids := client.GetAllRoute53RecordIds()
 	expected := []common.Resource{
-		{TerraformID: "Z123", ResourceType: common.Route53_zone},
+		{TerraformID: "Z123", ResourceType: common.Route53_zone, Region: "global"},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
@@ -63,10 +79,11 @@ func TestGetAllRoute53RecordIds_SimpleRecord(t *testing.T) {
 			}, nil
 		},
 	}
-	ids := aws.GetAllRoute53RecordIds(mock)
+	client := getMockedRoute53Service(mock)
+	ids := client.GetAllRoute53RecordIds()
 	expected := []common.Resource{
-		{TerraformID: "Z123", ResourceType: common.Route53_zone},
-		{TerraformID: "Z123_www_A", ResourceType: common.Route53_record},
+		{TerraformID: "Z123", ResourceType: common.Route53_zone, Region: "global"},
+		{TerraformID: "Z123_www_A", ResourceType: common.Route53_record, Region: "global"},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
@@ -91,10 +108,11 @@ func TestGetAllRoute53RecordIds_WithSetIdentifier(t *testing.T) {
 			}, nil
 		},
 	}
-	ids := aws.GetAllRoute53RecordIds(mock)
+	client := getMockedRoute53Service(mock)
+	ids := client.GetAllRoute53RecordIds()
 	expected := []common.Resource{
-		{TerraformID: "Z123", ResourceType: common.Route53_zone},
-		{TerraformID: "Z123_www_A_primary", ResourceType: common.Route53_record},
+		{TerraformID: "Z123", ResourceType: common.Route53_zone, Region: "global"},
+		{TerraformID: "Z123_www_A_primary", ResourceType: common.Route53_record, Region: "global"},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
@@ -135,11 +153,12 @@ func TestGetAllRoute53RecordIds_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	ids := aws.GetAllRoute53RecordIds(mock)
+	client := getMockedRoute53Service(mock)
+	ids := client.GetAllRoute53RecordIds()
 	expected := []common.Resource{
-		{TerraformID: "Z123", ResourceType: common.Route53_zone},
-		{TerraformID: "Z123_a_A", ResourceType: common.Route53_record},
-		{TerraformID: "Z123_b_A", ResourceType: common.Route53_record},
+		{TerraformID: "Z123", ResourceType: common.Route53_zone, Region: "global"},
+		{TerraformID: "Z123_a_A", ResourceType: common.Route53_record, Region: "global"},
+		{TerraformID: "Z123_b_A", ResourceType: common.Route53_record, Region: "global"},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)

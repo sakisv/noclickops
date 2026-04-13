@@ -4,13 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
-	"github.com/aws/aws-sdk-go-v2/service/eks"
-	"github.com/aws/aws-sdk-go-v2/service/iam"
-	"github.com/aws/aws-sdk-go-v2/service/identitystore"
-	"github.com/aws/aws-sdk-go-v2/service/route53"
-	"github.com/aws/aws-sdk-go-v2/service/ssm"
-	"github.com/aws/aws-sdk-go-v2/service/ssoadmin"
 	claws "github.com/noclickops/aws"
 	"github.com/noclickops/common"
 )
@@ -20,9 +13,13 @@ func main() {
 
 	configs := generatePerRegionConfigs(opts.regionsList)
 
-	println("Downloading statefiles from s3")
-	s3_cfg := generateStatefileBucketConfig(opts.s3BucketRegion)
-	downloaded_files := download_statefiles_from_s3(opts.s3Bucket, opts.forceDownload, s3_cfg)
+	var downloaded_files []string
+	if opts.s3Bucket != "" {
+		println("Downloading statefiles from s3")
+		s3_cfg := generateStatefileBucketConfig(opts.s3BucketRegion)
+		downloaded_files = download_statefiles_from_s3(opts.s3Bucket, opts.forceDownload, s3_cfg)
+
+	}
 	if opts.stateFile != "" {
 		downloaded_files = append(downloaded_files, opts.stateFile)
 	}
@@ -33,29 +30,26 @@ func main() {
 		defer delete_statefiles_dir()
 	}
 
+	iamclient := claws.NewNoclickopsServiceFromConfigs(common.IAM, configs)
 	foundRecords := make(map[string][]common.Resource)
-	println("Retrieving IAM policies")
-	foundRecords["iam_policies"] = claws.GetAllPoliciesArns(iam.NewFromConfig(configs[0]))
-	println("Retrieving IAM users")
-	foundRecords["iam_users"] = claws.GetAllIAMUsers(iam.NewFromConfig(configs[0]))
-	println("Retrieving IAM groups")
-	foundRecords["iam_groups"] = claws.GetAllIAMGroups(iam.NewFromConfig(configs[0]))
-	println("Retrieving SSM params")
-	foundRecords["ssm_params"] = claws.GetAllParametersNames(ssm.NewFromConfig(configs[0]))
-	println("Retrieving route53 records")
-	foundRecords["route53_records"] = claws.GetAllRoute53RecordIds(route53.NewFromConfig(configs[0]))
-	println("Retrieving security groups")
-	foundRecords["ec2_security_groups"] = claws.GetAllSecurityGroups(ec2.NewFromConfig(configs[0]))
-	println("Retrieving security group rules")
-	foundRecords["ec2_security_group_rules"] = claws.GetAllSecurityGroupRules(ec2.NewFromConfig(configs[0]))
-	println("Retrieving identity store users")
-	foundRecords["identity_store_users"] = claws.GetAllIdentityStoreUsers(identitystore.NewFromConfig(configs[0]), ssoadmin.NewFromConfig(configs[0]))
-	println("Retrieving identity store groups")
-	foundRecords["identity_store_groups"] = claws.GetAllIdentityStoreGroups(identitystore.NewFromConfig(configs[0]), ssoadmin.NewFromConfig(configs[0]))
-	println("Retrieving permission sets")
-	foundRecords["ssoadmin_permission_sets"] = claws.GetAllPermissionSets(ssoadmin.NewFromConfig(configs[0]))
-	println("Retrieving EKS clusters")
-	foundRecords["eks_clusters"] = claws.GetAllEKSClusters(eks.NewFromConfig(configs[0]))
+	foundRecords[iamclient.GetServiceName()] = iamclient.GetAllResources()
+
+	ssmclient := claws.NewNoclickopsServiceFromConfigs(common.SSM, configs)
+	foundRecords[ssmclient.GetServiceName()] = ssmclient.GetAllResources()
+
+	route53client := claws.NewNoclickopsServiceFromConfigs(common.Route53, configs)
+	foundRecords[route53client.GetServiceName()] = route53client.GetAllResources()
+
+	ec2client := claws.NewNoclickopsServiceFromConfigs(common.SecurityGroups, configs)
+	foundRecords[ec2client.GetServiceName()] = ec2client.GetAllResources()
+
+	ssoadminclient := claws.NewNoclickopsServiceFromConfigs(common.SSOAdmin, configs)
+	identitystoreclient := claws.NewNoclickopsServiceFromConfigs(common.IdentityStore, configs)
+	foundRecords[identitystoreclient.GetServiceName()] = identitystoreclient.GetAllResources()
+	foundRecords[ssoadminclient.GetServiceName()] = ssoadminclient.GetAllResources()
+
+	eksclient := claws.NewNoclickopsServiceFromConfigs(common.EKS, configs)
+	foundRecords[ec2client.GetServiceName()] = eksclient.GetAllResources()
 
 	unmanagedResourceIds := filter(managedIDs, foundRecords)
 	json, _ := json.Marshal(unmanagedResourceIds)

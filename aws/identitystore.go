@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/identitystore"
 	"github.com/noclickops/common"
 )
@@ -14,11 +15,39 @@ type IdentityStoreClient interface {
 	ListGroups(ctx context.Context, params *identitystore.ListGroupsInput, optFns ...func(*identitystore.Options)) (*identitystore.ListGroupsOutput, error)
 }
 
-func GetAllIdentityStoreUsers(client IdentityStoreClient, ssoadmin_client SSOAdminClient) []common.Resource {
+type NoclickopsIdentityStoreClient struct {
+	Client IdentityStoreClient
+	ClientMeta
+}
+
+type NoclickopsIdentityStoreService struct {
+	Clients        []NoclickopsIdentityStoreClient
+	SSOAdminClient *NoclickopsSSOAdminService
+	common.ServiceMeta
+}
+
+func NewIdentityStoreServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta, ssoClient *NoclickopsSSOAdminService) NoclickopsIdentityStoreService {
+	service := NoclickopsIdentityStoreService{ServiceMeta: meta, SSOAdminClient: ssoClient}
+	service.Clients = append(service.Clients, NoclickopsIdentityStoreClient{
+		Client:     identitystore.NewFromConfig(cfg[0]),
+		ClientMeta: ClientMeta{Region: cfg[0].Region},
+	})
+	return service
+}
+
+func (s *NoclickopsIdentityStoreService) GetAllResources() []common.Resource {
+	var resources []common.Resource
+	resources = append(resources, s.GetAllIdentityStoreUsers(s.SSOAdminClient)...)
+	resources = append(resources, s.GetAllIdentityStoreGroups(s.SSOAdminClient)...)
+	return resources
+}
+
+func (s *NoclickopsIdentityStoreService) GetAllIdentityStoreUsers(ssoadmin_client *NoclickopsSSOAdminService) []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
+	client := s.Clients[0].Client
 
-	instance_id := getSSOInstanceId(ssoadmin_client)
+	instance_id := ssoadmin_client.getSSOInstanceId()
 	if instance_id == "" {
 		return resources
 	}
@@ -45,11 +74,12 @@ func GetAllIdentityStoreUsers(client IdentityStoreClient, ssoadmin_client SSOAdm
 	return resources
 }
 
-func GetAllIdentityStoreGroups(client IdentityStoreClient, ssoadmin_client SSOAdminClient) []common.Resource {
+func (s *NoclickopsIdentityStoreService) GetAllIdentityStoreGroups(ssoadmin_client *NoclickopsSSOAdminService) []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
+	client := s.Clients[0].Client
 
-	instance_id := getSSOInstanceId(ssoadmin_client)
+	instance_id := ssoadmin_client.getSSOInstanceId()
 	if instance_id == "" {
 		return resources
 	}

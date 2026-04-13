@@ -29,9 +29,6 @@ func (opts *options) validate() error {
 		if opts.s3BucketRegion == "" {
 			errs = append(errs, "s3-bucket-region must be provided if s3-bucket is defined")
 		}
-		if opts.s3BucketRegion == "all" {
-			errs = append(errs, "s3-bucket-region cannot be 'all'")
-		}
 		if !isValidRegion(opts.s3BucketRegion) {
 			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", opts.s3BucketRegion))
 		}
@@ -49,13 +46,7 @@ func (opts *options) validate() error {
 			continue
 		}
 
-		// if any of the regions is "all" then we overwrite what we currently have and break
-		if r == "all" {
-			opts.regionsList = getAllRegions()
-			break
-		} else {
-			opts.regionsList = append(opts.regionsList, r)
-		}
+		opts.regionsList = append(opts.regionsList, r)
 	}
 
 	if len(errs) > 0 {
@@ -66,9 +57,6 @@ func (opts *options) validate() error {
 }
 
 func isValidRegion(region string) bool {
-	if region == "all" {
-		return true
-	}
 	_, found := VALID_REGIONS[region]
 	return found
 }
@@ -78,8 +66,8 @@ func parseFlags() options {
 
 	flag.StringVar(&opts.stateFile, "statefile", "", "The statefile to parse")
 	flag.StringVar(&opts.s3Bucket, "s3-bucket", "", "Download statefile(s) from this s3 bucket")
-	flag.StringVar(&opts.s3BucketRegion, "s3-bucket-region", "", "The bucket's region. Cannot be 'all'")
-	flag.StringVar(&opts.regions, "regions", "all", "Comma-separated list of regions to check, or 'all'")
+	flag.StringVar(&opts.s3BucketRegion, "s3-bucket-region", "", "The bucket's region")
+	flag.StringVar(&opts.regions, "regions", "", "Comma-separated list of regions to check")
 	flag.BoolVar(&opts.removeDownloadedStatefiles, "remove-downloaded-statefiles", false, "If specified, any downloaded statefiles will be deleted at the end")
 	flag.BoolVar(&opts.forceDownload, "force-download", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
 	flag.Parse()

@@ -1,7 +1,10 @@
 package common
 
+import "strings"
+
 type ResourceType int
 
+//go:generate stringer -type=ResourceType
 const (
 	Route53_zone ResourceType = iota
 	Route53_record
@@ -19,7 +22,36 @@ const (
 	IdentityStore_group
 )
 
+func (r ResourceType) MarshalJSON() ([]byte, error) {
+	return []byte(`"` + strings.ToLower(r.String()) + `"`), nil
+}
+
+type AWSServiceName int
+
+const (
+	Route53 AWSServiceName = iota
+	IAM
+	EKS
+	SSM
+	SecurityGroups
+	SSOAdmin
+	IdentityStore
+)
+
 type Resource struct {
-	TerraformID  string
-	ResourceType ResourceType
+	TerraformID  string       `json:"terraform_id"`
+	ResourceType ResourceType `json:"resource_type"`
+	Region       string       `json:"region"`
+}
+
+type ServiceMeta struct {
+	Global      bool
+	ServiceName string
+}
+
+func (m ServiceMeta) GetServiceName() string { return m.ServiceName }
+
+type NoclickopsService interface {
+	GetAllResources() []Resource
+	GetServiceName() string
 }

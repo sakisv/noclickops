@@ -12,6 +12,18 @@ import (
 	"github.com/noclickops/common"
 )
 
+func getMockedEC2Service(mock *mockEC2Client) aws.NoclickopsEC2Service {
+	return aws.NoclickopsEC2Service{
+		Clients: []aws.NoclickopsEC2Client{
+			{
+				Client:     mock,
+				ClientMeta: aws.ClientMeta{Region: "eu-west-1"},
+			},
+		},
+		ServiceMeta: common.ServiceMeta{Global: false, ServiceName: "ec2"},
+	}
+}
+
 func TestGetAllSecurityGroups_PaginationFollowed(t *testing.T) {
 	callCount := 0
 	mock := &mockEC2Client{
@@ -31,10 +43,11 @@ func TestGetAllSecurityGroups_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	got := aws.GetAllSecurityGroups(mock)
+	client := getMockedEC2Service(mock)
+	got := client.GetAllSecurityGroups()
 	expected := []common.Resource{
-		{TerraformID: "sg-1", ResourceType: common.EC2_securitygroup},
-		{TerraformID: "sg-2", ResourceType: common.EC2_securitygroup},
+		{TerraformID: "sg-1", ResourceType: common.EC2_securitygroup, Region: "eu-west-1"},
+		{TerraformID: "sg-2", ResourceType: common.EC2_securitygroup, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)
@@ -83,10 +96,11 @@ func TestGetAllSecurityGroupRules_PaginationFollowed(t *testing.T) {
 			}, nil
 		},
 	}
-	got := aws.GetAllSecurityGroupRules(mock)
+	client := getMockedEC2Service(mock)
+	got := client.GetAllSecurityGroupRules()
 	expected := []common.Resource{
-		{TerraformID: "sg-aaa_ingress_tcp_80_80_10.0.0.0/8", ResourceType: common.EC2_securitygrouprule},
-		{TerraformID: "sg-bbb_egress_tcp_443_443_::/0", ResourceType: common.EC2_securitygrouprule},
+		{TerraformID: "sg-aaa_ingress_tcp_80_80_10.0.0.0/8", ResourceType: common.EC2_securitygrouprule, Region: "eu-west-1"},
+		{TerraformID: "sg-bbb_egress_tcp_443_443_::/0", ResourceType: common.EC2_securitygrouprule, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)

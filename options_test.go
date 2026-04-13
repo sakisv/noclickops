@@ -13,7 +13,7 @@ func TestIsValidRegion(t *testing.T) {
 	}{
 		{"us-east-1", true},
 		{"eu-west-1", true},
-		{"all", true},
+		{"all", false},
 		{"", false},
 		{"invalid-region", false},
 		{"US-EAST-1", false},
@@ -46,16 +46,16 @@ func TestOptionsValidate(t *testing.T) {
 		wantRegionsList []string
 	}{
 		{
-			name:            "valid with statefile only regions all",
-			opts:            options{stateFile: "state.tfstate", regions: "all"},
-			wantErr:         false,
-			wantRegionsList: []string{"eu-west-1", "us-east-1", "us-east-2"},
+			name:        "valid with statefile only regions all",
+			opts:        options{stateFile: "state.tfstate", regions: "all"},
+			wantErr:     true,
+			errContains: "'all' is not a valid region",
 		},
 		{
-			name:            "valid with s3 bucket",
-			opts:            options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
-			wantErr:         false,
-			wantRegionsList: []string{"eu-west-1", "us-east-1", "us-east-2"},
+			name:        "valid with s3 bucket",
+			opts:        options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
+			wantErr:     true,
+			errContains: "'all' is not a valid region",
 		},
 		{
 			name:            "valid with s3 bucket and specific regions",
@@ -97,7 +97,7 @@ func TestOptionsValidate(t *testing.T) {
 			name:        "s3 bucket region set to all",
 			opts:        options{s3Bucket: "my-bucket", s3BucketRegion: "all", regions: "all"},
 			wantErr:     true,
-			errContains: "s3-bucket-region cannot be 'all'",
+			errContains: "'all' is not a valid region",
 		},
 		{
 			name:        "invalid s3 bucket region",

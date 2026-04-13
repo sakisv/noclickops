@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	awssdk "github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssoadmin"
 	"github.com/aws/aws-sdk-go-v2/service/ssoadmin/types"
 	"github.com/noclickops/common"
@@ -15,29 +16,51 @@ type SSOAdminClient interface {
 	ListPermissionSets(ctx context.Context, params *ssoadmin.ListPermissionSetsInput, optFns ...func(*ssoadmin.Options)) (*ssoadmin.ListPermissionSetsOutput, error)
 }
 
-func getSSOInstanceId(client SSOAdminClient) string {
-	instances := GetAllSSOInstances(client)
-	if len(instances) != 1 {
-		println("Found more than 1 SSO Instances, returning")
-		return ""
-	}
-
-	return *instances[0].IdentityStoreId
+type NoclickopsSSOAdminClient struct {
+	Client SSOAdminClient
+	ClientMeta
 }
 
-func getSSOInstanceArn(client SSOAdminClient) string {
-	instances := GetAllSSOInstances(client)
-	if len(instances) != 1 {
-		println("Found more than 1 SSO Instances, returning")
-		return ""
-	}
-
-	return *instances[0].InstanceArn
+type NoclickopsSSOAdminService struct {
+	Clients []NoclickopsSSOAdminClient
+	common.ServiceMeta
 }
 
-func GetAllSSOInstances(client SSOAdminClient) []types.InstanceMetadata {
+func NewSSOAdminServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) NoclickopsSSOAdminService {
+	service := NoclickopsSSOAdminService{ServiceMeta: meta}
+	for _, c := range cfg {
+		service.Clients = append(service.Clients, NoclickopsSSOAdminClient{
+			Client:     ssoadmin.NewFromConfig(c),
+			ClientMeta: ClientMeta{Region: c.Region},
+		})
+	}
+	return service
+}
+
+func (s *NoclickopsSSOAdminService) GetAllResources() []common.Resource {
+	return s.GetAllPermissionSets()
+}
+
+func (s *NoclickopsSSOAdminService) getSSOInstanceId() string {
+	instances := s.GetAllSSOInstances()
+	if len(instances) == 1 {
+		return *instances[0].IdentityStoreId
+	}
+	return ""
+}
+
+func (s *NoclickopsSSOAdminService) getSSOInstanceArn() string {
+	instances := s.GetAllSSOInstances()
+	if len(instances) == 1 {
+		return *instances[0].InstanceArn
+	}
+	return ""
+}
+
+func (s *NoclickopsSSOAdminService) GetAllSSOInstances() []types.InstanceMetadata {
 	var resources []types.InstanceMetadata
 	var nextToken *string = nil
+	client := s.Clients[0].Client
 	for {
 		res, err := client.ListInstances(context.TODO(), &ssoadmin.ListInstancesInput{
 			NextToken: nextToken,
@@ -58,11 +81,12 @@ func GetAllSSOInstances(client SSOAdminClient) []types.InstanceMetadata {
 	return resources
 }
 
-func GetAllPermissionSets(client SSOAdminClient) []common.Resource {
+func (s *NoclickopsSSOAdminService) GetAllPermissionSets() []common.Resource {
 	var resources []common.Resource
 	var nextToken *string = nil
+	client := s.Clients[0].Client
 
-	instance_arn := getSSOInstanceArn(client)
+	instance_arn := s.getSSOInstanceArn()
 	if instance_arn == "" {
 		return resources
 	}
