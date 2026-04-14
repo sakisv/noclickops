@@ -26,7 +26,11 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		panic("Cannot create clients without config")
 	}
 
-	meta := SERVICES[service]
+	meta, found := SERVICES[service]
+	if !found {
+		panic("unknown service")
+	}
+
 	if meta.Global {
 		configs = configs[:1]
 	}
