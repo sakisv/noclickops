@@ -28,11 +28,12 @@ func _() {
 	_ = x[SNS_topic-17]
 	_ = x[SNS_subscription-18]
 	_ = x[S3_bucket-19]
+	_ = x[CloudFront_distribution-20]
 }
 
-const _ResourceType_name = "Route53_zoneRoute53_recordIAM_policyIAM_userIAM_groupSSM_parameterSecurity_groupSecurity_group_ruleEKS_clusterEKS_node_groupSSOAdmin_permission_setIdentitystore_userIdentitystore_groupInstanceEipDB_instanceRDS_clusterSNS_topicSNS_subscriptionS3_bucket"
+const _ResourceType_name = "Route53_zoneRoute53_recordIAM_policyIAM_userIAM_groupSSM_parameterSecurity_groupSecurity_group_ruleEKS_clusterEKS_node_groupSSOAdmin_permission_setIdentitystore_userIdentitystore_groupInstanceEipDB_instanceRDS_clusterSNS_topicSNS_subscriptionS3_bucketCloudFront_distribution"
 
-var _ResourceType_index = [...]uint8{0, 12, 26, 36, 44, 53, 66, 80, 99, 110, 124, 147, 165, 184, 192, 195, 206, 217, 226, 242, 251}
+var _ResourceType_index = [...]uint16{0, 12, 26, 36, 44, 53, 66, 80, 99, 110, 124, 147, 165, 184, 192, 195, 206, 217, 226, 242, 251, 274}
 
 func (i ResourceType) String() string {
 	idx := int(i) - 0

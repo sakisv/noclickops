@@ -26,6 +26,7 @@ const (
 	SNS_topic
 	SNS_subscription
 	S3_bucket
+	CloudFront_distribution
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -45,6 +46,7 @@ const (
 	IdentityStore
 	SNS
 	S3
+	CloudFront
 )
 
 type Resource struct {

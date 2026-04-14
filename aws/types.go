@@ -10,8 +10,9 @@ type ClientMeta struct {
 }
 
 var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
-	common.IAM:     {Global: true, ServiceName: "iam"},
-	common.Route53: {Global: true, ServiceName: "route53"},
+	common.IAM:        {Global: true, ServiceName: "iam"},
+	common.Route53:    {Global: true, ServiceName: "route53"},
+	common.CloudFront: {Global: true, ServiceName: "cloudfront"},
 
 	common.EKS:           {Global: false, ServiceName: "eks"},
 	common.IdentityStore: {Global: false, ServiceName: "identitystore"},
@@ -64,6 +65,9 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		return &c
 	case common.SNS:
 		c := NewSNSServiceFromConfigs(configs, meta)
+		return &c
+	case common.CloudFront:
+		c := NewCloudFrontServiceFromConfigs(configs, meta)
 		return &c
 	case common.IdentityStore:
 		ssoMeta := SERVICES[common.SSOAdmin]
