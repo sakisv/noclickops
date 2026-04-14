@@ -52,6 +52,7 @@ func download_statefiles_from_s3(bucket string, forceDownload bool, cfg aws.Conf
 		_, err := os.Stat(full_path)
 		fileExists := err == nil
 		if fileExists && !forceDownload {
+			files = append(files, full_path)
 			continue
 		}
 
