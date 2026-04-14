@@ -7,13 +7,13 @@ import (
 	"strings"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	awsec2 "github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/noclickops/common"
 )
 
 type EC2Client interface {
-	DescribeSecurityGroups(ctx context.Context, params *ec2.DescribeSecurityGroupsInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupsOutput, error)
-	DescribeSecurityGroupRules(ctx context.Context, params *ec2.DescribeSecurityGroupRulesInput, optFns ...func(*ec2.Options)) (*ec2.DescribeSecurityGroupRulesOutput, error)
+	DescribeSecurityGroups(ctx context.Context, params *awsec2.DescribeSecurityGroupsInput, optFns ...func(*awsec2.Options)) (*awsec2.DescribeSecurityGroupsOutput, error)
+	DescribeSecurityGroupRules(ctx context.Context, params *awsec2.DescribeSecurityGroupRulesInput, optFns ...func(*awsec2.Options)) (*awsec2.DescribeSecurityGroupRulesOutput, error)
 }
 
 type NoclickopsEC2Client struct {
@@ -30,7 +30,7 @@ func NewEC2ServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) Nocl
 	service := NoclickopsEC2Service{ServiceMeta: meta}
 	for _, c := range cfg {
 		service.Clients = append(service.Clients, NoclickopsEC2Client{
-			Client:     ec2.NewFromConfig(c),
+			Client:     awsec2.NewFromConfig(c),
 			ClientMeta: ClientMeta{Region: c.Region},
 		})
 	}
@@ -49,7 +49,7 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroups() []common.Resource {
 	for _, rc := range s.Clients {
 		var nextToken *string = nil
 		for {
-			res, err := rc.Client.DescribeSecurityGroups(context.TODO(), &ec2.DescribeSecurityGroupsInput{
+			res, err := rc.Client.DescribeSecurityGroups(context.TODO(), &awsec2.DescribeSecurityGroupsInput{
 				NextToken: nextToken,
 			})
 			if err != nil {
@@ -74,7 +74,7 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroupRules() []common.Resource {
 	for _, rc := range s.Clients {
 		var nextToken *string = nil
 		for {
-			res, err := rc.Client.DescribeSecurityGroupRules(context.TODO(), &ec2.DescribeSecurityGroupRulesInput{
+			res, err := rc.Client.DescribeSecurityGroupRules(context.TODO(), &awsec2.DescribeSecurityGroupRulesInput{
 				NextToken: nextToken,
 			})
 			if err != nil {
