@@ -49,6 +49,9 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 	case common.EC2:
 		c := NewEC2ServiceFromConfigs(configs, meta)
 		return &c
+	case common.RDS:
+		c := NewRDSServiceFromConfigs(configs, meta)
+		return &c
 	case common.IdentityStore:
 		ssoMeta := SERVICES[common.SSOAdmin]
 		ssoClient := NewSSOAdminServiceFromConfigs(configs[:1], ssoMeta)

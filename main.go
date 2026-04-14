@@ -51,6 +51,9 @@ func main() {
 	eksclient := claws.NewNoclickopsServiceFromConfigs(common.EKS, configs)
 	foundRecords[eksclient.GetServiceName()] = eksclient.GetAllResources()
 
+	rdsclient := claws.NewNoclickopsServiceFromConfigs(common.RDS, configs)
+	foundRecords[rdsclient.GetServiceName()] = rdsclient.GetAllResources()
+
 	unmanagedResourceIds := filter(managedIDs, foundRecords)
 	json, _ := json.Marshal(unmanagedResourceIds)
 	fmt.Println(string(json))
