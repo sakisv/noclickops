@@ -20,6 +20,7 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.EC2:           {Global: false, ServiceName: "ec2"},
 	common.RDS:           {Global: false, ServiceName: "rds"},
 	common.SNS:           {Global: false, ServiceName: "sns"},
+	common.S3:            {Global: false, ServiceName: "s3"},
 }
 
 func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config) common.NoclickopsService {
@@ -57,6 +58,9 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		return &c
 	case common.RDS:
 		c := NewRDSServiceFromConfigs(configs, meta)
+		return &c
+	case common.S3:
+		c := NewS3ServiceFromConfigs(configs, meta)
 		return &c
 	case common.SNS:
 		c := NewSNSServiceFromConfigs(configs, meta)

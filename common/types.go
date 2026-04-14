@@ -25,6 +25,7 @@ const (
 	RDS_cluster
 	SNS_topic
 	SNS_subscription
+	S3_bucket
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -43,6 +44,7 @@ const (
 	SSOAdmin
 	IdentityStore
 	SNS
+	S3
 )
 
 type Resource struct {
