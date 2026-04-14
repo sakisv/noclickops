@@ -40,7 +40,7 @@ func main() {
 	route53client := claws.NewNoclickopsServiceFromConfigs(common.Route53, configs)
 	foundRecords[route53client.GetServiceName()] = route53client.GetAllResources()
 
-	ec2client := claws.NewNoclickopsServiceFromConfigs(common.SecurityGroups, configs)
+	ec2client := claws.NewNoclickopsServiceFromConfigs(common.EC2, configs)
 	foundRecords[ec2client.GetServiceName()] = ec2client.GetAllResources()
 
 	ssoadminclient := claws.NewNoclickopsServiceFromConfigs(common.SSOAdmin, configs)

@@ -46,13 +46,13 @@ func TestOptionsValidate(t *testing.T) {
 		wantRegionsList []string
 	}{
 		{
-			name:        "valid with statefile only regions all",
+			name:        "invalid with statefile only regions all",
 			opts:        options{stateFile: "state.tfstate", regions: "all"},
 			wantErr:     true,
 			errContains: "'all' is not a valid region",
 		},
 		{
-			name:        "valid with s3 bucket",
+			name:        "invalid with s3 bucket regions all",
 			opts:        options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
 			wantErr:     true,
 			errContains: "'all' is not a valid region",

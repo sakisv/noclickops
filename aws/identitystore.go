@@ -62,7 +62,7 @@ func (s *NoclickopsIdentityStoreService) GetAllIdentityStoreUsers(ssoadmin_clien
 		}
 		for _, el := range res.Users {
 			tf_id := fmt.Sprintf("%v/%v", instance_id, *el.UserId)
-			resources = append(resources, common.Resource{TerraformID: tf_id, ResourceType: common.IdentityStore_user})
+			resources = append(resources, common.Resource{TerraformID: tf_id, ResourceType: common.Identitystore_user})
 		}
 
 		if res.NextToken == nil {
@@ -94,7 +94,7 @@ func (s *NoclickopsIdentityStoreService) GetAllIdentityStoreGroups(ssoadmin_clie
 		}
 		for _, el := range res.Groups {
 			tf_id := fmt.Sprintf("%v/%v", instance_id, *el.GroupId)
-			resources = append(resources, common.Resource{TerraformID: tf_id, ResourceType: common.IdentityStore_group})
+			resources = append(resources, common.Resource{TerraformID: tf_id, ResourceType: common.Identitystore_group})
 		}
 
 		if res.NextToken == nil {

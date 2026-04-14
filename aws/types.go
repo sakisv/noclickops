@@ -13,11 +13,11 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.IAM:     {Global: true, ServiceName: "iam"},
 	common.Route53: {Global: true, ServiceName: "route53"},
 
-	common.EKS:            {Global: false, ServiceName: "eks"},
-	common.IdentityStore:  {Global: false, ServiceName: "identitystore"},
-	common.SSM:            {Global: false, ServiceName: "ssm"},
-	common.SSOAdmin:       {Global: false, ServiceName: "ssoadmin"},
-	common.SecurityGroups: {Global: false, ServiceName: "securitygroups"},
+	common.EKS:           {Global: false, ServiceName: "eks"},
+	common.IdentityStore: {Global: false, ServiceName: "identitystore"},
+	common.SSM:           {Global: false, ServiceName: "ssm"},
+	common.SSOAdmin:      {Global: false, ServiceName: "ssoadmin"},
+	common.EC2:           {Global: false, ServiceName: "ec2"},
 }
 
 func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config) common.NoclickopsService {
@@ -46,7 +46,7 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 	case common.SSOAdmin:
 		c := NewSSOAdminServiceFromConfigs(configs, meta)
 		return &c
-	case common.SecurityGroups:
+	case common.EC2:
 		c := NewEC2ServiceFromConfigs(configs, meta)
 		return &c
 	case common.IdentityStore:
