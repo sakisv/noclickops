@@ -15,6 +15,7 @@ const (
 	Security_group
 	Security_group_rule
 	EKS_cluster
+	EKS_node_group
 	SSOAdmin_permission_set
 	Identitystore_user
 	Identitystore_group

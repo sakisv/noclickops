@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -11,6 +12,7 @@ import (
 
 type EKSClient interface {
 	ListClusters(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error)
+	ListNodegroups(ctx context.Context, params *eks.ListNodegroupsInput, optFns ...func(*eks.Options)) (*eks.ListNodegroupsOutput, error)
 }
 
 type NoclickopsEKSClient struct {
@@ -35,10 +37,10 @@ func NewEKSServiceFromConfigs(cfg []awssdk.Config, meta common.ServiceMeta) Nocl
 }
 
 func (s *NoclickopsEKSService) GetAllResources() []common.Resource {
-	return s.GetAllEKSClusters()
+	return s.GetEKSClustersAndNodegroups()
 }
 
-func (s *NoclickopsEKSService) GetAllEKSClusters() []common.Resource {
+func (s *NoclickopsEKSService) GetEKSClustersAndNodegroups() []common.Resource {
 	var resources []common.Resource
 	for _, rc := range s.Clients {
 		var nextToken *string = nil
@@ -54,6 +56,28 @@ func (s *NoclickopsEKSService) GetAllEKSClusters() []common.Resource {
 
 			for _, el := range res.Clusters {
 				resources = append(resources, common.Resource{TerraformID: el, ResourceType: common.EKS_cluster, Region: rc.Region})
+				var nextNodegroupToken *string = nil
+
+				for {
+					res2, err := rc.Client.ListNodegroups(context.TODO(), &eks.ListNodegroupsInput{
+						ClusterName: &el,
+						NextToken:   nextNodegroupToken,
+					})
+
+					if err != nil {
+						log.Fatal(err)
+					}
+
+					for _, nodegroup := range res2.Nodegroups {
+						tfId := fmt.Sprintf("%v:%v", el, nodegroup)
+						resources = append(resources, common.Resource{TerraformID: tfId, ResourceType: common.EKS_node_group, Region: rc.Region})
+					}
+
+					if res2.NextToken == nil {
+						break
+					}
+					nextNodegroupToken = res2.NextToken
+				}
 			}
 
 			if res.NextToken == nil {
