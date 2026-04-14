@@ -49,7 +49,7 @@ func main() {
 	foundRecords[ssoadminclient.GetServiceName()] = ssoadminclient.GetAllResources()
 
 	eksclient := claws.NewNoclickopsServiceFromConfigs(common.EKS, configs)
-	foundRecords[ec2client.GetServiceName()] = eksclient.GetAllResources()
+	foundRecords[eksclient.GetServiceName()] = eksclient.GetAllResources()
 
 	unmanagedResourceIds := filter(managedIDs, foundRecords)
 	json, _ := json.Marshal(unmanagedResourceIds)
