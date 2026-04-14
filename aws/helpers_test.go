@@ -3,6 +3,7 @@ package aws_test
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/eks"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
@@ -86,6 +87,14 @@ func (m *mockEKSClient) ListClusters(ctx context.Context, params *eks.ListCluste
 
 func (m *mockEKSClient) ListNodegroups(ctx context.Context, params *eks.ListNodegroupsInput, optFns ...func(*eks.Options)) (*eks.ListNodegroupsOutput, error) {
 	return m.listNodegroupsFn(ctx, params, optFns...)
+}
+
+type mockCloudFrontClient struct {
+	listDistributionsFn func(ctx context.Context, params *cloudfront.ListDistributionsInput, optFns ...func(*cloudfront.Options)) (*cloudfront.ListDistributionsOutput, error)
+}
+
+func (m *mockCloudFrontClient) ListDistributions(ctx context.Context, params *cloudfront.ListDistributionsInput, optFns ...func(*cloudfront.Options)) (*cloudfront.ListDistributionsOutput, error) {
+	return m.listDistributionsFn(ctx, params, optFns...)
 }
 
 type mockS3Client struct {
