@@ -17,7 +17,7 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 |      iam      	|           iam_user, iam_group, iam_policy                  	|
 |      ssm      	|                      ssm_parameter                         	|
 |      ec2      	|   security_group, security_group_rule, instance, eip       	|
-|      eks      	|                       eks_cluster                          	|
+|      eks      	|                 eks_cluster, eks_node_group                 |
 | identitystore 	|        identitystore_group, identitystore_user             	|
 |    ssoadmin   	|                 ssoadmin_permission_set                    	|
 |      rds      	|                 db_instance, rds_cluster                   	|
