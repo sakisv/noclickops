@@ -27,6 +27,8 @@ const (
 	SNS_subscription
 	S3_bucket
 	CloudFront_distribution
+	ELB_load_balancer
+	ELBV2_load_balancer
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -47,6 +49,8 @@ const (
 	SNS
 	S3
 	CloudFront
+	ELB
+	ELBV2
 )
 
 type Resource struct {
