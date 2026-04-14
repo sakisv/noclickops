@@ -47,6 +47,18 @@ type Resource struct {
 	Region       string       `json:"region"`
 }
 
+type FilteredMeta struct {
+	Found        int     `json:"found"`
+	Managed      int     `json:"managed"`
+	Unmanaged    int     `json:"unmanaged"`
+	PctUnmanaged float32 `json:"pct_unmanaged"`
+}
+
+type FilteredResults struct {
+	Resources []Resource   `json:"resources"`
+	Meta      FilteredMeta `json:"meta"`
+}
+
 type ServiceMeta struct {
 	Global      bool
 	ServiceName string

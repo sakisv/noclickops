@@ -31,30 +31,30 @@ func main() {
 	}
 
 	iamclient := claws.NewNoclickopsServiceFromConfigs(common.IAM, configs)
-	foundRecords := make(map[string][]common.Resource)
-	foundRecords[iamclient.GetServiceName()] = iamclient.GetAllResources()
+	foundResources := make(map[string][]common.Resource)
+	foundResources[iamclient.GetServiceName()] = iamclient.GetAllResources()
 
 	ssmclient := claws.NewNoclickopsServiceFromConfigs(common.SSM, configs)
-	foundRecords[ssmclient.GetServiceName()] = ssmclient.GetAllResources()
+	foundResources[ssmclient.GetServiceName()] = ssmclient.GetAllResources()
 
 	route53client := claws.NewNoclickopsServiceFromConfigs(common.Route53, configs)
-	foundRecords[route53client.GetServiceName()] = route53client.GetAllResources()
+	foundResources[route53client.GetServiceName()] = route53client.GetAllResources()
 
 	ec2client := claws.NewNoclickopsServiceFromConfigs(common.EC2, configs)
-	foundRecords[ec2client.GetServiceName()] = ec2client.GetAllResources()
+	foundResources[ec2client.GetServiceName()] = ec2client.GetAllResources()
 
 	ssoadminclient := claws.NewNoclickopsServiceFromConfigs(common.SSOAdmin, configs)
 	identitystoreclient := claws.NewNoclickopsServiceFromConfigs(common.IdentityStore, configs)
-	foundRecords[identitystoreclient.GetServiceName()] = identitystoreclient.GetAllResources()
-	foundRecords[ssoadminclient.GetServiceName()] = ssoadminclient.GetAllResources()
+	foundResources[identitystoreclient.GetServiceName()] = identitystoreclient.GetAllResources()
+	foundResources[ssoadminclient.GetServiceName()] = ssoadminclient.GetAllResources()
 
 	eksclient := claws.NewNoclickopsServiceFromConfigs(common.EKS, configs)
-	foundRecords[eksclient.GetServiceName()] = eksclient.GetAllResources()
+	foundResources[eksclient.GetServiceName()] = eksclient.GetAllResources()
 
 	rdsclient := claws.NewNoclickopsServiceFromConfigs(common.RDS, configs)
-	foundRecords[rdsclient.GetServiceName()] = rdsclient.GetAllResources()
+	foundResources[rdsclient.GetServiceName()] = rdsclient.GetAllResources()
 
-	unmanagedResourceIds := filter(managedIDs, foundRecords)
+	unmanagedResourceIds := filter(managedIDs, foundResources)
 	json, _ := json.Marshal(unmanagedResourceIds)
 	fmt.Println(string(json))
 }

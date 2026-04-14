@@ -11,15 +11,16 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 
 ## Supported services and resources
 
-|    Service    	|                Resources                	|
-|:-------------:	|:---------------------------------------:	|
-|    route53    	|       route53_zone, route53_record      	|
-|      iam      	|     iam_user, iam_group, iam_policy     	|
-|      ssm      	|              ssm_pararmeter             	|
-|      ec2      	|   security_group, security_group_rule   	|
-|      eks      	|               eks_cluster               	|
-| identitystore 	| identitystore_group, identitystore_user 	|
-|    ssoadmin   	|            ssoadmin_instances           	|
+|    Service    	|                         Resources                          	|
+|:-------------:	|:----------------------------------------------------------:	|
+|    route53    	|              route53_zone, route53_record                  	|
+|      iam      	|           iam_user, iam_group, iam_policy                  	|
+|      ssm      	|                      ssm_parameter                         	|
+|      ec2      	|   security_group, security_group_rule, instance, eip       	|
+|      eks      	|                       eks_cluster                          	|
+| identitystore 	|        identitystore_group, identitystore_user             	|
+|    ssoadmin   	|                 ssoadmin_permission_set                    	|
+|      rds      	|                 db_instance, rds_cluster                   	|
 
 ## How to use
 
@@ -43,13 +44,21 @@ noclickops -s3-bucket example-s3-statefile-bucket -s3-bucket-region eu-west-2 --
 
 ```json
 {
-  "<service name>": [
-    {
-      "terraform_id": "<the id you would have used in `terraform import` which varies per resource>"
-      "resource_type": "<the resource name>"
-      "region": "<global | specific region>"
+  "<service name>": {
+    "resources": [
+      {
+        "terraform_id": "<the id you would have used in `terraform import` which varies per resource>",
+        "resource_type": "<the resource name>",
+        "region": "<global | specific region>"
+      }
+    ],
+    "meta": {
+      "found": "<total number of resources found in AWS>",
+      "managed": "<number of resources found in statefiles>",
+      "unmanaged": "<number of resources not found in statefiles>",
+      "pct_unmanaged": "<percentage of unmanaged resources>"
     }
-  ]
+  }
 }
 ```
 
@@ -57,30 +66,46 @@ Example:
 
 ```json
 {
-  "iam": [
-    {
-      "terraform_id": "admin",
-      "resource_type": "iam_user",
-      "region": "global"
-    },
-    {
-      "terraform_id": "sakisv",
-      "resource_type": "iam_user",
-      "region": "global"
-    },
-    {
-      "terraform_id": "admins",
-      "resource_type": "iam_group",
-      "region": "global"
+  "iam": {
+    "resources": [
+      {
+        "terraform_id": "admin",
+        "resource_type": "iam_user",
+        "region": "global"
+      },
+      {
+        "terraform_id": "sakisv",
+        "resource_type": "iam_user",
+        "region": "global"
+      },
+      {
+        "terraform_id": "admins",
+        "resource_type": "iam_group",
+        "region": "global"
+      }
+    ],
+    "meta": {
+      "found": 10,
+      "managed": 7,
+      "unmanaged": 3,
+      "pct_unmanaged": 30.0
     }
-  ],
-  "ssm": [
-    {
-      "terraform_id": "/an/example/ssm/parameter",
-      "resource_type": "ssm_parameter",
-      "region": "eu-west-2"
+  },
+  "ssm": {
+    "resources": [
+      {
+        "terraform_id": "/an/example/ssm/parameter",
+        "resource_type": "ssm_parameter",
+        "region": "eu-west-2"
+      }
+    ],
+    "meta": {
+      "found": 5,
+      "managed": 4,
+      "unmanaged": 1,
+      "pct_unmanaged": 20.0
     }
-  ]
+  }
 }
 ```
 
@@ -95,11 +120,11 @@ noclickops -s3-bucket example-s3-statefile-bucket -s3-bucket-region eu-west-2 --
 
 ## Using `jq` to narrow down the list
 
-You can use `jq` to slice the results in more manageable chunks either by piping the output directly to `jq` or by storing it in a file and then `cat`ing .
+You can use `jq` to slice the results in more manageable chunks either by piping the output directly to `jq` or by storing it in a file and then `cat`ing it.
 
 The examples below use the second method, but they'd work on the first as well
 
-### Find which services have unamanged resources
+### Find which services have unmanaged resources
 
 ```
 cat unmanaged_resources.json | jq 'keys'
@@ -108,30 +133,36 @@ cat unmanaged_resources.json | jq 'keys'
 ### List unmanaged resources from a specific service only
 
 ```
-cat unmanaged_resources.json | jq '.ssm'
+cat unmanaged_resources.json | jq '.ssm.resources'
 ```
 
 ### List specific resource types
 
 ```
-cat unmanaged_resources.json | jq '.[] | .[] | select(.resource_type | contains("iam_policy"))'
+cat unmanaged_resources.json | jq '.[] | .resources[] | select(.resource_type | contains("iam_policy"))'
 ```
 
 or, if you know the service
 
 ```
-cat unmanaged_resources.json | jq '.iam | .[] | select(.resource_type | contains("iam_policy"))'
+cat unmanaged_resources.json | jq '.iam.resources[] | select(.resource_type | contains("iam_policy"))'
 ```
 
 
 ### List all the different resource types
 
 ```
-cat unmanaged_resources.json | jq '[.[].[] | .resource_type] | unique'
+cat unmanaged_resources.json | jq '[.[].resources[] | .resource_type] | unique'
 ```
 
 Alternatively, if you also want counts:
 
 ```
-cat unmanaged_resources.json | jq '.[] | .[].resource_type' | sort | uniq -c
+cat unmanaged_resources.json | jq '.[] | .resources[].resource_type' | sort | uniq -c
+```
+
+### Show the unmanaged percentage per service
+
+```
+cat unmanaged_resources.json | jq 'to_entries[] | {service: .key, pct_unmanaged: .value.meta.pct_unmanaged}'
 ```
