@@ -21,6 +21,8 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 | identitystore 	|        identitystore_group, identitystore_user             	|
 |    ssoadmin   	|                 ssoadmin_permission_set                    	|
 |      rds      	|                 db_instance, rds_cluster                   	|
+|      sns      	|              sns_topic, sns_subscription                   	|
+|      s3       	|                        s3_bucket                          	|
 
 ## How to use
 

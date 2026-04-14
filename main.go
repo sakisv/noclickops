@@ -33,6 +33,7 @@ func main() {
 	foundResources := make(map[string][]common.Resource)
 	for service := range claws.SERVICES {
 		client := claws.NewNoclickopsServiceFromConfigs(service, configs)
+		println("Fetching resources for " + client.GetServiceName())
 		foundResources[client.GetServiceName()] = client.GetAllResources()
 	}
 
