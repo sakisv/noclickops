@@ -154,3 +154,25 @@ func TestGetAllInstances_PaginationFollowed(t *testing.T) {
 		t.Errorf("expected 2 calls to DescribeInstances, got %d", callCount)
 	}
 }
+
+func TestGetAllAddresses(t *testing.T) {
+	mock := &mockEC2Client{
+		describeAddressesFn: func(_ context.Context, params *ec2.DescribeAddressesInput, _ ...func(*ec2.Options)) (*ec2.DescribeAddressesOutput, error) {
+			return &ec2.DescribeAddressesOutput{
+				Addresses: []types.Address{
+					{AllocationId: ptr("eip-12345678")},
+					{AllocationId: ptr("eip-23456790")},
+				},
+			}, nil
+		},
+	}
+	client := getMockedEC2Service(mock)
+	got := client.GetAllElasticIPs()
+	expected := []common.Resource{
+		{TerraformID: "eip-12345678", ResourceType: common.Eip, Region: "eu-west-1"},
+		{TerraformID: "eip-23456790", ResourceType: common.Eip, Region: "eu-west-1"},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("expected %v, got %v", expected, got)
+	}
+}

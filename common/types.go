@@ -19,6 +19,7 @@ const (
 	Identitystore_user
 	Identitystore_group
 	Instance
+	Eip
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
