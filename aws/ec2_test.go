@@ -176,3 +176,168 @@ func TestGetAllAddresses(t *testing.T) {
 		t.Errorf("expected %v, got %v", expected, got)
 	}
 }
+
+func TestGetAllVPCs_PaginationFollowed(t *testing.T) {
+	callCount := 0
+	mock := &mockEC2Client{
+		describeVpcsFn: func(_ context.Context, params *ec2.DescribeVpcsInput, _ ...func(*ec2.Options)) (*ec2.DescribeVpcsOutput, error) {
+			callCount++
+			if callCount == 1 {
+				return &ec2.DescribeVpcsOutput{
+					NextToken: ptr("next"),
+					Vpcs:      []types.Vpc{{VpcId: ptr("vpc-1")}},
+				}, nil
+			}
+			if params.NextToken == nil || *params.NextToken != "next" {
+				return nil, fmt.Errorf("wrong NextToken: expected 'next', got %v", params.NextToken)
+			}
+			return &ec2.DescribeVpcsOutput{
+				Vpcs: []types.Vpc{{VpcId: ptr("vpc-2")}},
+			}, nil
+		},
+	}
+	client := getMockedEC2Service(mock)
+	got := client.GetAllVPCs()
+	expected := []common.Resource{
+		{TerraformID: "vpc-1", ResourceType: common.VPC, Region: "eu-west-1"},
+		{TerraformID: "vpc-2", ResourceType: common.VPC, Region: "eu-west-1"},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("mismatch (-got +want):\n%s", diff)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls to DescribeVpcs, got %d", callCount)
+	}
+}
+
+func TestGetAllInternetGateways_PaginationFollowed(t *testing.T) {
+	callCount := 0
+	mock := &mockEC2Client{
+		describeInternetGatewaysFn: func(_ context.Context, params *ec2.DescribeInternetGatewaysInput, _ ...func(*ec2.Options)) (*ec2.DescribeInternetGatewaysOutput, error) {
+			callCount++
+			if callCount == 1 {
+				return &ec2.DescribeInternetGatewaysOutput{
+					NextToken:        ptr("next"),
+					InternetGateways: []types.InternetGateway{{InternetGatewayId: ptr("igw-1")}},
+				}, nil
+			}
+			if params.NextToken == nil || *params.NextToken != "next" {
+				return nil, fmt.Errorf("wrong NextToken: expected 'next', got %v", params.NextToken)
+			}
+			return &ec2.DescribeInternetGatewaysOutput{
+				InternetGateways: []types.InternetGateway{{InternetGatewayId: ptr("igw-2")}},
+			}, nil
+		},
+	}
+	client := getMockedEC2Service(mock)
+	got := client.GetAllInternetGateways()
+	expected := []common.Resource{
+		{TerraformID: "igw-1", ResourceType: common.Internet_gateway, Region: "eu-west-1"},
+		{TerraformID: "igw-2", ResourceType: common.Internet_gateway, Region: "eu-west-1"},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("mismatch (-got +want):\n%s", diff)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls to DescribeInternetGateways, got %d", callCount)
+	}
+}
+
+func TestGetAllNATGateways_PaginationFollowed(t *testing.T) {
+	callCount := 0
+	mock := &mockEC2Client{
+		describeNatGatewaysFn: func(_ context.Context, params *ec2.DescribeNatGatewaysInput, _ ...func(*ec2.Options)) (*ec2.DescribeNatGatewaysOutput, error) {
+			callCount++
+			if callCount == 1 {
+				return &ec2.DescribeNatGatewaysOutput{
+					NextToken:   ptr("next"),
+					NatGateways: []types.NatGateway{{NatGatewayId: ptr("nat-1")}},
+				}, nil
+			}
+			if params.NextToken == nil || *params.NextToken != "next" {
+				return nil, fmt.Errorf("wrong NextToken: expected 'next', got %v", params.NextToken)
+			}
+			return &ec2.DescribeNatGatewaysOutput{
+				NatGateways: []types.NatGateway{{NatGatewayId: ptr("nat-2")}},
+			}, nil
+		},
+	}
+	client := getMockedEC2Service(mock)
+	got := client.GetAllNATGateways()
+	expected := []common.Resource{
+		{TerraformID: "nat-1", ResourceType: common.NAT_gateway, Region: "eu-west-1"},
+		{TerraformID: "nat-2", ResourceType: common.NAT_gateway, Region: "eu-west-1"},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("mismatch (-got +want):\n%s", diff)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls to DescribeNatGateways, got %d", callCount)
+	}
+}
+
+func TestGetAllSubnets_PaginationFollowed(t *testing.T) {
+	callCount := 0
+	mock := &mockEC2Client{
+		describeSubnetsFn: func(_ context.Context, params *ec2.DescribeSubnetsInput, _ ...func(*ec2.Options)) (*ec2.DescribeSubnetsOutput, error) {
+			callCount++
+			if callCount == 1 {
+				return &ec2.DescribeSubnetsOutput{
+					NextToken: ptr("next"),
+					Subnets:   []types.Subnet{{SubnetId: ptr("subnet-1")}},
+				}, nil
+			}
+			if params.NextToken == nil || *params.NextToken != "next" {
+				return nil, fmt.Errorf("wrong NextToken: expected 'next', got %v", params.NextToken)
+			}
+			return &ec2.DescribeSubnetsOutput{
+				Subnets: []types.Subnet{{SubnetId: ptr("subnet-2")}},
+			}, nil
+		},
+	}
+	client := getMockedEC2Service(mock)
+	got := client.GetAllSubnets()
+	expected := []common.Resource{
+		{TerraformID: "subnet-1", ResourceType: common.Subnet, Region: "eu-west-1"},
+		{TerraformID: "subnet-2", ResourceType: common.Subnet, Region: "eu-west-1"},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("mismatch (-got +want):\n%s", diff)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls to DescribeSubnets, got %d", callCount)
+	}
+}
+
+func TestGetAllVPCEndpoints_PaginationFollowed(t *testing.T) {
+	callCount := 0
+	mock := &mockEC2Client{
+		describeVpcEndpointsFn: func(_ context.Context, params *ec2.DescribeVpcEndpointsInput, _ ...func(*ec2.Options)) (*ec2.DescribeVpcEndpointsOutput, error) {
+			callCount++
+			if callCount == 1 {
+				return &ec2.DescribeVpcEndpointsOutput{
+					NextToken:    ptr("next"),
+					VpcEndpoints: []types.VpcEndpoint{{VpcEndpointId: ptr("vpce-1")}},
+				}, nil
+			}
+			if params.NextToken == nil || *params.NextToken != "next" {
+				return nil, fmt.Errorf("wrong NextToken: expected 'next', got %v", params.NextToken)
+			}
+			return &ec2.DescribeVpcEndpointsOutput{
+				VpcEndpoints: []types.VpcEndpoint{{VpcEndpointId: ptr("vpce-2")}},
+			}, nil
+		},
+	}
+	client := getMockedEC2Service(mock)
+	got := client.GetAllVPCEndpoints()
+	expected := []common.Resource{
+		{TerraformID: "vpce-1", ResourceType: common.VPC_endpoint, Region: "eu-west-1"},
+		{TerraformID: "vpce-2", ResourceType: common.VPC_endpoint, Region: "eu-west-1"},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("mismatch (-got +want):\n%s", diff)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls to DescribeVpcEndpoints, got %d", callCount)
+	}
+}

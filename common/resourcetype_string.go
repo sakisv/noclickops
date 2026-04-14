@@ -31,11 +31,16 @@ func _() {
 	_ = x[CloudFront_distribution-20]
 	_ = x[ELB_load_balancer-21]
 	_ = x[ELBV2_load_balancer-22]
+	_ = x[VPC-23]
+	_ = x[Internet_gateway-24]
+	_ = x[NAT_gateway-25]
+	_ = x[Subnet-26]
+	_ = x[VPC_endpoint-27]
 }
 
-const _ResourceType_name = "Route53_zoneRoute53_recordIAM_policyIAM_userIAM_groupSSM_parameterSecurity_groupSecurity_group_ruleEKS_clusterEKS_node_groupSSOAdmin_permission_setIdentitystore_userIdentitystore_groupInstanceEipDB_instanceRDS_clusterSNS_topicSNS_subscriptionS3_bucketCloudFront_distributionELB_load_balancerELBV2_load_balancer"
+const _ResourceType_name = "Route53_zoneRoute53_recordIAM_policyIAM_userIAM_groupSSM_parameterSecurity_groupSecurity_group_ruleEKS_clusterEKS_node_groupSSOAdmin_permission_setIdentitystore_userIdentitystore_groupInstanceEipDB_instanceRDS_clusterSNS_topicSNS_subscriptionS3_bucketCloudFront_distributionELB_load_balancerELBV2_load_balancerVPCInternet_gatewayNAT_gatewaySubnetVPC_endpoint"
 
-var _ResourceType_index = [...]uint16{0, 12, 26, 36, 44, 53, 66, 80, 99, 110, 124, 147, 165, 184, 192, 195, 206, 217, 226, 242, 251, 274, 291, 310}
+var _ResourceType_index = [...]uint16{0, 12, 26, 36, 44, 53, 66, 80, 99, 110, 124, 147, 165, 184, 192, 195, 206, 217, 226, 242, 251, 274, 291, 310, 313, 329, 340, 346, 358}
 
 func (i ResourceType) String() string {
 	idx := int(i) - 0

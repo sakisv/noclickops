@@ -29,6 +29,11 @@ const (
 	CloudFront_distribution
 	ELB_load_balancer
 	ELBV2_load_balancer
+	VPC
+	Internet_gateway
+	NAT_gateway
+	Subnet
+	VPC_endpoint
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
