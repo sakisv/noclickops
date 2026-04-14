@@ -109,3 +109,48 @@ func TestGetAllSecurityGroupRules_PaginationFollowed(t *testing.T) {
 		t.Errorf("expected 2 calls to DescribeSecurityGroupRules, got %d", callCount)
 	}
 }
+
+func TestGetAllInstances_PaginationFollowed(t *testing.T) {
+	callCount := 0
+	mock := &mockEC2Client{
+		describeInstancesFn: func(_ context.Context, params *ec2.DescribeInstancesInput, _ ...func(*ec2.Options)) (*ec2.DescribeInstancesOutput, error) {
+			callCount++
+			if callCount == 1 {
+				return &ec2.DescribeInstancesOutput{
+					NextToken: ptr("next"),
+					Reservations: []types.Reservation{
+						{
+							Instances: []types.Instance{
+								{InstanceId: ptr("i-123456")},
+							},
+						},
+					},
+				}, nil
+			}
+			if params.NextToken == nil || *params.NextToken != "next" {
+				return nil, fmt.Errorf("wrong NextToken, expected 'next' got '%v'", params.NextToken)
+			}
+			return &ec2.DescribeInstancesOutput{
+				Reservations: []types.Reservation{
+					{
+						Instances: []types.Instance{
+							{InstanceId: ptr("i-23456789")},
+						},
+					},
+				},
+			}, nil
+		},
+	}
+	client := getMockedEC2Service(mock)
+	got := client.GetAllEC2Instances()
+	expected := []common.Resource{
+		{TerraformID: "i-123456", ResourceType: common.Instance, Region: "eu-west-1"},
+		{TerraformID: "i-23456789", ResourceType: common.Instance, Region: "eu-west-1"},
+	}
+	if diff := cmp.Diff(got, expected); diff != "" {
+		t.Errorf("expected %v, got %v", expected, got)
+	}
+	if callCount != 2 {
+		t.Errorf("expected 2 calls to DescribeInstances, got %d", callCount)
+	}
+}

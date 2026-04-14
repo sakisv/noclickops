@@ -18,6 +18,7 @@ const (
 	SSOAdmin_permission_set
 	Identitystore_user
 	Identitystore_group
+	Instance
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {

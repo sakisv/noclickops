@@ -14,6 +14,7 @@ import (
 type EC2Client interface {
 	DescribeSecurityGroups(ctx context.Context, params *awsec2.DescribeSecurityGroupsInput, optFns ...func(*awsec2.Options)) (*awsec2.DescribeSecurityGroupsOutput, error)
 	DescribeSecurityGroupRules(ctx context.Context, params *awsec2.DescribeSecurityGroupRulesInput, optFns ...func(*awsec2.Options)) (*awsec2.DescribeSecurityGroupRulesOutput, error)
+	DescribeInstances(ctx context.Context, params *awsec2.DescribeInstancesInput, optFns ...func(*awsec2.Options)) (*awsec2.DescribeInstancesOutput, error)
 }
 
 type NoclickopsEC2Client struct {
@@ -41,6 +42,7 @@ func (s *NoclickopsEC2Service) GetAllResources() []common.Resource {
 	var resources []common.Resource
 	resources = append(resources, s.GetAllSecurityGroups()...)
 	resources = append(resources, s.GetAllSecurityGroupRules()...)
+	resources = append(resources, s.GetAllEC2Instances()...)
 	return resources
 }
 
@@ -101,6 +103,33 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroupRules() []common.Resource {
 				}
 				id := strings.Join(id_pieces[:], "_")
 				resources = append(resources, common.Resource{TerraformID: id, ResourceType: common.Security_group_rule, Region: rc.Region})
+			}
+
+			if res.NextToken == nil {
+				break
+			}
+			nextToken = res.NextToken
+		}
+	}
+	return resources
+}
+
+func (s *NoclickopsEC2Service) GetAllEC2Instances() []common.Resource {
+	var resources []common.Resource
+	for _, rc := range s.Clients {
+		var nextToken *string = nil
+		for {
+			res, err := rc.Client.DescribeInstances(context.TODO(), &awsec2.DescribeInstancesInput{
+				NextToken: nextToken,
+			})
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			for _, reservation := range res.Reservations {
+				for _, instance := range reservation.Instances {
+					resources = append(resources, common.Resource{TerraformID: *instance.InstanceId, ResourceType: common.Instance, Region: rc.Region})
+				}
 			}
 
 			if res.NextToken == nil {
