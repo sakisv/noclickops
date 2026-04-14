@@ -20,6 +20,8 @@ const (
 	Identitystore_group
 	Instance
 	Eip
+	DB_instance
+	RDS_cluster
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -34,6 +36,7 @@ const (
 	EKS
 	SSM
 	EC2
+	RDS
 	SSOAdmin
 	IdentityStore
 )

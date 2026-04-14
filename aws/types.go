@@ -18,6 +18,7 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.SSM:           {Global: false, ServiceName: "ssm"},
 	common.SSOAdmin:      {Global: false, ServiceName: "ssoadmin"},
 	common.EC2:           {Global: false, ServiceName: "ec2"},
+	common.RDS:           {Global: false, ServiceName: "rds"},
 }
 
 func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config) common.NoclickopsService {
@@ -25,7 +26,11 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		panic("Cannot create clients without config")
 	}
 
-	meta := SERVICES[service]
+	meta, found := SERVICES[service]
+	if !found {
+		panic("unknown service")
+	}
+
 	if meta.Global {
 		configs = configs[:1]
 	}
@@ -48,6 +53,9 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		return &c
 	case common.EC2:
 		c := NewEC2ServiceFromConfigs(configs, meta)
+		return &c
+	case common.RDS:
+		c := NewRDSServiceFromConfigs(configs, meta)
 		return &c
 	case common.IdentityStore:
 		ssoMeta := SERVICES[common.SSOAdmin]
