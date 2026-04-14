@@ -2,9 +2,9 @@ package main
 
 import "github.com/noclickops/common"
 
-func filter(managedIds map[string]struct{}, foundRecords map[string][]common.Resource) map[string]common.FilteredResults {
+func filter(managedIds map[string]struct{}, foundResources map[string][]common.Resource) map[string]common.FilteredResults {
 	unmanagedResources := make(map[string]common.FilteredResults)
-	for key, value := range foundRecords {
+	for key, value := range foundResources {
 		if len(value) == 0 {
 			continue
 		}
