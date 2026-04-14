@@ -54,6 +54,9 @@ func main() {
 	rdsclient := claws.NewNoclickopsServiceFromConfigs(common.RDS, configs)
 	foundResources[rdsclient.GetServiceName()] = rdsclient.GetAllResources()
 
+	snsclient := claws.NewNoclickopsServiceFromConfigs(common.SNS, configs)
+	foundResources[snsclient.GetServiceName()] = snsclient.GetAllResources()
+
 	unmanagedResourceIds := filter(managedIDs, foundResources)
 	json, _ := json.Marshal(unmanagedResourceIds)
 	fmt.Println(string(json))

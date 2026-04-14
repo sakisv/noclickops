@@ -23,6 +23,8 @@ const (
 	Eip
 	DB_instance
 	RDS_cluster
+	SNS_topic
+	SNS_subscription
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -40,6 +42,7 @@ const (
 	RDS
 	SSOAdmin
 	IdentityStore
+	SNS
 )
 
 type Resource struct {

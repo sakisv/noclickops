@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/rds"
 	"github.com/aws/aws-sdk-go-v2/service/route53"
+	"github.com/aws/aws-sdk-go-v2/service/sns"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
 )
 
@@ -84,6 +85,19 @@ func (m *mockEKSClient) ListClusters(ctx context.Context, params *eks.ListCluste
 
 func (m *mockEKSClient) ListNodegroups(ctx context.Context, params *eks.ListNodegroupsInput, optFns ...func(*eks.Options)) (*eks.ListNodegroupsOutput, error) {
 	return m.listNodegroupsFn(ctx, params, optFns...)
+}
+
+type mockSNSClient struct {
+	listTopicsFn        func(ctx context.Context, params *sns.ListTopicsInput, optFns ...func(*sns.Options)) (*sns.ListTopicsOutput, error)
+	listSubscriptionsFn func(ctx context.Context, params *sns.ListSubscriptionsInput, optFns ...func(*sns.Options)) (*sns.ListSubscriptionsOutput, error)
+}
+
+func (m *mockSNSClient) ListTopics(ctx context.Context, params *sns.ListTopicsInput, optFns ...func(*sns.Options)) (*sns.ListTopicsOutput, error) {
+	return m.listTopicsFn(ctx, params, optFns...)
+}
+
+func (m *mockSNSClient) ListSubscriptions(ctx context.Context, params *sns.ListSubscriptionsInput, optFns ...func(*sns.Options)) (*sns.ListSubscriptionsOutput, error) {
+	return m.listSubscriptionsFn(ctx, params, optFns...)
 }
 
 type mockRDSClient struct {
