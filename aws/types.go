@@ -18,6 +18,7 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.SSM:           {Global: false, ServiceName: "ssm"},
 	common.SSOAdmin:      {Global: false, ServiceName: "ssoadmin"},
 	common.EC2:           {Global: false, ServiceName: "ec2"},
+	common.RDS:           {Global: false, ServiceName: "rds"},
 }
 
 func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config) common.NoclickopsService {
