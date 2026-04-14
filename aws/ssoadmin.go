@@ -102,7 +102,7 @@ func (s *NoclickopsSSOAdminService) GetAllPermissionSets() []common.Resource {
 		}
 		for _, el := range res.PermissionSets {
 			tf_id := fmt.Sprintf("%v,%v", el, instance_arn)
-			resources = append(resources, common.Resource{TerraformID: tf_id, ResourceType: common.SSOAdmin_permissionset})
+			resources = append(resources, common.Resource{TerraformID: tf_id, ResourceType: common.SSOAdmin_permission_set})
 		}
 
 		if res.NextToken == nil {

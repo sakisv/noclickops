@@ -12,14 +12,12 @@ const (
 	IAM_user
 	IAM_group
 	SSM_parameter
-	EC2_securitygroup
-	EC2_securitygrouprule
+	Security_group
+	Security_group_rule
 	EKS_cluster
-	SSOAdmin_identitystoreinstance
-	SSOAdmin_permissionset
-	SSOAdmin_accountassignments
-	IdentityStore_user
-	IdentityStore_group
+	SSOAdmin_permission_set
+	Identitystore_user
+	Identitystore_group
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -33,7 +31,7 @@ const (
 	IAM
 	EKS
 	SSM
-	SecurityGroups
+	EC2
 	SSOAdmin
 	IdentityStore
 )

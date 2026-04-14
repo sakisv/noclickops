@@ -57,7 +57,7 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroups() []common.Resource {
 			}
 
 			for _, el := range res.SecurityGroups {
-				resources = append(resources, common.Resource{TerraformID: *el.GroupId, ResourceType: common.EC2_securitygroup, Region: rc.Region})
+				resources = append(resources, common.Resource{TerraformID: *el.GroupId, ResourceType: common.Security_group, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {
@@ -100,7 +100,7 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroupRules() []common.Resource {
 					id_pieces = append(id_pieces, *el.CidrIpv6)
 				}
 				id := strings.Join(id_pieces[:], "_")
-				resources = append(resources, common.Resource{TerraformID: id, ResourceType: common.EC2_securitygrouprule, Region: rc.Region})
+				resources = append(resources, common.Resource{TerraformID: id, ResourceType: common.Security_group_rule, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {

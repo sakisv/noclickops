@@ -14,19 +14,17 @@ func _() {
 	_ = x[IAM_user-3]
 	_ = x[IAM_group-4]
 	_ = x[SSM_parameter-5]
-	_ = x[EC2_securitygroup-6]
-	_ = x[EC2_securitygrouprule-7]
+	_ = x[Security_group-6]
+	_ = x[Security_group_rule-7]
 	_ = x[EKS_cluster-8]
-	_ = x[SSOAdmin_identitystoreinstance-9]
-	_ = x[SSOAdmin_permissionset-10]
-	_ = x[SSOAdmin_accountassignments-11]
-	_ = x[IdentityStore_user-12]
-	_ = x[IdentityStore_group-13]
+	_ = x[SSOAdmin_permission_set-9]
+	_ = x[Identitystore_user-10]
+	_ = x[Identitystore_group-11]
 }
 
-const _ResourceType_name = "Route53_zoneRoute53_recordIAM_policyIAM_userIAM_groupSSM_parameterEC2_securitygroupEC2_securitygroupruleEKS_clusterSSOAdmin_identitystoreinstanceSSOAdmin_permissionsetSSOAdmin_accountassignmentsIdentityStore_userIdentityStore_group"
+const _ResourceType_name = "Route53_zoneRoute53_recordIAM_policyIAM_userIAM_groupSSM_parameterSecurity_groupSecurity_group_ruleEKS_clusterSSOAdmin_permission_setIdentitystore_userIdentitystore_group"
 
-var _ResourceType_index = [...]uint8{0, 12, 26, 36, 44, 53, 66, 83, 104, 115, 145, 167, 194, 212, 231}
+var _ResourceType_index = [...]uint8{0, 12, 26, 36, 44, 53, 66, 80, 99, 110, 133, 151, 170}
 
 func (i ResourceType) String() string {
 	idx := int(i) - 0
