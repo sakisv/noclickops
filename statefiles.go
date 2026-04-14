@@ -27,7 +27,6 @@ func createRemoteStatefilesDir() string {
 
 func delete_statefiles_dir() error {
 	target_dir := getFullPathToHomeTarget(STATEFILES_DIR)
-	//println("[DEBUG] Deleting " + target_dir)
 	return os.RemoveAll(target_dir)
 }
 
@@ -56,8 +55,6 @@ func download_statefiles_from_s3(bucket string, forceDownload bool, cfg aws.Conf
 			continue
 		}
 
-		//println("[DEBUG] Downloading " + *object.Key + " into " + full_path)
-
 		getObjectResp, err := client.GetObject(context.TODO(), &s3.GetObjectInput{
 			Bucket: aws.String(bucket),
 			Key:    object.Key,
@@ -74,6 +71,9 @@ func download_statefiles_from_s3(bucket string, forceDownload bool, cfg aws.Conf
 		defer file.Close()
 
 		body, err := io.ReadAll(getObjectResp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		_, err = file.Write(body)
 		if err != nil {

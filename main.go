@@ -30,29 +30,11 @@ func main() {
 		defer delete_statefiles_dir()
 	}
 
-	iamclient := claws.NewNoclickopsServiceFromConfigs(common.IAM, configs)
 	foundResources := make(map[string][]common.Resource)
-	foundResources[iamclient.GetServiceName()] = iamclient.GetAllResources()
-
-	ssmclient := claws.NewNoclickopsServiceFromConfigs(common.SSM, configs)
-	foundResources[ssmclient.GetServiceName()] = ssmclient.GetAllResources()
-
-	route53client := claws.NewNoclickopsServiceFromConfigs(common.Route53, configs)
-	foundResources[route53client.GetServiceName()] = route53client.GetAllResources()
-
-	ec2client := claws.NewNoclickopsServiceFromConfigs(common.EC2, configs)
-	foundResources[ec2client.GetServiceName()] = ec2client.GetAllResources()
-
-	ssoadminclient := claws.NewNoclickopsServiceFromConfigs(common.SSOAdmin, configs)
-	identitystoreclient := claws.NewNoclickopsServiceFromConfigs(common.IdentityStore, configs)
-	foundResources[identitystoreclient.GetServiceName()] = identitystoreclient.GetAllResources()
-	foundResources[ssoadminclient.GetServiceName()] = ssoadminclient.GetAllResources()
-
-	eksclient := claws.NewNoclickopsServiceFromConfigs(common.EKS, configs)
-	foundResources[eksclient.GetServiceName()] = eksclient.GetAllResources()
-
-	rdsclient := claws.NewNoclickopsServiceFromConfigs(common.RDS, configs)
-	foundResources[rdsclient.GetServiceName()] = rdsclient.GetAllResources()
+	for service := range claws.SERVICES {
+		client := claws.NewNoclickopsServiceFromConfigs(service, configs)
+		foundResources[client.GetServiceName()] = client.GetAllResources()
+	}
 
 	unmanagedResourceIds := filter(managedIDs, foundResources)
 	json, _ := json.Marshal(unmanagedResourceIds)
