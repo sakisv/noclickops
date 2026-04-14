@@ -19,6 +19,11 @@ func filter(managedIds map[string]struct{}, foundResources map[string][]common.R
 				entry.Meta.Unmanaged += 1
 			}
 		}
+		if entry.Meta.Unmanaged == 0 {
+			entry.Meta.PctUnmanaged = 0
+		} else {
+			entry.Meta.PctUnmanaged = (float32(entry.Meta.Unmanaged) / float32(entry.Meta.Found)) * 100
+		}
 		unmanagedResources[key] = entry
 	}
 	return unmanagedResources
