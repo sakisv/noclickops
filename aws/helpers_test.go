@@ -3,6 +3,7 @@ package aws_test
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
@@ -159,6 +160,14 @@ func (m *mockSNSClient) ListTopics(ctx context.Context, params *sns.ListTopicsIn
 
 func (m *mockSNSClient) ListSubscriptions(ctx context.Context, params *sns.ListSubscriptionsInput, optFns ...func(*sns.Options)) (*sns.ListSubscriptionsOutput, error) {
 	return m.listSubscriptionsFn(ctx, params, optFns...)
+}
+
+type mockAutoscalingClient struct {
+	describeAutoScalingGroupsFn func(ctx context.Context, params *autoscaling.DescribeAutoScalingGroupsInput, optFns ...func(*autoscaling.Options)) (*autoscaling.DescribeAutoScalingGroupsOutput, error)
+}
+
+func (m *mockAutoscalingClient) DescribeAutoScalingGroups(ctx context.Context, params *autoscaling.DescribeAutoScalingGroupsInput, optFns ...func(*autoscaling.Options)) (*autoscaling.DescribeAutoScalingGroupsOutput, error) {
+	return m.describeAutoScalingGroupsFn(ctx, params, optFns...)
 }
 
 type mockRDSClient struct {

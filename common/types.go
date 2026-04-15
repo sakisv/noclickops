@@ -34,6 +34,7 @@ const (
 	NAT_gateway
 	Subnet
 	VPC_endpoint
+	Autoscaling_group
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -56,6 +57,7 @@ const (
 	CloudFront
 	ELB
 	ELBV2
+	ASG
 )
 
 type Resource struct {
