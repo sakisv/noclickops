@@ -24,6 +24,7 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.S3:            {Global: false, ServiceName: "s3"},
 	common.ELB:           {Global: false, ServiceName: "elb"},
 	common.ELBV2:         {Global: false, ServiceName: "elbv2"},
+	common.ASG:           {Global: false, ServiceName: "autoscaling"},
 }
 
 func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config) common.NoclickopsService {
@@ -76,6 +77,9 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		return &c
 	case common.ELBV2:
 		c := NewELBV2ServiceFromConfigs(configs, meta)
+		return &c
+	case common.ASG:
+		c := NewAutoscalingServiceFromConfigs(configs, meta)
 		return &c
 	case common.IdentityStore:
 		ssoMeta := SERVICES[common.SSOAdmin]
