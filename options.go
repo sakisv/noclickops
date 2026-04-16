@@ -15,7 +15,9 @@ type options struct {
 	regions                    string
 	s3Bucket                   string
 	s3BucketRegion             string
+	ignoreTags                 string
 	regionsList                []string
+	ignoreTagsMap              map[string]string
 }
 
 func (opts *options) validate() error {
@@ -49,11 +51,34 @@ func (opts *options) validate() error {
 		opts.regionsList = append(opts.regionsList, r)
 	}
 
+	if opts.ignoreTags != "" {
+		opts.ignoreTagsMap = parseTags(opts.ignoreTags)
+	}
+
 	if len(errs) > 0 {
 		errs = append(errs, "Use -h / --help")
 		return errors.New(strings.Join(errs, "\n"))
 	}
 	return nil
+}
+
+func parseTags(tags string) map[string]string {
+	parsedTags := make(map[string]string)
+
+	for tag := range strings.SplitSeq(tags, ",") {
+		if !strings.Contains(tag, "=") {
+			continue
+		}
+
+		pair := strings.Split(tag, "=")
+		if len(pair) != 2 {
+			continue
+		}
+
+		parsedTags[pair[0]] = pair[1]
+	}
+
+	return parsedTags
 }
 
 func isValidRegion(region string) bool {
@@ -68,6 +93,7 @@ func parseFlags() options {
 	flag.StringVar(&opts.s3Bucket, "s3-bucket", "", "Download statefile(s) from this s3 bucket")
 	flag.StringVar(&opts.s3BucketRegion, "s3-bucket-region", "", "The bucket's region")
 	flag.StringVar(&opts.regions, "regions", "", "Comma-separated list of regions to check")
+	flag.StringVar(&opts.ignoreTags, "ignore-tags", "", "Comma-separated list of 'key=value' pairs of tags to ignore (e.g. mytag=myvalue,another/tag=another-value)")
 	flag.BoolVar(&opts.removeDownloadedStatefiles, "remove-downloaded-statefiles", false, "If specified, any downloaded statefiles will be deleted at the end")
 	flag.BoolVar(&opts.forceDownload, "force-download", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
 	flag.Parse()
