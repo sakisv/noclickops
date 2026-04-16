@@ -17,7 +17,7 @@ type options struct {
 	s3BucketRegion             string
 	ignoreTags                 string
 	regionsList                []string
-	ignoreTagsMap              map[string]string
+	ignoreTagsMap              map[string][]string
 }
 
 func (opts *options) validate() error {
@@ -40,8 +40,7 @@ func (opts *options) validate() error {
 		errs = append(errs, "'force-download' must be used alongside an 's3-bucket'")
 	}
 
-	regions := strings.Split(opts.regions, ",")
-	for _, region := range regions {
+	for region := range strings.SplitSeq(opts.regions, ",") {
 		r := strings.ToLower(strings.TrimSpace(region))
 		if !isValidRegion(r) {
 			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", r))
@@ -62,8 +61,8 @@ func (opts *options) validate() error {
 	return nil
 }
 
-func parseTags(tags string) map[string]string {
-	parsedTags := make(map[string]string)
+func parseTags(tags string) map[string][]string {
+	parsedTags := make(map[string][]string)
 
 	for tag := range strings.SplitSeq(tags, ",") {
 		if !strings.Contains(tag, "=") {
@@ -75,7 +74,12 @@ func parseTags(tags string) map[string]string {
 			continue
 		}
 
-		parsedTags[pair[0]] = pair[1]
+		valuesList, found := parsedTags[pair[0]]
+		if !found {
+			parsedTags[pair[0]] = make([]string, 0)
+		}
+		valuesList = append(valuesList, pair[1])
+		parsedTags[pair[0]] = valuesList
 	}
 
 	return parsedTags
