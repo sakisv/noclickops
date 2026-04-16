@@ -58,6 +58,7 @@ const (
 	ELB
 	ELBV2
 	ASG
+	ResourceGroupsTaggingAPI
 )
 
 type Resource struct {

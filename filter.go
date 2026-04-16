@@ -1,8 +1,15 @@
 package main
 
-import "github.com/noclickops/common"
+import (
+	"strconv"
+	"strings"
 
-func filter(managedIds map[string]struct{}, foundResources map[string][]common.Resource) map[string]common.FilteredResults {
+	"github.com/aws/aws-sdk-go-v2/aws"
+	claws "github.com/noclickops/aws"
+	"github.com/noclickops/common"
+)
+
+func filter(managedIds map[string]struct{}, foundResources map[string][]common.Resource, ignoredArns []string) map[string]common.FilteredResults {
 	unmanagedResources := make(map[string]common.FilteredResults)
 	for key, value := range foundResources {
 		if len(value) == 0 {
@@ -27,4 +34,19 @@ func filter(managedIds map[string]struct{}, foundResources map[string][]common.R
 		unmanagedResources[key] = entry
 	}
 	return unmanagedResources
+}
+
+func getIgnoredTagResources(ignoredTags map[string][]string, serviceConfigs []aws.Config) []string {
+	var arns []string
+
+	c := claws.NewResourceGroupTaggingAPIServiceFromConfigs(serviceConfigs, claws.SERVICES[common.ResourceGroupsTaggingAPI])
+	for k, v := range ignoredTags {
+		println("Searching for resources tagged with " + k + " with values " + strings.Join(v, ","))
+		resources := c.GetResourcesWithTags(k, v)
+		println("Found " + strconv.Itoa(len(resources)) + " resources")
+		for _, r := range resources {
+			arns = append(arns, r.TerraformID)
+		}
+	}
+	return arns
 }

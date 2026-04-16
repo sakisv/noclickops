@@ -37,7 +37,11 @@ func main() {
 		foundResources[client.GetServiceName()] = client.GetAllResources()
 	}
 
-	unmanagedResourceIds := filter(managedIDs, foundResources)
+	var ignoredArns []string
+	if len(opts.ignoreTagsMap) > 0 {
+		ignoredArns = getIgnoredTagResources(opts.ignoreTagsMap, configs)
+	}
+	unmanagedResourceIds := filter(managedIDs, foundResources, ignoredArns)
 	json, _ := json.Marshal(unmanagedResourceIds)
 	fmt.Println(string(json))
 }
