@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/account"
 )
 
 var VALID_REGIONS = map[string]string{
@@ -68,7 +69,7 @@ func getFullPathToHomeTarget(to string) string {
 	return path.Join(homedir, to)
 }
 
-func generateStatefileBucketConfig(region string) aws.Config {
+func getConfigForRegion(region string) aws.Config {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
@@ -90,4 +91,16 @@ func generatePerRegionConfigs(regions []string) []aws.Config {
 	}
 
 	return configs
+}
+
+func getAccountId() string {
+	cfg := getConfigForRegion("us-east-1")
+	acc := account.NewFromConfig(cfg)
+	res, err := acc.GetAccountInformation(context.TODO(), &account.GetAccountInformationInput{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return *res.AccountId
 }

@@ -32,12 +32,13 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.ResourceGroupsTaggingAPI: {Global: false, ServiceName: "resourcegroupstaggingapi"},
 }
 
-func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config) common.NoclickopsService {
+func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config, accountId string) common.NoclickopsService {
 	if len(configs) == 0 {
 		panic("Cannot create clients without config")
 	}
 
 	meta, found := SERVICES[service]
+	meta.AccountId = accountId
 	if !found {
 		panic("unknown service")
 	}

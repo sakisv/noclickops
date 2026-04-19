@@ -16,7 +16,7 @@ func main() {
 	var downloaded_files []string
 	if opts.s3Bucket != "" {
 		println("Downloading statefiles from s3")
-		s3_cfg := generateStatefileBucketConfig(opts.s3BucketRegion)
+		s3_cfg := getConfigForRegion(opts.s3BucketRegion)
 		downloaded_files = download_statefiles_from_s3(opts.s3Bucket, opts.forceDownload, s3_cfg)
 
 	}
@@ -30,12 +30,13 @@ func main() {
 		defer delete_statefiles_dir()
 	}
 
+	accountId := getAccountId()
 	foundResources := make(map[string][]common.Resource)
 	for service := range claws.SERVICES {
 		if service == common.ResourceGroupsTaggingAPI {
 			continue
 		}
-		client := claws.NewNoclickopsServiceFromConfigs(service, configs)
+		client := claws.NewNoclickopsServiceFromConfigs(service, configs, accountId)
 		println("Fetching resources for " + client.GetServiceName())
 		foundResources[client.GetServiceName()] = client.GetAllResources()
 	}

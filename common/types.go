@@ -83,6 +83,7 @@ type FilteredResults struct {
 type ServiceMeta struct {
 	Global      bool
 	ServiceName string
+	AccountId   string
 }
 
 func (m ServiceMeta) GetServiceName() string { return m.ServiceName }
