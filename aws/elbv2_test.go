@@ -38,8 +38,8 @@ func TestGetAllLoadBalancers_BasicCase(t *testing.T) {
 	svc := getMockedELBV2Service(mock)
 	got := svc.GetAllLoadBalancers()
 	expected := []common.Resource{
-		{TerraformID: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/my-alb/abc123", ResourceType: common.ELBV2_load_balancer, Region: "eu-west-1"},
-		{TerraformID: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/net/my-nlb/def456", ResourceType: common.ELBV2_load_balancer, Region: "eu-west-1"},
+		{Arn: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/my-alb/abc123", TerraformID: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/my-alb/abc123", ResourceType: common.ELBV2_load_balancer, Region: "eu-west-1"},
+		{Arn: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/net/my-nlb/def456", TerraformID: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/net/my-nlb/def456", ResourceType: common.ELBV2_load_balancer, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -85,8 +85,8 @@ func TestGetAllLoadBalancers_PaginationFollowed(t *testing.T) {
 	svc := getMockedELBV2Service(mock)
 	got := svc.GetAllLoadBalancers()
 	expected := []common.Resource{
-		{TerraformID: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/my-alb/abc123", ResourceType: common.ELBV2_load_balancer, Region: "eu-west-1"},
-		{TerraformID: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/net/my-nlb/def456", ResourceType: common.ELBV2_load_balancer, Region: "eu-west-1"},
+		{Arn: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/my-alb/abc123", TerraformID: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/app/my-alb/abc123", ResourceType: common.ELBV2_load_balancer, Region: "eu-west-1"},
+		{Arn: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/net/my-nlb/def456", TerraformID: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/net/my-nlb/def456", ResourceType: common.ELBV2_load_balancer, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)

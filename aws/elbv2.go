@@ -51,7 +51,7 @@ func (s *NoclickopsELBV2Service) GetAllLoadBalancers() []common.Resource {
 			}
 
 			for _, el := range res.LoadBalancers {
-				resources = append(resources, common.Resource{TerraformID: *el.LoadBalancerArn, ResourceType: common.ELBV2_load_balancer, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.LoadBalancerArn, TerraformID: *el.LoadBalancerArn, ResourceType: common.ELBV2_load_balancer, Region: rc.Region})
 			}
 
 			if res.NextMarker == nil {

@@ -256,7 +256,7 @@ func (s *NoclickopsEC2Service) GetAllSubnets() []common.Resource {
 			}
 
 			for _, el := range res.Subnets {
-				resources = append(resources, common.Resource{TerraformID: *el.SubnetId, ResourceType: common.Subnet, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.SubnetArn, TerraformID: *el.SubnetId, ResourceType: common.Subnet, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {

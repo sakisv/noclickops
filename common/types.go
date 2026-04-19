@@ -62,6 +62,7 @@ const (
 )
 
 type Resource struct {
+	Arn          string       `json:"arn"`
 	TerraformID  string       `json:"terraform_id"`
 	ResourceType ResourceType `json:"resource_type"`
 	Region       string       `json:"region"`

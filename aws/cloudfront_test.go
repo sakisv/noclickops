@@ -31,8 +31,8 @@ func TestGetAllDistributions_BasicCase(t *testing.T) {
 				DistributionList: &types.DistributionList{
 					IsTruncated: ptr(false),
 					Items: []types.DistributionSummary{
-						{Id: ptr("E1EXAMPLE1")},
-						{Id: ptr("E2EXAMPLE2")},
+						{Id: ptr("E1EXAMPLE1"), ARN: ptr("arn:aws:cloudfront::123456789012:distribution/E1EXAMPLE1")},
+						{Id: ptr("E2EXAMPLE2"), ARN: ptr("arn:aws:cloudfront::123456789012:distribution/E2EXAMPLE2")},
 					},
 				},
 			}, nil
@@ -41,8 +41,8 @@ func TestGetAllDistributions_BasicCase(t *testing.T) {
 	svc := getMockedCloudFrontService(mock)
 	got := svc.GetAllDistributions()
 	expected := []common.Resource{
-		{TerraformID: "E1EXAMPLE1", ResourceType: common.CloudFront_distribution, Region: "us-east-1"},
-		{TerraformID: "E2EXAMPLE2", ResourceType: common.CloudFront_distribution, Region: "us-east-1"},
+		{Arn: "arn:aws:cloudfront::123456789012:distribution/E1EXAMPLE1", TerraformID: "E1EXAMPLE1", ResourceType: common.CloudFront_distribution, Region: "us-east-1"},
+		{Arn: "arn:aws:cloudfront::123456789012:distribution/E2EXAMPLE2", TerraformID: "E2EXAMPLE2", ResourceType: common.CloudFront_distribution, Region: "us-east-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -76,7 +76,7 @@ func TestGetAllDistributions_PaginationFollowed(t *testing.T) {
 					DistributionList: &types.DistributionList{
 						IsTruncated: ptr(true),
 						NextMarker:  ptr("next-dist"),
-						Items:       []types.DistributionSummary{{Id: ptr("E1EXAMPLE1")}},
+						Items:       []types.DistributionSummary{{Id: ptr("E1EXAMPLE1"), ARN: ptr("arn:aws:cloudfront::123456789012:distribution/E1EXAMPLE1")}},
 					},
 				}, nil
 			}
@@ -86,7 +86,7 @@ func TestGetAllDistributions_PaginationFollowed(t *testing.T) {
 			return &cloudfront.ListDistributionsOutput{
 				DistributionList: &types.DistributionList{
 					IsTruncated: ptr(false),
-					Items:       []types.DistributionSummary{{Id: ptr("E2EXAMPLE2")}},
+					Items:       []types.DistributionSummary{{Id: ptr("E2EXAMPLE2"), ARN: ptr("arn:aws:cloudfront::123456789012:distribution/E2EXAMPLE2")}},
 				},
 			}, nil
 		},
@@ -94,8 +94,8 @@ func TestGetAllDistributions_PaginationFollowed(t *testing.T) {
 	svc := getMockedCloudFrontService(mock)
 	got := svc.GetAllDistributions()
 	expected := []common.Resource{
-		{TerraformID: "E1EXAMPLE1", ResourceType: common.CloudFront_distribution, Region: "us-east-1"},
-		{TerraformID: "E2EXAMPLE2", ResourceType: common.CloudFront_distribution, Region: "us-east-1"},
+		{Arn: "arn:aws:cloudfront::123456789012:distribution/E1EXAMPLE1", TerraformID: "E1EXAMPLE1", ResourceType: common.CloudFront_distribution, Region: "us-east-1"},
+		{Arn: "arn:aws:cloudfront::123456789012:distribution/E2EXAMPLE2", TerraformID: "E2EXAMPLE2", ResourceType: common.CloudFront_distribution, Region: "us-east-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)

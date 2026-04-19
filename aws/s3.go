@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -52,7 +53,7 @@ func (s *NoclickopsS3Service) GetAllBuckets() []common.Resource {
 			}
 
 			for _, el := range res.Buckets {
-				resources = append(resources, common.Resource{TerraformID: *el.Name, ResourceType: common.S3_bucket, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: fmt.Sprintf("arn:aws:s3:::%v", *el.Name), TerraformID: *el.Name, ResourceType: common.S3_bucket, Region: rc.Region})
 			}
 
 			if res.ContinuationToken == nil {

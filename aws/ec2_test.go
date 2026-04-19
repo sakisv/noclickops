@@ -284,22 +284,22 @@ func TestGetAllSubnets_PaginationFollowed(t *testing.T) {
 			if callCount == 1 {
 				return &ec2.DescribeSubnetsOutput{
 					NextToken: ptr("next"),
-					Subnets:   []types.Subnet{{SubnetId: ptr("subnet-1")}},
+					Subnets:   []types.Subnet{{SubnetId: ptr("subnet-1"), SubnetArn: ptr("arn:aws:ec2:eu-west-1:123456789012:subnet/subnet-1")}},
 				}, nil
 			}
 			if params.NextToken == nil || *params.NextToken != "next" {
 				return nil, fmt.Errorf("wrong NextToken: expected 'next', got %v", params.NextToken)
 			}
 			return &ec2.DescribeSubnetsOutput{
-				Subnets: []types.Subnet{{SubnetId: ptr("subnet-2")}},
+				Subnets: []types.Subnet{{SubnetId: ptr("subnet-2"), SubnetArn: ptr("arn:aws:ec2:eu-west-1:123456789012:subnet/subnet-2")}},
 			}, nil
 		},
 	}
 	client := getMockedEC2Service(mock)
 	got := client.GetAllSubnets()
 	expected := []common.Resource{
-		{TerraformID: "subnet-1", ResourceType: common.Subnet, Region: "eu-west-1"},
-		{TerraformID: "subnet-2", ResourceType: common.Subnet, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:subnet/subnet-1", TerraformID: "subnet-1", ResourceType: common.Subnet, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:subnet/subnet-2", TerraformID: "subnet-2", ResourceType: common.Subnet, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)

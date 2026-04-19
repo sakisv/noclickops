@@ -54,7 +54,7 @@ func (s *NoclickopsRoute53Service) GetAllRoute53RecordIds() []common.Resource {
 		var id string
 		for _, zone := range hostedZones.HostedZones {
 			zone_id := strings.Split(*zone.Id, "/")[2]
-			resources = append(resources, common.Resource{TerraformID: zone_id, ResourceType: common.Route53_zone, Region: rc.Region})
+			resources = append(resources, common.Resource{Arn: fmt.Sprintf("arn:aws:route53:::hostedzone/%v", zone_id), TerraformID: zone_id, ResourceType: common.Route53_zone, Region: rc.Region})
 			if *zone.ResourceRecordSetCount == 0 {
 				continue
 			}

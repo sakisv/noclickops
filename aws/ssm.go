@@ -54,7 +54,7 @@ func (s *NoclickopsSSMService) GetAllParametersNames() []common.Resource {
 				log.Fatal(err)
 			}
 			for _, el := range res.Parameters {
-				resources = append(resources, common.Resource{TerraformID: *el.Name, ResourceType: common.SSM_parameter, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.ARN, TerraformID: *el.Name, ResourceType: common.SSM_parameter, Region: rc.Region})
 			}
 
 			if res.NextToken == nil || *res.NextToken == "" {
