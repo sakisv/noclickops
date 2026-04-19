@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -51,7 +52,10 @@ func (s *NoclickopsELBService) GetAllClassicLoadBalancers() []common.Resource {
 			}
 
 			for _, el := range res.LoadBalancerDescriptions {
-				resources = append(resources, common.Resource{TerraformID: *el.LoadBalancerName, ResourceType: common.ELB_load_balancer, Region: rc.Region})
+				// clb arn format:
+				//  arn:${Partition}:elasticloadbalancing:${Region}:${Account}:loadbalancer/${LoadBalancerName}
+				arn := fmt.Sprintf("arn:aws:elasticloadbalancing:%v:%v:loadbalancer/%v", rc.Region, s.AccountId, *el.LoadBalancerName)
+				resources = append(resources, common.Resource{Arn: arn, TerraformID: *el.LoadBalancerName, ResourceType: common.ELB_load_balancer, Region: rc.Region})
 			}
 
 			if res.NextMarker == nil {
