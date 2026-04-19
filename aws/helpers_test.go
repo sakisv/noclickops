@@ -105,8 +105,9 @@ func (m *mockEC2Client) DescribeVpcEndpoints(ctx context.Context, params *ec2.De
 }
 
 type mockEKSClient struct {
-	listClustersFn   func(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error)
-	listNodegroupsFn func(ctx context.Context, params *eks.ListNodegroupsInput, optFns ...func(*eks.Options)) (*eks.ListNodegroupsOutput, error)
+	listClustersFn      func(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error)
+	listNodegroupsFn    func(ctx context.Context, params *eks.ListNodegroupsInput, optFns ...func(*eks.Options)) (*eks.ListNodegroupsOutput, error)
+	describeNodegroupFn func(ctx context.Context, params *eks.DescribeNodegroupInput, optFns ...func(*eks.Options)) (*eks.DescribeNodegroupOutput, error)
 }
 
 func (m *mockEKSClient) ListClusters(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error) {
@@ -115,6 +116,10 @@ func (m *mockEKSClient) ListClusters(ctx context.Context, params *eks.ListCluste
 
 func (m *mockEKSClient) ListNodegroups(ctx context.Context, params *eks.ListNodegroupsInput, optFns ...func(*eks.Options)) (*eks.ListNodegroupsOutput, error) {
 	return m.listNodegroupsFn(ctx, params, optFns...)
+}
+
+func (m *mockEKSClient) DescribeNodegroup(ctx context.Context, params *eks.DescribeNodegroupInput, optFns ...func(*eks.Options)) (*eks.DescribeNodegroupOutput, error) {
+	return m.describeNodegroupFn(ctx, params, optFns...)
 }
 
 type mockCloudFrontClient struct {

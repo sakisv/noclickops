@@ -13,6 +13,7 @@ import (
 type EKSClient interface {
 	ListClusters(ctx context.Context, params *eks.ListClustersInput, optFns ...func(*eks.Options)) (*eks.ListClustersOutput, error)
 	ListNodegroups(ctx context.Context, params *eks.ListNodegroupsInput, optFns ...func(*eks.Options)) (*eks.ListNodegroupsOutput, error)
+	DescribeNodegroup(ctx context.Context, params *eks.DescribeNodegroupInput, optFns ...func(*eks.Options)) (*eks.DescribeNodegroupOutput, error)
 }
 
 type NoclickopsEKSClient struct {
@@ -55,7 +56,10 @@ func (s *NoclickopsEKSService) GetEKSClustersAndNodegroups() []common.Resource {
 			}
 
 			for _, el := range res.Clusters {
-				resources = append(resources, common.Resource{TerraformID: el, ResourceType: common.EKS_cluster, Region: rc.Region})
+				// eks arn format:
+				// arn:${Partition}:eks:${Region}:${Account}:cluster/${ClusterName}
+				eksArn := fmt.Sprintf("arn:aws:eks:%v:%v:cluster/%v", rc.Region, s.AccountId, el)
+				resources = append(resources, common.Resource{Arn: eksArn, TerraformID: el, ResourceType: common.EKS_cluster, Region: rc.Region})
 				var nextNodegroupToken *string = nil
 
 				for {
@@ -69,8 +73,15 @@ func (s *NoclickopsEKSService) GetEKSClustersAndNodegroups() []common.Resource {
 					}
 
 					for _, nodegroup := range res2.Nodegroups {
+						res3, err := rc.Client.DescribeNodegroup(context.TODO(), &eks.DescribeNodegroupInput{
+							ClusterName:   &el,
+							NodegroupName: &nodegroup,
+						})
+						if err != nil {
+							log.Fatal(err)
+						}
 						tfId := fmt.Sprintf("%v:%v", el, nodegroup)
-						resources = append(resources, common.Resource{TerraformID: tfId, ResourceType: common.EKS_node_group, Region: rc.Region})
+						resources = append(resources, common.Resource{Arn: *res3.Nodegroup.NodegroupArn, TerraformID: tfId, ResourceType: common.EKS_node_group, Region: rc.Region})
 					}
 
 					if res2.NextToken == nil {
