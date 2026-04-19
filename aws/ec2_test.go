@@ -20,7 +20,7 @@ func getMockedEC2Service(mock *mockEC2Client) aws.NoclickopsEC2Service {
 				ClientMeta: aws.ClientMeta{Region: "eu-west-1"},
 			},
 		},
-		ServiceMeta: common.ServiceMeta{Global: false, ServiceName: "ec2"},
+		ServiceMeta: common.ServiceMeta{Global: false, ServiceName: "ec2", AccountId: "123456789012"},
 	}
 }
 
@@ -32,22 +32,22 @@ func TestGetAllSecurityGroups_PaginationFollowed(t *testing.T) {
 			if callCount == 1 {
 				return &ec2.DescribeSecurityGroupsOutput{
 					NextToken:      ptr("next"),
-					SecurityGroups: []types.SecurityGroup{{GroupId: ptr("sg-1")}},
+					SecurityGroups: []types.SecurityGroup{{GroupId: ptr("sg-1"), SecurityGroupArn: ptr("arn:aws:ec2:eu-west-1:123456789012:security-group/sg-1")}},
 				}, nil
 			}
 			if params.NextToken == nil || *params.NextToken != "next" {
 				return nil, fmt.Errorf("wrong NextToken, expected 'next' got '%v'", params.NextToken)
 			}
 			return &ec2.DescribeSecurityGroupsOutput{
-				SecurityGroups: []types.SecurityGroup{{GroupId: ptr("sg-2")}},
+				SecurityGroups: []types.SecurityGroup{{GroupId: ptr("sg-2"), SecurityGroupArn: ptr("arn:aws:ec2:eu-west-1:123456789012:security-group/sg-2")}},
 			}, nil
 		},
 	}
 	client := getMockedEC2Service(mock)
 	got := client.GetAllSecurityGroups()
 	expected := []common.Resource{
-		{TerraformID: "sg-1", ResourceType: common.Security_group, Region: "eu-west-1"},
-		{TerraformID: "sg-2", ResourceType: common.Security_group, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:security-group/sg-1", TerraformID: "sg-1", ResourceType: common.Security_group, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:security-group/sg-2", TerraformID: "sg-2", ResourceType: common.Security_group, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)
@@ -67,13 +67,14 @@ func TestGetAllSecurityGroupRules_PaginationFollowed(t *testing.T) {
 					NextToken: ptr("next"),
 					SecurityGroupRules: []types.SecurityGroupRule{
 						{
-							SecurityGroupRuleId: ptr("sgr-1"),
-							GroupId:             ptr("sg-aaa"),
-							IsEgress:            ptr(false),
-							IpProtocol:          ptr("tcp"),
-							FromPort:            ptr(int32(80)),
-							ToPort:              ptr(int32(80)),
-							CidrIpv4:            ptr("10.0.0.0/8"),
+							SecurityGroupRuleId:  ptr("sgr-1"),
+							SecurityGroupRuleArn: ptr("arn:aws:ec2:eu-west-1:123456789012:security-group-rule/sgr-1"),
+							GroupId:              ptr("sg-aaa"),
+							IsEgress:             ptr(false),
+							IpProtocol:           ptr("tcp"),
+							FromPort:             ptr(int32(80)),
+							ToPort:               ptr(int32(80)),
+							CidrIpv4:             ptr("10.0.0.0/8"),
 						},
 					},
 				}, nil
@@ -84,13 +85,14 @@ func TestGetAllSecurityGroupRules_PaginationFollowed(t *testing.T) {
 			return &ec2.DescribeSecurityGroupRulesOutput{
 				SecurityGroupRules: []types.SecurityGroupRule{
 					{
-						SecurityGroupRuleId: ptr("sgr-2"),
-						GroupId:             ptr("sg-bbb"),
-						IsEgress:            ptr(true),
-						IpProtocol:          ptr("tcp"),
-						FromPort:            ptr(int32(443)),
-						ToPort:              ptr(int32(443)),
-						CidrIpv6:            ptr("::/0"),
+						SecurityGroupRuleId:  ptr("sgr-2"),
+						SecurityGroupRuleArn: ptr("arn:aws:ec2:eu-west-1:123456789012:security-group-rule/sgr-2"),
+						GroupId:              ptr("sg-bbb"),
+						IsEgress:             ptr(true),
+						IpProtocol:           ptr("tcp"),
+						FromPort:             ptr(int32(443)),
+						ToPort:               ptr(int32(443)),
+						CidrIpv6:             ptr("::/0"),
 					},
 				},
 			}, nil
@@ -99,8 +101,8 @@ func TestGetAllSecurityGroupRules_PaginationFollowed(t *testing.T) {
 	client := getMockedEC2Service(mock)
 	got := client.GetAllSecurityGroupRules()
 	expected := []common.Resource{
-		{TerraformID: "sg-aaa_ingress_tcp_80_80_10.0.0.0/8", ResourceType: common.Security_group_rule, Region: "eu-west-1"},
-		{TerraformID: "sg-bbb_egress_tcp_443_443_::/0", ResourceType: common.Security_group_rule, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:security-group-rule/sgr-1", TerraformID: "sg-aaa_ingress_tcp_80_80_10.0.0.0/8", ResourceType: common.Security_group_rule, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:security-group-rule/sgr-2", TerraformID: "sg-bbb_egress_tcp_443_443_::/0", ResourceType: common.Security_group_rule, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)
@@ -144,8 +146,8 @@ func TestGetAllInstances_PaginationFollowed(t *testing.T) {
 	client := getMockedEC2Service(mock)
 	got := client.GetAllEC2Instances()
 	expected := []common.Resource{
-		{TerraformID: "i-123456", ResourceType: common.Instance, Region: "eu-west-1"},
-		{TerraformID: "i-23456789", ResourceType: common.Instance, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:instance/i-123456", TerraformID: "i-123456", ResourceType: common.Instance, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:instance/i-23456789", TerraformID: "i-23456789", ResourceType: common.Instance, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)
@@ -169,8 +171,8 @@ func TestGetAllAddresses(t *testing.T) {
 	client := getMockedEC2Service(mock)
 	got := client.GetAllElasticIPs()
 	expected := []common.Resource{
-		{TerraformID: "eip-12345678", ResourceType: common.Eip, Region: "eu-west-1"},
-		{TerraformID: "eip-23456790", ResourceType: common.Eip, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:elastic-ip/eip-12345678", TerraformID: "eip-12345678", ResourceType: common.Eip, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:elastic-ip/eip-23456790", TerraformID: "eip-23456790", ResourceType: common.Eip, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)
@@ -199,8 +201,8 @@ func TestGetAllVPCs_PaginationFollowed(t *testing.T) {
 	client := getMockedEC2Service(mock)
 	got := client.GetAllVPCs()
 	expected := []common.Resource{
-		{TerraformID: "vpc-1", ResourceType: common.VPC, Region: "eu-west-1"},
-		{TerraformID: "vpc-2", ResourceType: common.VPC, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:vpc/vpc-1", TerraformID: "vpc-1", ResourceType: common.VPC, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:vpc/vpc-2", TerraformID: "vpc-2", ResourceType: common.VPC, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -232,8 +234,8 @@ func TestGetAllInternetGateways_PaginationFollowed(t *testing.T) {
 	client := getMockedEC2Service(mock)
 	got := client.GetAllInternetGateways()
 	expected := []common.Resource{
-		{TerraformID: "igw-1", ResourceType: common.Internet_gateway, Region: "eu-west-1"},
-		{TerraformID: "igw-2", ResourceType: common.Internet_gateway, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:internet-gateway/igw-1", TerraformID: "igw-1", ResourceType: common.Internet_gateway, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:internet-gateway/igw-2", TerraformID: "igw-2", ResourceType: common.Internet_gateway, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -265,8 +267,8 @@ func TestGetAllNATGateways_PaginationFollowed(t *testing.T) {
 	client := getMockedEC2Service(mock)
 	got := client.GetAllNATGateways()
 	expected := []common.Resource{
-		{TerraformID: "nat-1", ResourceType: common.NAT_gateway, Region: "eu-west-1"},
-		{TerraformID: "nat-2", ResourceType: common.NAT_gateway, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:natgateway/nat-1", TerraformID: "nat-1", ResourceType: common.NAT_gateway, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:natgateway/nat-2", TerraformID: "nat-2", ResourceType: common.NAT_gateway, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -331,8 +333,8 @@ func TestGetAllVPCEndpoints_PaginationFollowed(t *testing.T) {
 	client := getMockedEC2Service(mock)
 	got := client.GetAllVPCEndpoints()
 	expected := []common.Resource{
-		{TerraformID: "vpce-1", ResourceType: common.VPC_endpoint, Region: "eu-west-1"},
-		{TerraformID: "vpce-2", ResourceType: common.VPC_endpoint, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:vpc-endpoint/vpce-1", TerraformID: "vpce-1", ResourceType: common.VPC_endpoint, Region: "eu-west-1"},
+		{Arn: "arn:aws:ec2:eu-west-1:123456789012:vpc-endpoint/vpce-2", TerraformID: "vpce-2", ResourceType: common.VPC_endpoint, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
