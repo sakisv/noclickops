@@ -71,6 +71,7 @@ type Resource struct {
 type FilteredMeta struct {
 	Found        int     `json:"found"`
 	Managed      int     `json:"managed"`
+	Ignored      int     `json:"ignored"`
 	Unmanaged    int     `json:"unmanaged"`
 	PctUnmanaged float32 `json:"pct_unmanaged"`
 }

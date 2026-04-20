@@ -1,10 +1,10 @@
 package main
 
 import (
-	"strconv"
+	"maps"
+	"slices"
 	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	claws "github.com/noclickops/aws"
 	"github.com/noclickops/common"
 )
@@ -19,6 +19,14 @@ func filter(managedIds map[string]struct{}, foundResources map[string][]common.R
 		for _, el := range value {
 			entry.Meta.Found += 1
 			_, found := managedIds[el.TerraformID]
+
+			// first check for things to ignore
+			if slices.Contains(ignoredArns, el.Arn) {
+				entry.Meta.Ignored += 1
+				continue
+			}
+
+			// then we check for managed resources
 			if found {
 				entry.Meta.Managed += 1
 			} else {
@@ -26,6 +34,8 @@ func filter(managedIds map[string]struct{}, foundResources map[string][]common.R
 				entry.Meta.Unmanaged += 1
 			}
 		}
+
+		// calculate totals for the service
 		if entry.Meta.Unmanaged == 0 {
 			entry.Meta.PctUnmanaged = 0
 		} else {
@@ -36,14 +46,33 @@ func filter(managedIds map[string]struct{}, foundResources map[string][]common.R
 	return unmanagedResources
 }
 
-func getIgnoredTagResources(ignoredTags map[string][]string, serviceConfigs []aws.Config) []string {
+func getDefaultIgnoreTags(service claws.NoclickopsResourceGroupTaggingAPIService) []string {
+	tagKeyResources := service.GetTagKeysWithPrefixes(IGNORED_TAG_KEY_PREFIXES)
+
+	var tagKeys []string
+	for _, key := range tagKeyResources {
+		tagKeys = append(tagKeys, key.TerraformID)
+	}
+	return tagKeys
+}
+
+func getIgnoredTagResources(s claws.NoclickopsResourceGroupTaggingAPIService, ignoredTags map[string][]string) []string {
 	var arns []string
 
-	c := claws.NewResourceGroupTaggingAPIServiceFromConfigs(serviceConfigs, claws.SERVICES[common.ResourceGroupsTaggingAPI])
+	tagKeys := getDefaultIgnoreTags(s)
+	for _, k := range tagKeys {
+		if _, found := ignoredTags[k]; found {
+			continue
+		}
+		ignoredTags[k] = make([]string, 0)
+	}
+
+	it := strings.Join(slices.Collect(maps.Keys(ignoredTags)), ",")
+	println("Ignoring resources tagged with these tags:")
+	println(it)
+
 	for k, v := range ignoredTags {
-		println("Searching for resources tagged with " + k + " with values " + strings.Join(v, ","))
-		resources := c.GetResourcesWithTags(k, v)
-		println("Found " + strconv.Itoa(len(resources)) + " resources")
+		resources := s.GetResourcesWithTags(k, v)
 		for _, r := range resources {
 			arns = append(arns, r.TerraformID)
 		}

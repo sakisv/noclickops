@@ -55,6 +55,11 @@ var VALID_REGIONS = map[string]string{
 	"eusc-de-east-1": "AWS European Sovereign Cloud (Germany)",
 }
 
+var IGNORED_TAG_KEY_PREFIXES = []string {
+	"kubernetes.io/cluster/",
+	"noclickops/ignore",
+}
+
 func getAllRegions() []string {
 	keys := make([]string, 0, len(VALID_REGIONS))
 	for k := range VALID_REGIONS {

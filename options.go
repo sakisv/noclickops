@@ -50,9 +50,7 @@ func (opts *options) validate() error {
 		opts.regionsList = append(opts.regionsList, r)
 	}
 
-	if opts.ignoreTags != "" {
-		opts.ignoreTagsMap = parseTags(opts.ignoreTags)
-	}
+	opts.ignoreTagsMap = parseTags(opts.ignoreTags)
 
 	if len(errs) > 0 {
 		errs = append(errs, "Use -h / --help")

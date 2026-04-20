@@ -41,10 +41,8 @@ func main() {
 		foundResources[client.GetServiceName()] = client.GetAllResources()
 	}
 
-	var ignoredArns []string
-	if len(opts.ignoreTagsMap) > 0 {
-		ignoredArns = getIgnoredTagResources(opts.ignoreTagsMap, configs)
-	}
+	s := claws.NewResourceGroupTaggingAPIServiceFromConfigs(configs, claws.SERVICES[common.ResourceGroupsTaggingAPI])
+	ignoredArns := getIgnoredTagResources(s, opts.ignoreTagsMap)
 	unmanagedResourceIds := filter(managedIDs, foundResources, ignoredArns)
 	json, _ := json.Marshal(unmanagedResourceIds)
 	fmt.Println(string(json))
