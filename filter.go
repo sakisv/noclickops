@@ -9,7 +9,7 @@ import (
 	"github.com/noclickops/common"
 )
 
-func filter(managedIds map[string]struct{}, foundResources map[string][]common.Resource, ignoredArns []string) map[string]common.FilteredResults {
+func filter(managedIds map[string]struct{}, foundResources map[string][]common.Resource, ignoredArns map[string]struct{}) map[string]common.FilteredResults {
 	unmanagedResources := make(map[string]common.FilteredResults)
 	for key, value := range foundResources {
 		if len(value) == 0 {
@@ -21,7 +21,7 @@ func filter(managedIds map[string]struct{}, foundResources map[string][]common.R
 			_, found := managedIds[el.TerraformID]
 
 			// first check for things to ignore
-			if slices.Contains(ignoredArns, el.Arn) {
+			if _, found := ignoredArns[el.Arn]; found {
 				entry.Meta.Ignored += 1
 				continue
 			}
@@ -56,8 +56,8 @@ func getDefaultIgnoreTags(service claws.NoclickopsResourceGroupTaggingAPIService
 	return tagKeys
 }
 
-func getIgnoredTagResources(s claws.NoclickopsResourceGroupTaggingAPIService, ignoredTags map[string][]string) []string {
-	var arns []string
+func getIgnoredTagResources(s claws.NoclickopsResourceGroupTaggingAPIService, ignoredTags map[string][]string) map[string]struct{} {
+	arns := make(map[string]struct{})
 
 	tagKeys := getDefaultIgnoreTags(s)
 	for _, k := range tagKeys {
@@ -74,7 +74,9 @@ func getIgnoredTagResources(s claws.NoclickopsResourceGroupTaggingAPIService, ig
 	for k, v := range ignoredTags {
 		resources := s.GetResourcesWithTags(k, v)
 		for _, r := range resources {
-			arns = append(arns, r.TerraformID)
+			if _, found := arns[r.Arn]; !found {
+				arns[r.Arn] = struct{}{}
+			}
 		}
 	}
 	return arns
