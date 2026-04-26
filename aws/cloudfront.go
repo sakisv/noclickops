@@ -51,7 +51,7 @@ func (s *NoclickopsCloudFrontService) GetAllDistributions() []common.Resource {
 			}
 
 			for _, el := range res.DistributionList.Items {
-				resources = append(resources, common.Resource{TerraformID: *el.Id, ResourceType: common.CloudFront_distribution, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.ARN, TerraformID: *el.Id, ResourceType: common.CloudFront_distribution, Region: rc.Region})
 			}
 
 			if !*res.DistributionList.IsTruncated {

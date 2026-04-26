@@ -54,8 +54,8 @@ func TestListPolicies_PaginationFollowed(t *testing.T) {
 	client := getMockedIAMService(mock)
 	ids := client.GetAllPoliciesArns()
 	expected := []common.Resource{
-		{TerraformID: "arn:policy_1", ResourceType: common.IAM_policy, Region: "global"},
-		{TerraformID: "arn:policy_2", ResourceType: common.IAM_policy, Region: "global"},
+		{Arn: "arn:policy_1", TerraformID: "arn:policy_1", ResourceType: common.IAM_policy, Region: "global"},
+		{Arn: "arn:policy_2", TerraformID: "arn:policy_2", ResourceType: common.IAM_policy, Region: "global"},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)
@@ -75,7 +75,7 @@ func TestGetAllIAMUsers_PaginationFollowed(t *testing.T) {
 					IsTruncated: true,
 					Marker:      ptr("next"),
 					Users: []types.User{
-						{UserName: ptr("user_1")},
+						{UserName: ptr("user_1"), Arn: ptr("arn:user_1")},
 					},
 				}, nil
 			}
@@ -85,7 +85,7 @@ func TestGetAllIAMUsers_PaginationFollowed(t *testing.T) {
 			return &iam.ListUsersOutput{
 				IsTruncated: false,
 				Users: []types.User{
-					{UserName: ptr("user_2")},
+					{UserName: ptr("user_2"), Arn: ptr("arn:user_2")},
 				},
 			}, nil
 		},
@@ -93,8 +93,8 @@ func TestGetAllIAMUsers_PaginationFollowed(t *testing.T) {
 	client := getMockedIAMService(mock)
 	got := client.GetAllIAMUsers()
 	expected := []common.Resource{
-		{TerraformID: "user_1", ResourceType: common.IAM_user, Region: "global"},
-		{TerraformID: "user_2", ResourceType: common.IAM_user, Region: "global"},
+		{Arn: "arn:user_1", TerraformID: "user_1", ResourceType: common.IAM_user, Region: "global"},
+		{Arn: "arn:user_2", TerraformID: "user_2", ResourceType: common.IAM_user, Region: "global"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)
@@ -114,7 +114,7 @@ func TestGetAllIAMGroups_PaginationFollowed(t *testing.T) {
 					IsTruncated: true,
 					Marker:      ptr("next"),
 					Groups: []types.Group{
-						{GroupName: ptr("group_1")},
+						{GroupName: ptr("group_1"), Arn: ptr("arn:group_1")},
 					},
 				}, nil
 			}
@@ -124,7 +124,7 @@ func TestGetAllIAMGroups_PaginationFollowed(t *testing.T) {
 			return &iam.ListGroupsOutput{
 				IsTruncated: false,
 				Groups: []types.Group{
-					{GroupName: ptr("group_2")},
+					{GroupName: ptr("group_2"), Arn: ptr("arn:group_2")},
 				},
 			}, nil
 		},
@@ -132,8 +132,8 @@ func TestGetAllIAMGroups_PaginationFollowed(t *testing.T) {
 	client := getMockedIAMService(mock)
 	got := client.GetAllIAMGroups()
 	expected := []common.Resource{
-		{TerraformID: "group_1", ResourceType: common.IAM_group, Region: "global"},
-		{TerraformID: "group_2", ResourceType: common.IAM_group, Region: "global"},
+		{Arn: "arn:group_1", TerraformID: "group_1", ResourceType: common.IAM_group, Region: "global"},
+		{Arn: "arn:group_2", TerraformID: "group_2", ResourceType: common.IAM_group, Region: "global"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)

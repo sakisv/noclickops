@@ -56,7 +56,7 @@ func (s *NoclickopsSNSService) GetAllTopics() []common.Resource {
 			}
 
 			for _, el := range res.Topics {
-				resources = append(resources, common.Resource{TerraformID: *el.TopicArn, ResourceType: common.SNS_topic, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.TopicArn, TerraformID: *el.TopicArn, ResourceType: common.SNS_topic, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {
@@ -81,7 +81,7 @@ func (s *NoclickopsSNSService) GetAllSubscriptions() []common.Resource {
 			}
 
 			for _, el := range res.Subscriptions {
-				resources = append(resources, common.Resource{TerraformID: *el.SubscriptionArn, ResourceType: common.SNS_subscription, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.SubscriptionArn, TerraformID: *el.SubscriptionArn, ResourceType: common.SNS_subscription, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {

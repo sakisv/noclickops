@@ -2,6 +2,7 @@ package aws
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -71,7 +72,7 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroups() []common.Resource {
 			}
 
 			for _, el := range res.SecurityGroups {
-				resources = append(resources, common.Resource{TerraformID: *el.GroupId, ResourceType: common.Security_group, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.SecurityGroupArn, TerraformID: *el.GroupId, ResourceType: common.Security_group, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {
@@ -114,7 +115,7 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroupRules() []common.Resource {
 					id_pieces = append(id_pieces, *el.CidrIpv6)
 				}
 				id := strings.Join(id_pieces[:], "_")
-				resources = append(resources, common.Resource{TerraformID: id, ResourceType: common.Security_group_rule, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.SecurityGroupRuleArn, TerraformID: id, ResourceType: common.Security_group_rule, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {
@@ -140,7 +141,10 @@ func (s *NoclickopsEC2Service) GetAllEC2Instances() []common.Resource {
 
 			for _, reservation := range res.Reservations {
 				for _, instance := range reservation.Instances {
-					resources = append(resources, common.Resource{TerraformID: *instance.InstanceId, ResourceType: common.Instance, Region: rc.Region})
+					// ec2 instance arn format:
+					//  arn:${Partition}:ec2:${Region}:${Account}:instance/${InstanceId}
+					arn := fmt.Sprintf("arn:aws:ec2:%v:%v:instance/%v", rc.Region, s.AccountId, *instance.InstanceId)
+					resources = append(resources, common.Resource{Arn: arn, TerraformID: *instance.InstanceId, ResourceType: common.Instance, Region: rc.Region})
 				}
 			}
 
@@ -162,7 +166,10 @@ func (s *NoclickopsEC2Service) GetAllElasticIPs() []common.Resource {
 		}
 
 		for _, address := range res.Addresses {
-			resources = append(resources, common.Resource{TerraformID: *address.AllocationId, ResourceType: common.Eip, Region: rc.Region})
+			// elastic ip arn format:
+			// arn:${Partition}:ec2:${Region}:${Account}:elastic-ip/${AllocationId}
+			arn := fmt.Sprintf("arn:aws:ec2:%v:%v:elastic-ip/%v", rc.Region, s.AccountId, *address.AllocationId)
+			resources = append(resources, common.Resource{Arn: arn, TerraformID: *address.AllocationId, ResourceType: common.Eip, Region: rc.Region})
 		}
 	}
 	return resources
@@ -181,7 +188,10 @@ func (s *NoclickopsEC2Service) GetAllVPCs() []common.Resource {
 			}
 
 			for _, el := range res.Vpcs {
-				resources = append(resources, common.Resource{TerraformID: *el.VpcId, ResourceType: common.VPC, Region: rc.Region})
+				// vpc arn format:
+				//  arn:${Partition}:ec2:${Region}:${Account}:vpc/${VpcId}
+				arn := fmt.Sprintf("arn:aws:ec2:%v:%v:vpc/%v", rc.Region, s.AccountId, *el.VpcId)
+				resources = append(resources, common.Resource{Arn: arn, TerraformID: *el.VpcId, ResourceType: common.VPC, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {
@@ -206,7 +216,10 @@ func (s *NoclickopsEC2Service) GetAllInternetGateways() []common.Resource {
 			}
 
 			for _, el := range res.InternetGateways {
-				resources = append(resources, common.Resource{TerraformID: *el.InternetGatewayId, ResourceType: common.Internet_gateway, Region: rc.Region})
+				// igw arn format:
+				//  arn:${Partition}:ec2:${Region}:${Account}:internet-gateway/${InternetGatewayId}
+				arn := fmt.Sprintf("arn:aws:ec2:%v:%v:internet-gateway/%v", rc.Region, s.AccountId, *el.InternetGatewayId)
+				resources = append(resources, common.Resource{Arn: arn, TerraformID: *el.InternetGatewayId, ResourceType: common.Internet_gateway, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {
@@ -231,7 +244,10 @@ func (s *NoclickopsEC2Service) GetAllNATGateways() []common.Resource {
 			}
 
 			for _, el := range res.NatGateways {
-				resources = append(resources, common.Resource{TerraformID: *el.NatGatewayId, ResourceType: common.NAT_gateway, Region: rc.Region})
+				// nat gateway arn format:
+				//  arn:${Partition}:ec2:${Region}:${Account}:natgateway/${NatGatewayId}
+				arn := fmt.Sprintf("arn:aws:ec2:%v:%v:natgateway/%v", rc.Region, s.AccountId, *el.NatGatewayId)
+				resources = append(resources, common.Resource{Arn: arn, TerraformID: *el.NatGatewayId, ResourceType: common.NAT_gateway, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {
@@ -256,7 +272,7 @@ func (s *NoclickopsEC2Service) GetAllSubnets() []common.Resource {
 			}
 
 			for _, el := range res.Subnets {
-				resources = append(resources, common.Resource{TerraformID: *el.SubnetId, ResourceType: common.Subnet, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.SubnetArn, TerraformID: *el.SubnetId, ResourceType: common.Subnet, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {
@@ -281,7 +297,10 @@ func (s *NoclickopsEC2Service) GetAllVPCEndpoints() []common.Resource {
 			}
 
 			for _, el := range res.VpcEndpoints {
-				resources = append(resources, common.Resource{TerraformID: *el.VpcEndpointId, ResourceType: common.VPC_endpoint, Region: rc.Region})
+				// vpc-endpoint arn format:
+				//  arn:${Partition}:ec2:${Region}:${Account}:vpc-endpoint/${VpcEndpointId}
+				arn := fmt.Sprintf("arn:aws:ec2:%v:%v:vpc-endpoint/%v", rc.Region, s.AccountId, *el.VpcEndpointId)
+				resources = append(resources, common.Resource{Arn: arn, TerraformID: *el.VpcEndpointId, ResourceType: common.VPC_endpoint, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {

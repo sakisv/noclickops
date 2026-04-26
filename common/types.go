@@ -58,9 +58,11 @@ const (
 	ELB
 	ELBV2
 	ASG
+	ResourceGroupsTaggingAPI
 )
 
 type Resource struct {
+	Arn          string       `json:"arn"`
 	TerraformID  string       `json:"terraform_id"`
 	ResourceType ResourceType `json:"resource_type"`
 	Region       string       `json:"region"`
@@ -69,6 +71,7 @@ type Resource struct {
 type FilteredMeta struct {
 	Found        int     `json:"found"`
 	Managed      int     `json:"managed"`
+	Ignored      int     `json:"ignored"`
 	Unmanaged    int     `json:"unmanaged"`
 	PctUnmanaged float32 `json:"pct_unmanaged"`
 }
@@ -81,6 +84,7 @@ type FilteredResults struct {
 type ServiceMeta struct {
 	Global      bool
 	ServiceName string
+	AccountId   string
 }
 
 func (m ServiceMeta) GetServiceName() string { return m.ServiceName }

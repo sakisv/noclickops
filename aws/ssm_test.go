@@ -53,8 +53,8 @@ func TestGetAllParametersNames(t *testing.T) {
 	client := getMockedSSMService(mock)
 	ids := client.GetAllParametersNames()
 	expected := []common.Resource{
-		{TerraformID: "/some/parameter", ResourceType: common.SSM_parameter, Region: "eu-west-1"},
-		{TerraformID: "/some/other/parameter", ResourceType: common.SSM_parameter, Region: "eu-west-1"},
+		{Arn: "some:arn:", TerraformID: "/some/parameter", ResourceType: common.SSM_parameter, Region: "eu-west-1"},
+		{Arn: "second:arn:", TerraformID: "/some/other/parameter", ResourceType: common.SSM_parameter, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(ids, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, ids)

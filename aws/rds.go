@@ -55,7 +55,7 @@ func (s *NoclickopsRDSService) GetAllDBInstances() []common.Resource {
 			}
 
 			for _, el := range res.DBInstances {
-				resources = append(resources, common.Resource{TerraformID: *el.DBInstanceIdentifier, ResourceType: common.DB_instance, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.DBInstanceArn, TerraformID: *el.DBInstanceIdentifier, ResourceType: common.DB_instance, Region: rc.Region})
 			}
 
 			if res.Marker == nil {
@@ -80,7 +80,7 @@ func (s *NoclickopsRDSService) GetAllDBClusters() []common.Resource {
 			}
 
 			for _, el := range res.DBClusters {
-				resources = append(resources, common.Resource{TerraformID: *el.DBClusterIdentifier, ResourceType: common.RDS_cluster, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.DBClusterArn, TerraformID: *el.DBClusterIdentifier, ResourceType: common.RDS_cluster, Region: rc.Region})
 			}
 
 			if res.Marker == nil {

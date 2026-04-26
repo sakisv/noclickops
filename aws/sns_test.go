@@ -38,8 +38,8 @@ func TestGetAllTopics_BasicCase(t *testing.T) {
 	svc := getMockedSNSService(mock)
 	got := svc.GetAllTopics()
 	expected := []common.Resource{
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1", ResourceType: common.SNS_topic, Region: "eu-west-1"},
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-2", ResourceType: common.SNS_topic, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-1", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1", ResourceType: common.SNS_topic, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-2", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-2", ResourceType: common.SNS_topic, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -68,8 +68,8 @@ func TestGetAllTopics_PaginationFollowed(t *testing.T) {
 	svc := getMockedSNSService(mock)
 	got := svc.GetAllTopics()
 	expected := []common.Resource{
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1", ResourceType: common.SNS_topic, Region: "eu-west-1"},
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-2", ResourceType: common.SNS_topic, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-1", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1", ResourceType: common.SNS_topic, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-2", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-2", ResourceType: common.SNS_topic, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -106,8 +106,8 @@ func TestGetAllSubscriptions_BasicCase(t *testing.T) {
 	svc := getMockedSNSService(mock)
 	got := svc.GetAllSubscriptions()
 	expected := []common.Resource{
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-bbb", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-bbb", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-bbb", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -136,8 +136,8 @@ func TestGetAllSubscriptions_PaginationFollowed(t *testing.T) {
 	svc := getMockedSNSService(mock)
 	got := svc.GetAllSubscriptions()
 	expected := []common.Resource{
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-bbb", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-bbb", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-bbb", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -176,8 +176,8 @@ func TestGetAllResources_CombinesTopicsAndSubscriptions(t *testing.T) {
 	svc := getMockedSNSService(mock)
 	got := svc.GetAllResources()
 	expected := []common.Resource{
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1", ResourceType: common.SNS_topic, Region: "eu-west-1"},
-		{TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-1", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1", ResourceType: common.SNS_topic, Region: "eu-west-1"},
+		{Arn: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", TerraformID: "arn:aws:sns:eu-west-1:123456789012:topic-1:sub-aaa", ResourceType: common.SNS_subscription, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)

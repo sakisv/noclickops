@@ -38,8 +38,8 @@ func TestGetAllBuckets_BasicCase(t *testing.T) {
 	svc := getMockedS3Service(mock)
 	got := svc.GetAllBuckets()
 	expected := []common.Resource{
-		{TerraformID: "bucket-1", ResourceType: common.S3_bucket, Region: "eu-west-1"},
-		{TerraformID: "bucket-2", ResourceType: common.S3_bucket, Region: "eu-west-1"},
+		{Arn: "arn:aws:s3:::bucket-1", TerraformID: "bucket-1", ResourceType: common.S3_bucket, Region: "eu-west-1"},
+		{Arn: "arn:aws:s3:::bucket-2", TerraformID: "bucket-2", ResourceType: common.S3_bucket, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -81,8 +81,8 @@ func TestGetAllBuckets_PaginationFollowed(t *testing.T) {
 	svc := getMockedS3Service(mock)
 	got := svc.GetAllBuckets()
 	expected := []common.Resource{
-		{TerraformID: "bucket-1", ResourceType: common.S3_bucket, Region: "eu-west-1"},
-		{TerraformID: "bucket-2", ResourceType: common.S3_bucket, Region: "eu-west-1"},
+		{Arn: "arn:aws:s3:::bucket-1", TerraformID: "bucket-1", ResourceType: common.S3_bucket, Region: "eu-west-1"},
+		{Arn: "arn:aws:s3:::bucket-2", TerraformID: "bucket-2", ResourceType: common.S3_bucket, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)

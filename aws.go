@@ -8,6 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/account"
 )
 
 var VALID_REGIONS = map[string]string{
@@ -54,6 +55,11 @@ var VALID_REGIONS = map[string]string{
 	"eusc-de-east-1": "AWS European Sovereign Cloud (Germany)",
 }
 
+var IGNORED_TAG_KEY_PREFIXES = []string {
+	"kubernetes.io/cluster/",
+	"noclickops/ignore",
+}
+
 func getAllRegions() []string {
 	keys := make([]string, 0, len(VALID_REGIONS))
 	for k := range VALID_REGIONS {
@@ -68,7 +74,7 @@ func getFullPathToHomeTarget(to string) string {
 	return path.Join(homedir, to)
 }
 
-func generateStatefileBucketConfig(region string) aws.Config {
+func getConfigForRegion(region string) aws.Config {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal(err)
@@ -90,4 +96,16 @@ func generatePerRegionConfigs(regions []string) []aws.Config {
 	}
 
 	return configs
+}
+
+func getAccountId() string {
+	cfg := getConfigForRegion("us-east-1")
+	acc := account.NewFromConfig(cfg)
+	res, err := acc.GetAccountInformation(context.TODO(), &account.GetAccountInformationInput{})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return *res.AccountId
 }

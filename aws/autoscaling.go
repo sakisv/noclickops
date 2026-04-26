@@ -52,7 +52,7 @@ func (s *NoclickopsAutoscalingService) GetAllAutoScalingGroups() []common.Resour
 			}
 
 			for _, el := range res.AutoScalingGroups {
-				resources = append(resources, common.Resource{TerraformID: *el.AutoScalingGroupName, ResourceType: common.Autoscaling_group, Region: rc.Region})
+				resources = append(resources, common.Resource{Arn: *el.AutoScalingGroupARN, TerraformID: *el.AutoScalingGroupName, ResourceType: common.Autoscaling_group, Region: rc.Region})
 			}
 
 			if res.NextToken == nil {

@@ -32,22 +32,22 @@ func TestGetAllDBInstances_PaginationFollowed(t *testing.T) {
 			if callCount == 1 {
 				return &rds.DescribeDBInstancesOutput{
 					Marker:      ptr("next"),
-					DBInstances: []types.DBInstance{{DBInstanceIdentifier: ptr("db-1")}},
+					DBInstances: []types.DBInstance{{DBInstanceIdentifier: ptr("db-1"), DBInstanceArn: ptr("arn:aws:rds:eu-west-1:123456789012:db:db-1")}},
 				}, nil
 			}
 			if params.Marker == nil || *params.Marker != "next" {
 				return nil, fmt.Errorf("wrong Marker, expected 'next' got '%v'", params.Marker)
 			}
 			return &rds.DescribeDBInstancesOutput{
-				DBInstances: []types.DBInstance{{DBInstanceIdentifier: ptr("db-2")}},
+				DBInstances: []types.DBInstance{{DBInstanceIdentifier: ptr("db-2"), DBInstanceArn: ptr("arn:aws:rds:eu-west-1:123456789012:db:db-2")}},
 			}, nil
 		},
 	}
 	client := getMockedRDSService(mock)
 	got := client.GetAllDBInstances()
 	expected := []common.Resource{
-		{TerraformID: "db-1", ResourceType: common.DB_instance, Region: "eu-west-1"},
-		{TerraformID: "db-2", ResourceType: common.DB_instance, Region: "eu-west-1"},
+		{Arn: "arn:aws:rds:eu-west-1:123456789012:db:db-1", TerraformID: "db-1", ResourceType: common.DB_instance, Region: "eu-west-1"},
+		{Arn: "arn:aws:rds:eu-west-1:123456789012:db:db-2", TerraformID: "db-2", ResourceType: common.DB_instance, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)
@@ -65,22 +65,22 @@ func TestGetAllDBClusters_PaginationFollowed(t *testing.T) {
 			if callCount == 1 {
 				return &rds.DescribeDBClustersOutput{
 					Marker:     ptr("next"),
-					DBClusters: []types.DBCluster{{DBClusterIdentifier: ptr("cluster-1")}},
+					DBClusters: []types.DBCluster{{DBClusterIdentifier: ptr("cluster-1"), DBClusterArn: ptr("arn:aws:rds:eu-west-1:123456789012:cluster:cluster-1")}},
 				}, nil
 			}
 			if params.Marker == nil || *params.Marker != "next" {
 				return nil, fmt.Errorf("wrong Marker, expected 'next' got '%v'", params.Marker)
 			}
 			return &rds.DescribeDBClustersOutput{
-				DBClusters: []types.DBCluster{{DBClusterIdentifier: ptr("cluster-2")}},
+				DBClusters: []types.DBCluster{{DBClusterIdentifier: ptr("cluster-2"), DBClusterArn: ptr("arn:aws:rds:eu-west-1:123456789012:cluster:cluster-2")}},
 			}, nil
 		},
 	}
 	client := getMockedRDSService(mock)
 	got := client.GetAllDBClusters()
 	expected := []common.Resource{
-		{TerraformID: "cluster-1", ResourceType: common.RDS_cluster, Region: "eu-west-1"},
-		{TerraformID: "cluster-2", ResourceType: common.RDS_cluster, Region: "eu-west-1"},
+		{Arn: "arn:aws:rds:eu-west-1:123456789012:cluster:cluster-1", TerraformID: "cluster-1", ResourceType: common.RDS_cluster, Region: "eu-west-1"},
+		{Arn: "arn:aws:rds:eu-west-1:123456789012:cluster:cluster-2", TerraformID: "cluster-2", ResourceType: common.RDS_cluster, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)

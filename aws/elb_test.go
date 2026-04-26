@@ -20,7 +20,7 @@ func getMockedELBService(mock *mockELBClient) aws.NoclickopsELBService {
 				ClientMeta: aws.ClientMeta{Region: "eu-west-1"},
 			},
 		},
-		ServiceMeta: common.ServiceMeta{Global: false, ServiceName: "elb"},
+		ServiceMeta: common.ServiceMeta{Global: false, ServiceName: "elb", AccountId: "123456789012"},
 	}
 }
 
@@ -38,8 +38,8 @@ func TestGetAllClassicLoadBalancers_BasicCase(t *testing.T) {
 	svc := getMockedELBService(mock)
 	got := svc.GetAllClassicLoadBalancers()
 	expected := []common.Resource{
-		{TerraformID: "my-classic-lb-1", ResourceType: common.ELB_load_balancer, Region: "eu-west-1"},
-		{TerraformID: "my-classic-lb-2", ResourceType: common.ELB_load_balancer, Region: "eu-west-1"},
+		{Arn: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/my-classic-lb-1", TerraformID: "my-classic-lb-1", ResourceType: common.ELB_load_balancer, Region: "eu-west-1"},
+		{Arn: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/my-classic-lb-2", TerraformID: "my-classic-lb-2", ResourceType: common.ELB_load_balancer, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)
@@ -81,8 +81,8 @@ func TestGetAllClassicLoadBalancers_PaginationFollowed(t *testing.T) {
 	svc := getMockedELBService(mock)
 	got := svc.GetAllClassicLoadBalancers()
 	expected := []common.Resource{
-		{TerraformID: "my-classic-lb-1", ResourceType: common.ELB_load_balancer, Region: "eu-west-1"},
-		{TerraformID: "my-classic-lb-2", ResourceType: common.ELB_load_balancer, Region: "eu-west-1"},
+		{Arn: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/my-classic-lb-1", TerraformID: "my-classic-lb-1", ResourceType: common.ELB_load_balancer, Region: "eu-west-1"},
+		{Arn: "arn:aws:elasticloadbalancing:eu-west-1:123456789012:loadbalancer/my-classic-lb-2", TerraformID: "my-classic-lb-2", ResourceType: common.ELB_load_balancer, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("mismatch (-got +want):\n%s", diff)

@@ -45,22 +45,22 @@ func TestGetAllAutoScalingGroups_PaginationFollowed(t *testing.T) {
 			if callCount == 1 {
 				return &autoscaling.DescribeAutoScalingGroupsOutput{
 					NextToken:         ptr("next"),
-					AutoScalingGroups: []types.AutoScalingGroup{{AutoScalingGroupName: ptr("asg-1")}},
+					AutoScalingGroups: []types.AutoScalingGroup{{AutoScalingGroupName: ptr("asg-1"), AutoScalingGroupARN: ptr("arn:aws:autoscaling:eu-west-1:123456789012:autoScalingGroup:asg-1")}},
 				}, nil
 			}
 			if params.NextToken == nil || *params.NextToken != "next" {
 				return nil, fmt.Errorf("wrong NextToken, expected 'next' got '%v'", params.NextToken)
 			}
 			return &autoscaling.DescribeAutoScalingGroupsOutput{
-				AutoScalingGroups: []types.AutoScalingGroup{{AutoScalingGroupName: ptr("asg-2")}},
+				AutoScalingGroups: []types.AutoScalingGroup{{AutoScalingGroupName: ptr("asg-2"), AutoScalingGroupARN: ptr("arn:aws:autoscaling:eu-west-1:123456789012:autoScalingGroup:asg-2")}},
 			}, nil
 		},
 	}
 	client := getMockedAutoscalingService(mock)
 	got := client.GetAllAutoScalingGroups()
 	expected := []common.Resource{
-		{TerraformID: "asg-1", ResourceType: common.Autoscaling_group, Region: "eu-west-1"},
-		{TerraformID: "asg-2", ResourceType: common.Autoscaling_group, Region: "eu-west-1"},
+		{Arn: "arn:aws:autoscaling:eu-west-1:123456789012:autoScalingGroup:asg-1", TerraformID: "asg-1", ResourceType: common.Autoscaling_group, Region: "eu-west-1"},
+		{Arn: "arn:aws:autoscaling:eu-west-1:123456789012:autoScalingGroup:asg-2", TerraformID: "asg-2", ResourceType: common.Autoscaling_group, Region: "eu-west-1"},
 	}
 	if diff := cmp.Diff(got, expected); diff != "" {
 		t.Errorf("expected %v, got %v", expected, got)

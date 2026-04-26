@@ -25,14 +25,20 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.ELB:           {Global: false, ServiceName: "elb"},
 	common.ELBV2:         {Global: false, ServiceName: "elbv2"},
 	common.ASG:           {Global: false, ServiceName: "autoscaling"},
+
+	// not included in the switch/case in `NewclickopsServiceFromConfigs`
+	// because it doesn't follow the same invocation pattern.
+	// It's only included here for convenience
+	common.ResourceGroupsTaggingAPI: {Global: false, ServiceName: "resourcegroupstaggingapi"},
 }
 
-func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config) common.NoclickopsService {
+func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aws.Config, accountId string) common.NoclickopsService {
 	if len(configs) == 0 {
 		panic("Cannot create clients without config")
 	}
 
 	meta, found := SERVICES[service]
+	meta.AccountId = accountId
 	if !found {
 		panic("unknown service")
 	}

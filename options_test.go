@@ -4,6 +4,8 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestIsValidRegion(t *testing.T) {
@@ -39,11 +41,12 @@ func TestOptionsValidate(t *testing.T) {
 	}
 
 	tests := []struct {
-		name            string
-		opts            options
-		wantErr         bool
-		errContains     string
-		wantRegionsList []string
+		name              string
+		opts              options
+		wantErr           bool
+		errContains       string
+		wantRegionsList   []string
+		wantIgnoreTagsMap map[string][]string
 	}{
 		{
 			name:        "invalid with statefile only regions all",
@@ -80,6 +83,24 @@ func TestOptionsValidate(t *testing.T) {
 			opts:            options{stateFile: "state.tfstate", regions: "US-EAST-1,EU-WEST-1"},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
+		},
+		{
+			name:              "single tag is parsed correctly",
+			opts:              options{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value"},
+			wantErr:           false,
+			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value"}},
+		},
+		{
+			name:              "multiple tags with special characters are parsed correctly",
+			opts:              options{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,another/tag=another.value/with-special-chars"},
+			wantErr:           false,
+			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value"}, "another/tag": []string{"another.value/with-special-chars"}},
+		},
+		{
+			name:              "same key multiple times is parsed properly",
+			opts:              options{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,a-tag=b-value,b-tag=c-value"},
+			wantErr:           false,
+			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value", "b-value"}, "b-tag": []string{"c-value"}},
 		},
 		{
 			name:        "neither statefile nor s3 bucket",
@@ -147,6 +168,15 @@ func TestOptionsValidate(t *testing.T) {
 					if !slices.Contains(tt.opts.regionsList, r) {
 						t.Errorf("Missing %v from %v", r, tt.opts.regionsList)
 					}
+				}
+			}
+			if tt.wantIgnoreTagsMap != nil {
+				if len(tt.wantIgnoreTagsMap) != len(tt.opts.ignoreTagsMap) {
+					t.Errorf("ignoreTagsMap length = %v, want %v", len(tt.opts.ignoreTagsMap), len(tt.wantIgnoreTagsMap))
+					return
+				}
+				if diff := cmp.Diff(tt.opts.ignoreTagsMap, tt.wantIgnoreTagsMap); diff != "" {
+					t.Errorf("expected %v, got %v", tt.wantIgnoreTagsMap, tt.opts.ignoreTagsMap)
 				}
 			}
 			// When regions == "all", regionsList should be populated with all known regions
