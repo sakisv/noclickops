@@ -3,6 +3,8 @@ package aws
 import (
 	"context"
 	"log"
+	"maps"
+	"slices"
 	"strings"
 
 	awssdk "github.com/aws/aws-sdk-go-v2/aws"
@@ -42,7 +44,7 @@ func (s *NoclickopsResourceGroupTaggingAPIService) GetAllResources() []common.Re
 }
 
 func (s *NoclickopsResourceGroupTaggingAPIService) GetResourcesWithTags(key string, values []string) []common.Resource {
-	var resources []common.Resource
+	var resourcesMap map[string]common.Resource= make(map[string]common.Resource)
 
 	for _, rc := range s.Clients {
 		var paginationToken *string = nil
@@ -62,7 +64,9 @@ func (s *NoclickopsResourceGroupTaggingAPIService) GetResourcesWithTags(key stri
 			}
 
 			for _, tagMapping := range resp.ResourceTagMappingList {
-				resources = append(resources, common.Resource{TerraformID: *tagMapping.ResourceARN, Region: rc.Region})
+				if _, found := resourcesMap[*tagMapping.ResourceARN]; !found {
+					resourcesMap[*tagMapping.ResourceARN] = common.Resource{TerraformID: *tagMapping.ResourceARN, Arn: *tagMapping.ResourceARN, Region: rc.Region}
+				}
 			}
 
 			if resp.PaginationToken == nil || *resp.PaginationToken == "" {
@@ -74,7 +78,7 @@ func (s *NoclickopsResourceGroupTaggingAPIService) GetResourcesWithTags(key stri
 
 	}
 
-	return resources
+	return slices.Collect(maps.Values(resourcesMap))
 }
 
 func (s *NoclickopsResourceGroupTaggingAPIService) GetTagKeysWithPrefixes(prefixes []string) []common.Resource {
