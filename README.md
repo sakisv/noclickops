@@ -74,6 +74,7 @@ noclickops -s3-bucket example-s3-statefile-bucket -s3-bucket-region eu-west-2 --
   "<service name>": {
     "resources": [
       {
+        "arn": "<the arn of the resource>",
         "terraform_id": "<the id you would have used in `terraform import` which varies per resource>",
         "resource_type": "<the resource name>",
         "region": "<global | specific region>"
@@ -83,6 +84,7 @@ noclickops -s3-bucket example-s3-statefile-bucket -s3-bucket-region eu-west-2 --
       "found": "<total number of resources found in AWS>",
       "managed": "<number of resources found in statefiles>",
       "unmanaged": "<number of resources not found in statefiles>",
+      "ignored": "<number of resources that are ignored because of their tags>",
       "pct_unmanaged": "<percentage of unmanaged resources>"
     }
   }
@@ -96,16 +98,19 @@ Example:
   "iam": {
     "resources": [
       {
+        "arn": "arn:aws:iam::1234567890:user/admin",
         "terraform_id": "admin",
         "resource_type": "iam_user",
         "region": "global"
       },
       {
+        "arn": "arn:aws:iam::1234567890:user/admin",
         "terraform_id": "sakisv",
         "resource_type": "iam_user",
         "region": "global"
       },
       {
+        "arn": "arn:aws:iam::1234567890:group/admin",
         "terraform_id": "admins",
         "resource_type": "iam_group",
         "region": "global"
@@ -115,12 +120,14 @@ Example:
       "found": 10,
       "managed": 7,
       "unmanaged": 3,
+      "ignored": 0,
       "pct_unmanaged": 30.0
     }
   },
   "ssm": {
     "resources": [
       {
+        "arn": "arn:aws:ssm:eu-west-2:1234567890:parameter/an/example/ssm/parameter"
         "terraform_id": "/an/example/ssm/parameter",
         "resource_type": "ssm_parameter",
         "region": "eu-west-2"
@@ -130,6 +137,7 @@ Example:
       "found": 5,
       "managed": 4,
       "unmanaged": 1,
+      "ignored": 0,
       "pct_unmanaged": 20.0
     }
   }
