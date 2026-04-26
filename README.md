@@ -1,6 +1,26 @@
 # NoClickOps
 
-A tool to see which and how much of your AWS infrastructure is captured in terraform.
+## What it is
+
+Noclickops intents to be a simple tool to see which and how many of your AWS resources are captured
+in terraform.
+
+## What it isn't
+
+1. Complete
+
+It only checks the resources listed below. It's not and it has no intention of becoming a tool that
+will list every single possible resource. It's meant to be informational, to help you find the
+biggest gaps in your terraform coverage.
+
+2. Replacement for terraform's [list](https://developer.hashicorp.com/terraform/language/block/tfquery/list)/[import](https://developer.hashicorp.com/terraform/language/block/import) tools
+
+Noclickops' intention is to help you decide which resources should take precedence over others, and then use terraform's tools to list and import resources to your code.
+
+3. Replacement for tools like [terraformer](https://github.com/GoogleCloudPlatform/terraformer/) 
+
+Same as above, the intention is to guide your decisions, it is not and will not become a tool to generate terraform code.
+
 
 ## How it works
 
