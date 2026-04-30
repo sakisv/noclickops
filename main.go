@@ -44,6 +44,7 @@ func main() {
 	s := claws.NewResourceGroupTaggingAPIServiceFromConfigs(configs, claws.SERVICES[common.ResourceGroupsTaggingAPI])
 	ignoredArns := getIgnoredTagResources(s, opts.ignoreTagsMap)
 	unmanagedResourceIds := filter(managedIDs, foundResources, ignoredArns)
-	json, _ := json.Marshal(unmanagedResourceIds)
+	summary := calculateSummary(unmanagedResourceIds)
+	json, _ := json.Marshal(common.Output{Results: unmanagedResourceIds, Summary: summary})
 	fmt.Println(string(json))
 }
