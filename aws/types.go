@@ -25,6 +25,7 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.ELB:           {Global: false, ServiceName: "elb"},
 	common.ELBV2:         {Global: false, ServiceName: "elbv2"},
 	common.ASG:           {Global: false, ServiceName: "autoscaling"},
+	common.Lambda:        {Global: false, ServiceName: "lambda"},
 
 	// not included in the switch/case in `NewclickopsServiceFromConfigs`
 	// because it doesn't follow the same invocation pattern.
@@ -86,6 +87,9 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		return &c
 	case common.ASG:
 		c := NewAutoscalingServiceFromConfigs(configs, meta)
+		return &c
+	case common.Lambda:
+		c := NewLambdaServiceFromConfigs(configs, meta)
 		return &c
 	case common.IdentityStore:
 		ssoMeta := SERVICES[common.SSOAdmin]
