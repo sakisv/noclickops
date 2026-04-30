@@ -48,6 +48,7 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 |      elb      	|                                      elb_load_balancer                                       	|
 |     elbv2     	|                                     elbv2_load_balancer                                      	|
 | autoscaling   	|                                    autoscaling_group                                         	|
+|    lambda     	|                                   lambda_function                                            	|
 
 ## How to use
 
