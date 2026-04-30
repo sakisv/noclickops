@@ -67,7 +67,8 @@ func (s *NoclickopsSSOAdminService) GetAllSSOInstances() []types.InstanceMetadat
 		})
 
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("warning: %v", err)
+			break
 		}
 		for _, el := range res.Instances {
 			resources = append(resources, el)
@@ -98,7 +99,8 @@ func (s *NoclickopsSSOAdminService) GetAllPermissionSets() []common.Resource {
 		})
 
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("warning: %v", err)
+			break
 		}
 		for _, el := range res.PermissionSets {
 			tf_id := fmt.Sprintf("%v,%v", el, instance_arn)

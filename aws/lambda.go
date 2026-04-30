@@ -48,7 +48,8 @@ func (s *NoclickopsLambdaService) GetAllLambdaFunctions() []common.Resource {
 				MaxItems: awssdk.Int32(50),
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.Functions {

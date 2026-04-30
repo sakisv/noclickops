@@ -47,7 +47,8 @@ func (s *NoclickopsELBV2Service) GetAllLoadBalancers() []common.Resource {
 				Marker: marker,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.LoadBalancers {

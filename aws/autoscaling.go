@@ -48,7 +48,8 @@ func (s *NoclickopsAutoscalingService) GetAllAutoScalingGroups() []common.Resour
 				IncludeInstances: awssdk.Bool(false),
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.AutoScalingGroups {

@@ -68,7 +68,8 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroups() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.SecurityGroups {
@@ -93,7 +94,8 @@ func (s *NoclickopsEC2Service) GetAllSecurityGroupRules() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.SecurityGroupRules {
@@ -136,7 +138,8 @@ func (s *NoclickopsEC2Service) GetAllEC2Instances() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, reservation := range res.Reservations {
@@ -162,7 +165,8 @@ func (s *NoclickopsEC2Service) GetAllElasticIPs() []common.Resource {
 	for _, rc := range s.Clients {
 		res, err := rc.Client.DescribeAddresses(context.TODO(), &awsec2.DescribeAddressesInput{})
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("warning: %v", err)
+			continue
 		}
 
 		for _, address := range res.Addresses {
@@ -184,7 +188,8 @@ func (s *NoclickopsEC2Service) GetAllVPCs() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.Vpcs {
@@ -212,7 +217,8 @@ func (s *NoclickopsEC2Service) GetAllInternetGateways() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.InternetGateways {
@@ -240,7 +246,8 @@ func (s *NoclickopsEC2Service) GetAllNATGateways() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.NatGateways {
@@ -268,7 +275,8 @@ func (s *NoclickopsEC2Service) GetAllSubnets() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.Subnets {
@@ -293,7 +301,8 @@ func (s *NoclickopsEC2Service) GetAllVPCEndpoints() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.VpcEndpoints {

@@ -48,7 +48,8 @@ func (s *NoclickopsRoute53Service) GetAllRoute53RecordIds() []common.Resource {
 		client := rc.Client
 		hostedZones, err := client.ListHostedZones(context.TODO(), &route53.ListHostedZonesInput{})
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("warning: %v", err)
+			continue
 		}
 
 		var id string
@@ -71,7 +72,8 @@ func (s *NoclickopsRoute53Service) GetAllRoute53RecordIds() []common.Resource {
 				})
 
 				if err != nil {
-					log.Fatal(err)
+					log.Printf("warning: %v", err)
+					break
 				}
 
 				for _, record := range listRecordSetsResponse.ResourceRecordSets {

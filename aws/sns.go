@@ -52,7 +52,8 @@ func (s *NoclickopsSNSService) GetAllTopics() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.Topics {
@@ -77,7 +78,8 @@ func (s *NoclickopsSNSService) GetAllSubscriptions() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.Subscriptions {

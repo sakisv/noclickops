@@ -51,7 +51,8 @@ func (s *NoclickopsSSMService) GetAllParametersNames() []common.Resource {
 			})
 
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 			for _, el := range res.Parameters {
 				resources = append(resources, common.Resource{Arn: *el.ARN, TerraformID: *el.Name, ResourceType: common.SSM_parameter, Region: rc.Region})
