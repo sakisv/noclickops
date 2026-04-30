@@ -44,13 +44,14 @@ func (s *NoclickopsResourceGroupTaggingAPIService) GetAllResources() []common.Re
 }
 
 func (s *NoclickopsResourceGroupTaggingAPIService) GetResourcesWithTags(key string, values []string) []common.Resource {
-	var resourcesMap map[string]common.Resource= make(map[string]common.Resource)
+	var resourcesMap map[string]common.Resource = make(map[string]common.Resource)
 
 	for _, rc := range s.Clients {
 		var paginationToken *string = nil
 		for {
 			resp, err := rc.Client.GetResources(context.TODO(), &resourcegroupstaggingapi.GetResourcesInput{
-				PaginationToken: paginationToken,
+				PaginationToken:  paginationToken,
+				ResourcesPerPage: awssdk.Int32(100),
 				TagFilters: []types.TagFilter{
 					{
 						Key:    awssdk.String(key),

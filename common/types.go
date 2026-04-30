@@ -81,6 +81,19 @@ type FilteredResults struct {
 	Meta      FilteredMeta `json:"meta"`
 }
 
+type Summary struct {
+	FoundInAWS          int     `json:"found_in_aws"`
+	FoundInTerraform    int     `json:"found_in_terraform"`
+	NotFoundInTerraform int     `json:"not_found_in_terraform"`
+	Ignored             int     `json:"ignored"`
+	PctUnmanaged        float32 `json:"pct_unmanaged"`
+}
+
+type Output struct {
+	Results map[string]FilteredResults `json:"results"`
+	Summary Summary                    `json:"summary"`
+}
+
 type ServiceMeta struct {
 	Global      bool
 	ServiceName string

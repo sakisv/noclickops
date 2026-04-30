@@ -55,8 +55,11 @@ var VALID_REGIONS = map[string]string{
 	"eusc-de-east-1": "AWS European Sovereign Cloud (Germany)",
 }
 
-var IGNORED_TAG_KEY_PREFIXES = []string {
-	"kubernetes.io/cluster/",
+var IGNORED_TAG_KEY_PREFIXES = []string{
+	"kubernetes.io/",
+	"aws:cloudformation:stack-name",
+	"k8s.io/",
+	"aws:eks:",
 	"noclickops/ignore",
 }
 

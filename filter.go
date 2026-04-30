@@ -81,3 +81,17 @@ func getIgnoredTagResources(s claws.NoclickopsResourceGroupTaggingAPIService, ig
 	}
 	return arns
 }
+
+func calculateSummary(filteredResults map[string]common.FilteredResults) common.Summary {
+	var summary common.Summary
+
+	for _, v := range filteredResults {
+		summary.FoundInAWS += v.Meta.Found
+		summary.NotFoundInTerraform += v.Meta.Unmanaged
+		summary.FoundInTerraform += v.Meta.Managed
+		summary.Ignored += v.Meta.Ignored
+	}
+
+	summary.PctUnmanaged = (float32(summary.NotFoundInTerraform) / float32(summary.FoundInAWS)) * 100
+	return summary
+}

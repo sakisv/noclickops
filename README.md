@@ -54,39 +54,81 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 ### Use with a local statefile and a single region
 
 ```
-noclickops ./example.tfstate --regions eu-west-1
+noclickops --statefile ./example.tfstate --regions eu-west-1
 ```
 
 ### Use with an s3 bucket and multiple regions
 
 ```
-noclickops -s3-bucket example-s3-statefile-bucket -s3-bucket-region eu-west-2 --regions eu-west-2,eu-west-1
+noclickops --s3-bucket example-s3-statefile-bucket --s3-bucket-region eu-west-2 --regions eu-west-2,eu-west-1
 ```
 
-## Output management
+### All flags
 
-### Format
+| Flag | Description |
+|---|---|
+| `--statefile` | Path to a local statefile to parse |
+| `--s3-bucket` | Download statefile(s) from this S3 bucket |
+| `--s3-bucket-region` | The region of the S3 bucket |
+| `--regions` | Comma-separated list of AWS regions to check |
+| `--ignore-tags` | Comma-separated list of `key=value` tag pairs — resources carrying any of these tags are excluded from results |
+| `--remove-downloaded-statefiles` | Delete any statefiles downloaded from S3 when done |
+| `--force-download` | Re-download all files from S3 even if they already exist locally |
 
-`noclickops` prints the missing resources in the following json format:
+## Ignoring resources by tag
+
+Resources tagged with certain keys are automatically excluded from results without needing `--ignore-tags`:
+
+- Tags whose key starts with `kubernetes.io/cluster/` (EKS-managed resources)
+- Tags whose key starts with `aws:eks:` (EKS-managed resources)
+- Tags whose key starts with `k8s.io/` (EKS-managed resources)
+- Tags whose key starts with `aws:cloudformation:stack-name` (resources provisioned by cloudformation)
+- Tags whose key starts with `noclickops/ignore`
+
+To exclude additional resources, pass their tags with `--ignore-tags`:
+
+```
+# Ignore all resources tagged environment=sandbox
+noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox
+
+# Multiple tag filters (any match causes the resource to be ignored)
+noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,team=platform
+
+# Multiple values for the same key
+noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,environment=staging
+```
+
+## Output format
+
+`noclickops` prints a JSON object with two top-level keys: `results` (per-service breakdown) and `summary` (account-wide totals).
 
 ```json
 {
-  "<service name>": {
-    "resources": [
-      {
-        "arn": "<the arn of the resource>",
-        "terraform_id": "<the id you would have used in `terraform import` which varies per resource>",
-        "resource_type": "<the resource name>",
-        "region": "<global | specific region>"
+  "results": {
+    "<service name>": {
+      "resources": [
+        {
+          "arn": "<the arn of the resource>",
+          "terraform_id": "<the id you would have used in `terraform import`, which varies per resource>",
+          "resource_type": "<the resource name>",
+          "region": "<global | specific region>"
+        }
+      ],
+      "meta": {
+        "found": "<total number of resources found in AWS>",
+        "managed": "<number of resources found in statefiles>",
+        "unmanaged": "<number of resources not found in statefiles>",
+        "ignored": "<number of resources excluded due to tags>",
+        "pct_unmanaged": "<percentage of unmanaged resources>"
       }
-    ],
-    "meta": {
-      "found": "<total number of resources found in AWS>",
-      "managed": "<number of resources found in statefiles>",
-      "unmanaged": "<number of resources not found in statefiles>",
-      "ignored": "<number of resources that are ignored because of their tags>",
-      "pct_unmanaged": "<percentage of unmanaged resources>"
     }
+  },
+  "summary": {
+    "found_in_aws": "<total resources found across all services>",
+    "found_in_terraform": "<total managed resources>",
+    "not_found_in_terraform": "<total unmanaged resources>",
+    "ignored": "<total ignored resources>",
+    "pct_unmanaged": "<overall unmanaged percentage>"
   }
 }
 ```
@@ -95,109 +137,122 @@ Example:
 
 ```json
 {
-  "iam": {
-    "resources": [
-      {
-        "arn": "arn:aws:iam::1234567890:user/admin",
-        "terraform_id": "admin",
-        "resource_type": "iam_user",
-        "region": "global"
-      },
-      {
-        "arn": "arn:aws:iam::1234567890:user/admin",
-        "terraform_id": "sakisv",
-        "resource_type": "iam_user",
-        "region": "global"
-      },
-      {
-        "arn": "arn:aws:iam::1234567890:group/admin",
-        "terraform_id": "admins",
-        "resource_type": "iam_group",
-        "region": "global"
+  "results": {
+    "iam": {
+      "resources": [
+        {
+          "arn": "arn:aws:iam::1234567890:user/admin",
+          "terraform_id": "admin",
+          "resource_type": "iam_user",
+          "region": "global"
+        },
+        {
+          "arn": "arn:aws:iam::1234567890:user/sakisv",
+          "terraform_id": "sakisv",
+          "resource_type": "iam_user",
+          "region": "global"
+        },
+        {
+          "arn": "arn:aws:iam::1234567890:group/admins",
+          "terraform_id": "admins",
+          "resource_type": "iam_group",
+          "region": "global"
+        }
+      ],
+      "meta": {
+        "found": 10,
+        "managed": 7,
+        "unmanaged": 3,
+        "ignored": 0,
+        "pct_unmanaged": 30.0
       }
-    ],
-    "meta": {
-      "found": 10,
-      "managed": 7,
-      "unmanaged": 3,
-      "ignored": 0,
-      "pct_unmanaged": 30.0
+    },
+    "ssm": {
+      "resources": [
+        {
+          "arn": "arn:aws:ssm:eu-west-2:1234567890:parameter/an/example/ssm/parameter",
+          "terraform_id": "/an/example/ssm/parameter",
+          "resource_type": "ssm_parameter",
+          "region": "eu-west-2"
+        }
+      ],
+      "meta": {
+        "found": 5,
+        "managed": 4,
+        "unmanaged": 1,
+        "ignored": 0,
+        "pct_unmanaged": 20.0
+      }
     }
   },
-  "ssm": {
-    "resources": [
-      {
-        "arn": "arn:aws:ssm:eu-west-2:1234567890:parameter/an/example/ssm/parameter"
-        "terraform_id": "/an/example/ssm/parameter",
-        "resource_type": "ssm_parameter",
-        "region": "eu-west-2"
-      }
-    ],
-    "meta": {
-      "found": 5,
-      "managed": 4,
-      "unmanaged": 1,
-      "ignored": 0,
-      "pct_unmanaged": 20.0
-    }
+  "summary": {
+    "found_in_aws": 15,
+    "found_in_terraform": 11,
+    "not_found_in_terraform": 4,
+    "ignored": 0,
+    "pct_unmanaged": 26.67
   }
 }
 ```
 
 ### Saving locally for quicker analysis
 
-To avoid having to query AWS if you just want to do a quick check of the findings, you can redirect the output to a file:
+To avoid having to query AWS repeatedly, redirect the output to a file:
 
 ```
-noclickops -s3-bucket example-s3-statefile-bucket -s3-bucket-region eu-west-2 --regions eu-west-2,eu-west-1 > unmanaged_resources.json
+noclickops --s3-bucket example-s3-statefile-bucket --s3-bucket-region eu-west-2 --regions eu-west-2,eu-west-1 > unmanaged_resources.json
 ```
 
 
 ## Using `jq` to narrow down the list
 
-You can use `jq` to slice the results in more manageable chunks either by piping the output directly to `jq` or by storing it in a file and then `cat`ing it.
-
-The examples below use the second method, but they'd work on the first as well
+You can pipe the output directly to `jq` or store it in a file first. The examples below use the file approach.
 
 ### Find which services have unmanaged resources
 
 ```
-cat unmanaged_resources.json | jq 'keys'
+cat unmanaged_resources.json | jq '.results | keys'
 ```
 
 ### List unmanaged resources from a specific service only
 
 ```
-cat unmanaged_resources.json | jq '.ssm.resources'
+cat unmanaged_resources.json | jq '.results.ssm.resources'
 ```
 
 ### List specific resource types
 
 ```
-cat unmanaged_resources.json | jq '.[] | .resources[] | select(.resource_type | contains("iam_policy"))'
+cat unmanaged_resources.json | jq '.results[] | .resources[] | select(.resource_type | contains("iam_policy"))'
 ```
 
-or, if you know the service
+or, if you know the service:
 
 ```
-cat unmanaged_resources.json | jq '.iam.resources[] | select(.resource_type | contains("iam_policy"))'
+cat unmanaged_resources.json | jq '.results.iam.resources[] | select(.resource_type | contains("iam_policy"))'
 ```
 
 
 ### List all the different resource types
 
 ```
-cat unmanaged_resources.json | jq '[.[].resources[] | .resource_type] | unique'
+cat unmanaged_resources.json | jq '[.results[].resources[] | .resource_type] | unique'
 ```
 
 Alternatively, if you also want counts:
 
 ```
-cat unmanaged_resources.json | jq '.[] | .resources[].resource_type' | sort | uniq -c
+cat unmanaged_resources.json | jq '.results[] | .resources[].resource_type' | sort | uniq -c
 ```
 
 ### Show the unmanaged percentage per service
 
 ```
-cat unmanaged_resources.json | jq 'to_entries[] | {service: .key, pct_unmanaged: .value.meta.pct_unmanaged}'
+cat unmanaged_resources.json | jq '.results | to_entries[] | {service: .key, pct_unmanaged: .value.meta.pct_unmanaged}'
+```
+
+### Show the overall summary
+
+```
+cat unmanaged_resources.json | jq '.summary'
 ```
