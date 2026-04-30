@@ -34,6 +34,7 @@ const (
 	NAT_gateway
 	Subnet
 	VPC_endpoint
+	Lambda_function
 	Autoscaling_group
 )
 
@@ -58,6 +59,7 @@ const (
 	ELB
 	ELBV2
 	ASG
+	Lambda
 	ResourceGroupsTaggingAPI
 )
 
