@@ -61,7 +61,8 @@ func (s *NoclickopsResourceGroupTaggingAPIService) GetResourcesWithTags(key stri
 			})
 
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, tagMapping := range resp.ResourceTagMappingList {
@@ -93,7 +94,8 @@ func (s *NoclickopsResourceGroupTaggingAPIService) GetTagKeysWithPrefixes(prefix
 			})
 
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, key := range resp.TagKeys {

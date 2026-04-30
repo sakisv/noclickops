@@ -49,7 +49,8 @@ func (s *NoclickopsS3Service) GetAllBuckets() []common.Resource {
 				ContinuationToken: continuationToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.Buckets {

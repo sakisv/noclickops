@@ -51,7 +51,8 @@ func (s *NoclickopsRDSService) GetAllDBInstances() []common.Resource {
 				Marker: marker,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.DBInstances {
@@ -76,7 +77,8 @@ func (s *NoclickopsRDSService) GetAllDBClusters() []common.Resource {
 				Marker: marker,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.DBClusters {

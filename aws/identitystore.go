@@ -58,7 +58,8 @@ func (s *NoclickopsIdentityStoreService) GetAllIdentityStoreUsers(ssoadmin_clien
 		})
 
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("warning: %v", err)
+			break
 		}
 		for _, el := range res.Users {
 			tf_id := fmt.Sprintf("%v/%v", instance_id, *el.UserId)
@@ -90,7 +91,8 @@ func (s *NoclickopsIdentityStoreService) GetAllIdentityStoreGroups(ssoadmin_clie
 		})
 
 		if err != nil {
-			log.Fatal(err)
+			log.Printf("warning: %v", err)
+			break
 		}
 		for _, el := range res.Groups {
 			tf_id := fmt.Sprintf("%v/%v", instance_id, *el.GroupId)

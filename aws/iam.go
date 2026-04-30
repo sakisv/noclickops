@@ -59,7 +59,8 @@ func (s *NoclickopsIAMService) GetAllPoliciesArns() []common.Resource {
 			})
 
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 			for _, el := range res.Policies {
 				resources = append(resources, common.Resource{Arn: *el.Arn, TerraformID: *el.Arn, ResourceType: common.IAM_policy, Region: rc.Region})
@@ -85,7 +86,8 @@ func (s *NoclickopsIAMService) GetAllIAMUsers() []common.Resource {
 			})
 
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 			for _, el := range res.Users {
 				resources = append(resources, common.Resource{Arn: *el.Arn, TerraformID: *el.UserName, ResourceType: common.IAM_user, Region: rc.Region})
@@ -111,7 +113,8 @@ func (s *NoclickopsIAMService) GetAllIAMGroups() []common.Resource {
 			})
 
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 			for _, el := range res.Groups {
 				resources = append(resources, common.Resource{Arn: *el.Arn, TerraformID: *el.GroupName, ResourceType: common.IAM_group, Region: rc.Region})

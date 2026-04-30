@@ -52,7 +52,8 @@ func (s *NoclickopsEKSService) GetEKSClustersAndNodegroups() []common.Resource {
 				NextToken: nextToken,
 			})
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("warning: %v", err)
+				break
 			}
 
 			for _, el := range res.Clusters {
@@ -69,7 +70,8 @@ func (s *NoclickopsEKSService) GetEKSClustersAndNodegroups() []common.Resource {
 					})
 
 					if err != nil {
-						log.Fatal(err)
+						log.Printf("warning: %v", err)
+						break
 					}
 
 					for _, nodegroup := range res2.Nodegroups {
@@ -78,7 +80,8 @@ func (s *NoclickopsEKSService) GetEKSClustersAndNodegroups() []common.Resource {
 							NodegroupName: &nodegroup,
 						})
 						if err != nil {
-							log.Fatal(err)
+							log.Printf("warning: %v", err)
+							continue
 						}
 						tfId := fmt.Sprintf("%v:%v", el, nodegroup)
 						resources = append(resources, common.Resource{Arn: *res3.Nodegroup.NodegroupArn, TerraformID: tfId, ResourceType: common.EKS_node_group, Region: rc.Region})
