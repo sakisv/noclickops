@@ -26,7 +26,7 @@ func main() {
 
 	println("Scanning statefiles for terraform ids")
 	managedIDs := getManagedIDs(downloaded_files)
-	if config.removeDownloadedStatefiles {
+	if config.deleteDownloadedStatefiles {
 		defer delete_statefiles_dir()
 	}
 

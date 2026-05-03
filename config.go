@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"log"
 	"strings"
@@ -11,9 +10,31 @@ import (
 	"github.com/spf13/viper"
 )
 
+type ConfigValues int
+
+const (
+	Statefile ConfigValues = iota
+	S3Bucket
+	S3BucketRegion
+	DeleteDownloadedStateFiles
+	ForceDownload
+	Regions
+	IgnoreTags
+)
+
+var configValues = map[ConfigValues]string{
+	Statefile:                  "statefile",
+	S3Bucket:                   "s3-bucket",
+	S3BucketRegion:             "s3-bucket-region",
+	DeleteDownloadedStateFiles: "delete-downloaded-state-files",
+	ForceDownload:              "force-download",
+	Regions:                    "regions",
+	IgnoreTags:                 "ignore-tags",
+}
+
 type NoclickopsConfig struct {
 	stateFile                  string
-	removeDownloadedStatefiles bool
+	deleteDownloadedStatefiles bool
 	forceDownload              bool
 	regions                    string
 	s3Bucket                   string
@@ -93,6 +114,7 @@ func isValidRegion(region string) bool {
 
 func loadConfig() NoclickopsConfig {
 	viper.SetConfigName(".noclickops")
+
 	// paths are searched in the order they've been added
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("$HOME/.config/noclickops/")
@@ -103,22 +125,22 @@ func loadConfig() NoclickopsConfig {
 		log.Fatal("Error when attempting to find and read the config file %w", err)
 	}
 
-	var config NoclickopsConfig
-
-	flag.StringVar(&config.stateFile, "statefile", "", "The statefile to parse")
-	flag.StringVar(&config.s3Bucket, "s3-bucket", "", "Download statefile(s) from this s3 bucket")
-	flag.StringVar(&config.s3BucketRegion, "s3-bucket-region", "", "The bucket's region")
-	flag.StringVar(&config.regions, "regions", "", "Comma-separated list of regions to check")
-	flag.StringVar(&config.ignoreTags, "ignore-tags", "", "Comma-separated list of 'key=value' pairs of tags to ignore (e.g. mytag=myvalue,another/tag=another-value)")
-	flag.BoolVar(&config.removeDownloadedStatefiles, "remove-downloaded-statefiles", false, "If specified, any downloaded statefiles will be deleted at the end")
-	flag.BoolVar(&config.forceDownload, "force-download", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
-	flag.Parse()
-
-	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.StringP(configValues[Statefile], "s", "", "The statefile to parse")
+	pflag.StringP(configValues[S3Bucket], "b", "", "Download statefile(s) from this s3 bucket")
+	pflag.StringP(configValues[S3BucketRegion], "k", "", "The bucket's region")
+	pflag.StringP(configValues[Regions], "r", "", "Comma-separated list of regions to check")
+	pflag.StringArrayP(configValues[IgnoreTags], "i", []string{}, "Can be used multiple times to provide list of 'tagKey=value1,value2' tags to ignore")
+	pflag.BoolP(configValues[DeleteDownloadedStateFiles], "d", false, "If specified, any downloaded statefiles will be deleted at the end")
+	pflag.BoolP(configValues[ForceDownload], "f", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
 	pflag.Parse()
+
+	// use this to pass control to viper
+	// This means that any references to `statefile` will be resolved in the
+	// right order (i.e. default, config, env, commandline)
 	viper.BindPFlags(pflag.CommandLine)
 
-	log.Fatal(viper.Get("s3-bucket"))
+	config := NewConfig(viper.GetViper())
+
 	err = config.validate()
 	if err != nil {
 		log.Fatal(err)
