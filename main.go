@@ -9,24 +9,24 @@ import (
 )
 
 func main() {
-	opts := parseFlags()
+	config := loadConfig()
 
-	configs := generatePerRegionConfigs(opts.regionsList)
+	configs := generatePerRegionConfigs(config.regionsList)
 
 	var downloaded_files []string
-	if opts.s3Bucket != "" {
+	if config.s3Bucket != "" {
 		println("Downloading statefiles from s3")
-		s3_cfg := getConfigForRegion(opts.s3BucketRegion)
-		downloaded_files = download_statefiles_from_s3(opts.s3Bucket, opts.forceDownload, s3_cfg)
+		s3_cfg := getConfigForRegion(config.s3BucketRegion)
+		downloaded_files = download_statefiles_from_s3(config.s3Bucket, config.forceDownload, s3_cfg)
 
 	}
-	if opts.stateFile != "" {
-		downloaded_files = append(downloaded_files, opts.stateFile)
+	if config.stateFile != "" {
+		downloaded_files = append(downloaded_files, config.stateFile)
 	}
 
 	println("Scanning statefiles for terraform ids")
 	managedIDs := getManagedIDs(downloaded_files)
-	if opts.removeDownloadedStatefiles {
+	if config.deleteDownloadedStatefiles {
 		defer delete_statefiles_dir()
 	}
 
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	s := claws.NewResourceGroupTaggingAPIServiceFromConfigs(configs, claws.SERVICES[common.ResourceGroupsTaggingAPI])
-	ignoredArns := getIgnoredTagResources(s, opts.ignoreTagsMap)
+	ignoredArns := getIgnoredTagResources(s, config.ignoreTagsMap)
 	unmanagedResourceIds := filter(managedIDs, foundResources, ignoredArns)
 	summary := calculateSummary(unmanagedResourceIds)
 	json, _ := json.Marshal(common.Output{Results: unmanagedResourceIds, Summary: summary})

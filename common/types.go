@@ -44,6 +44,7 @@ func (r ResourceType) MarshalJSON() ([]byte, error) {
 
 type AWSServiceName int
 
+//go:generate stringer -type=AWSServiceName
 const (
 	Route53 AWSServiceName = iota
 	IAM

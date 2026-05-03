@@ -1,0 +1,15 @@
+---
+version: 2
+updates:
+  - package-ecosystem: gomod
+    cooldown:
+      default-days: 7
+    groups:
+      dependencies:
+        update-types:
+          - patch
+          - minor
+    directories:
+      - "/"
+    schedule:
+      interval: "monthly"
