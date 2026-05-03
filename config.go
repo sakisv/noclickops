@@ -23,37 +23,37 @@ type NoclickopsConfig struct {
 	ignoreTagsMap              map[string][]string
 }
 
-func (opts *NoclickopsConfig) validate() error {
+func (config *NoclickopsConfig) validate() error {
 	var errs []string
 
-	if opts.stateFile == "" && opts.s3Bucket == "" {
+	if config.stateFile == "" && config.s3Bucket == "" {
 		errs = append(errs, "At least one of 's3-bucket' or 'statefile' must be provided")
 	}
 
-	if opts.s3Bucket != "" {
-		if opts.s3BucketRegion == "" {
+	if config.s3Bucket != "" {
+		if config.s3BucketRegion == "" {
 			errs = append(errs, "s3-bucket-region must be provided if s3-bucket is defined")
 		}
-		if !isValidRegion(opts.s3BucketRegion) {
-			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", opts.s3BucketRegion))
+		if !isValidRegion(config.s3BucketRegion) {
+			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", config.s3BucketRegion))
 		}
 	}
 
-	if opts.forceDownload && opts.s3Bucket == "" {
+	if config.forceDownload && config.s3Bucket == "" {
 		errs = append(errs, "'force-download' must be used alongside an 's3-bucket'")
 	}
 
-	for region := range strings.SplitSeq(opts.regions, ",") {
+	for region := range strings.SplitSeq(config.regions, ",") {
 		r := strings.ToLower(strings.TrimSpace(region))
 		if !isValidRegion(r) {
 			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", r))
 			continue
 		}
 
-		opts.regionsList = append(opts.regionsList, r)
+		config.regionsList = append(config.regionsList, r)
 	}
 
-	opts.ignoreTagsMap = parseTags(opts.ignoreTags)
+	config.ignoreTagsMap = parseTags(config.ignoreTags)
 
 	if len(errs) > 0 {
 		errs = append(errs, "Use -h / --help")
@@ -103,15 +103,15 @@ func loadConfig() NoclickopsConfig {
 		log.Fatal("Error when attempting to find and read the config file %w", err)
 	}
 
-	var opts NoclickopsConfig
+	var config NoclickopsConfig
 
-	flag.StringVar(&opts.stateFile, "statefile", "", "The statefile to parse")
-	flag.StringVar(&opts.s3Bucket, "s3-bucket", "", "Download statefile(s) from this s3 bucket")
-	flag.StringVar(&opts.s3BucketRegion, "s3-bucket-region", "", "The bucket's region")
-	flag.StringVar(&opts.regions, "regions", "", "Comma-separated list of regions to check")
-	flag.StringVar(&opts.ignoreTags, "ignore-tags", "", "Comma-separated list of 'key=value' pairs of tags to ignore (e.g. mytag=myvalue,another/tag=another-value)")
-	flag.BoolVar(&opts.removeDownloadedStatefiles, "remove-downloaded-statefiles", false, "If specified, any downloaded statefiles will be deleted at the end")
-	flag.BoolVar(&opts.forceDownload, "force-download", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
+	flag.StringVar(&config.stateFile, "statefile", "", "The statefile to parse")
+	flag.StringVar(&config.s3Bucket, "s3-bucket", "", "Download statefile(s) from this s3 bucket")
+	flag.StringVar(&config.s3BucketRegion, "s3-bucket-region", "", "The bucket's region")
+	flag.StringVar(&config.regions, "regions", "", "Comma-separated list of regions to check")
+	flag.StringVar(&config.ignoreTags, "ignore-tags", "", "Comma-separated list of 'key=value' pairs of tags to ignore (e.g. mytag=myvalue,another/tag=another-value)")
+	flag.BoolVar(&config.removeDownloadedStatefiles, "remove-downloaded-statefiles", false, "If specified, any downloaded statefiles will be deleted at the end")
+	flag.BoolVar(&config.forceDownload, "force-download", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
 	flag.Parse()
 
 	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
@@ -119,10 +119,10 @@ func loadConfig() NoclickopsConfig {
 	viper.BindPFlags(pflag.CommandLine)
 
 	log.Fatal(viper.Get("s3-bucket"))
-	err = opts.validate()
+	err = config.validate()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return opts
+	return config
 }

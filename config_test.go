@@ -42,7 +42,7 @@ func TestOptionsValidate(t *testing.T) {
 
 	tests := []struct {
 		name              string
-		opts              NoclickopsConfig
+		config            NoclickopsConfig
 		wantErr           bool
 		errContains       string
 		wantRegionsList   []string
@@ -50,97 +50,97 @@ func TestOptionsValidate(t *testing.T) {
 	}{
 		{
 			name:        "invalid with statefile only regions all",
-			opts:        NoclickopsConfig{stateFile: "state.tfstate", regions: "all"},
+			config:      NoclickopsConfig{stateFile: "state.tfstate", regions: "all"},
 			wantErr:     true,
 			errContains: "'all' is not a valid region",
 		},
 		{
 			name:        "invalid with s3 bucket regions all",
-			opts:        NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
+			config:      NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
 			wantErr:     true,
 			errContains: "'all' is not a valid region",
 		},
 		{
 			name:            "valid with s3 bucket and specific regions",
-			opts:            NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "us-east-1,eu-west-1"},
+			config:          NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "us-east-1,eu-west-1"},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:            "multiple valid regions populates regionsList",
-			opts:            NoclickopsConfig{stateFile: "state.tfstate", regions: "us-east-1,eu-west-1"},
+			config:          NoclickopsConfig{stateFile: "state.tfstate", regions: "us-east-1,eu-west-1"},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:            "regions with extra whitespace are trimmed",
-			opts:            NoclickopsConfig{stateFile: "state.tfstate", regions: " us-east-1 , eu-west-1 "},
+			config:          NoclickopsConfig{stateFile: "state.tfstate", regions: " us-east-1 , eu-west-1 "},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:            "regions are lowercased",
-			opts:            NoclickopsConfig{stateFile: "state.tfstate", regions: "US-EAST-1,EU-WEST-1"},
+			config:          NoclickopsConfig{stateFile: "state.tfstate", regions: "US-EAST-1,EU-WEST-1"},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:              "single tag is parsed correctly",
-			opts:              NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value"},
+			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value"},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value"}},
 		},
 		{
 			name:              "multiple tags with special characters are parsed correctly",
-			opts:              NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,another/tag=another.value/with-special-chars"},
+			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,another/tag=another.value/with-special-chars"},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value"}, "another/tag": []string{"another.value/with-special-chars"}},
 		},
 		{
 			name:              "same key multiple times is parsed properly",
-			opts:              NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,a-tag=b-value,b-tag=c-value"},
+			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,a-tag=b-value,b-tag=c-value"},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value", "b-value"}, "b-tag": []string{"c-value"}},
 		},
 		{
 			name:        "neither statefile nor s3 bucket",
-			opts:        NoclickopsConfig{regions: "all"},
+			config:      NoclickopsConfig{regions: "all"},
 			wantErr:     true,
 			errContains: "At least one of 's3-bucket' or 'statefile' must be provided",
 		},
 		{
 			name:        "s3 bucket without region",
-			opts:        NoclickopsConfig{s3Bucket: "my-bucket", regions: "all"},
+			config:      NoclickopsConfig{s3Bucket: "my-bucket", regions: "all"},
 			wantErr:     true,
 			errContains: "s3-bucket-region must be provided if s3-bucket is defined",
 		},
 		{
 			name:        "s3 bucket region set to all",
-			opts:        NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "all", regions: "all"},
+			config:      NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "all", regions: "all"},
 			wantErr:     true,
 			errContains: "'all' is not a valid region",
 		},
 		{
 			name:        "invalid s3 bucket region",
-			opts:        NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "not-a-region", regions: "all"},
+			config:      NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "not-a-region", regions: "all"},
 			wantErr:     true,
 			errContains: "'not-a-region' is not a valid region",
 		},
 		{
 			name:        "invalid region in regions list",
-			opts:        NoclickopsConfig{stateFile: "state.tfstate", regions: "us-east-1,bad-region"},
+			config:      NoclickopsConfig{stateFile: "state.tfstate", regions: "us-east-1,bad-region"},
 			wantErr:     true,
 			errContains: "'bad-region' is not a valid region",
 		},
 		{
 			name:        "multiple errors reported together",
-			opts:        NoclickopsConfig{regions: "bad-region"},
+			config:      NoclickopsConfig{regions: "bad-region"},
 			wantErr:     true,
 			errContains: "At least one of 's3-bucket' or 'statefile' must be provided",
 		},
 		{
 			name:        "error message includes help hint",
-			opts:        NoclickopsConfig{regions: "all"},
+			config:      NoclickopsConfig{regions: "all"},
 			wantErr:     true,
 			errContains: "Use -h / --help",
 		},
@@ -148,7 +148,7 @@ func TestOptionsValidate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.opts.validate()
+			err := tt.config.validate()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("validate() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -160,28 +160,28 @@ func TestOptionsValidate(t *testing.T) {
 				return
 			}
 			if tt.wantRegionsList != nil {
-				if len(tt.opts.regionsList) != len(tt.wantRegionsList) {
-					t.Errorf("regionsList length = %v, want %v", len(tt.opts.regionsList), len(tt.wantRegionsList))
+				if len(tt.config.regionsList) != len(tt.wantRegionsList) {
+					t.Errorf("regionsList length = %v, want %v", len(tt.config.regionsList), len(tt.wantRegionsList))
 					return
 				}
 				for _, r := range tt.wantRegionsList {
-					if !slices.Contains(tt.opts.regionsList, r) {
-						t.Errorf("Missing %v from %v", r, tt.opts.regionsList)
+					if !slices.Contains(tt.config.regionsList, r) {
+						t.Errorf("Missing %v from %v", r, tt.config.regionsList)
 					}
 				}
 			}
 			if tt.wantIgnoreTagsMap != nil {
-				if len(tt.wantIgnoreTagsMap) != len(tt.opts.ignoreTagsMap) {
-					t.Errorf("ignoreTagsMap length = %v, want %v", len(tt.opts.ignoreTagsMap), len(tt.wantIgnoreTagsMap))
+				if len(tt.wantIgnoreTagsMap) != len(tt.config.ignoreTagsMap) {
+					t.Errorf("ignoreTagsMap length = %v, want %v", len(tt.config.ignoreTagsMap), len(tt.wantIgnoreTagsMap))
 					return
 				}
-				if diff := cmp.Diff(tt.opts.ignoreTagsMap, tt.wantIgnoreTagsMap); diff != "" {
-					t.Errorf("expected %v, got %v", tt.wantIgnoreTagsMap, tt.opts.ignoreTagsMap)
+				if diff := cmp.Diff(tt.config.ignoreTagsMap, tt.wantIgnoreTagsMap); diff != "" {
+					t.Errorf("expected %v, got %v", tt.wantIgnoreTagsMap, tt.config.ignoreTagsMap)
 				}
 			}
 			// When regions == "all", regionsList should be populated with all known regions
-			if tt.opts.regions == "all" && !tt.wantErr {
-				if len(tt.opts.regionsList) == 0 {
+			if tt.config.regions == "all" && !tt.wantErr {
+				if len(tt.config.regionsList) == 0 {
 					t.Errorf("regionsList should be populated when regions is 'all'")
 				}
 			}
