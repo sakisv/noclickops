@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 type options struct {
@@ -89,6 +92,17 @@ func isValidRegion(region string) bool {
 }
 
 func parseFlags() options {
+	viper.SetConfigName(".noclickops")
+	// paths are searched in the order they've been added
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("$HOME/.config/noclickops/")
+	viper.AddConfigPath("/etc/noclickops/")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal("Error when attempting to find and read the config file %w", err)
+	}
+
 	var opts options
 
 	flag.StringVar(&opts.stateFile, "statefile", "", "The statefile to parse")
@@ -100,7 +114,12 @@ func parseFlags() options {
 	flag.BoolVar(&opts.forceDownload, "force-download", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
 	flag.Parse()
 
-	err := opts.validate()
+	pflag.CommandLine.AddGoFlagSet(flag.CommandLine)
+	pflag.Parse()
+	viper.BindPFlags(pflag.CommandLine)
+
+	log.Fatal(viper.Get("s3-bucket"))
+	err = opts.validate()
 	if err != nil {
 		log.Fatal(err)
 	}
