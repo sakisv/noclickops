@@ -45,29 +45,29 @@ type NoclickopsConfig struct {
 }
 
 func (config *NoclickopsConfig) validate() error {
-	var errs []string
+	var errs []error
 
 	if config.stateFile == "" && config.s3Bucket == "" {
-		errs = append(errs, "At least one of 's3-bucket' or 'statefile' must be provided")
+		errs = append(errs, fmt.Errorf("At least one of 's3-bucket' or 'statefile' must be provided"))
 	}
 
 	if config.s3Bucket != "" {
 		if config.s3BucketRegion == "" {
-			errs = append(errs, "s3-bucket-region must be provided if s3-bucket is defined")
+			errs = append(errs, fmt.Errorf("s3-bucket-region must be provided if s3-bucket is defined"))
 		}
 		if !isValidRegion(config.s3BucketRegion) {
-			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", config.s3BucketRegion))
+			errs = append(errs, fmt.Errorf("'%v' is not a valid region", config.s3BucketRegion))
 		}
 	}
 
 	if config.forceDownload && config.s3Bucket == "" {
-		errs = append(errs, "'force-download' must be used alongside an 's3-bucket'")
+		errs = append(errs, fmt.Errorf("'force-download' must be used alongside an 's3-bucket'"))
 	}
 
 	for region := range strings.SplitSeq(config.regions, ",") {
 		r := strings.ToLower(strings.TrimSpace(region))
 		if !isValidRegion(r) {
-			errs = append(errs, fmt.Sprintf("'%v' is not a valid region", r))
+			errs = append(errs, fmt.Errorf("'%v' is not a valid region", r))
 			continue
 		}
 
@@ -77,8 +77,8 @@ func (config *NoclickopsConfig) validate() error {
 	config.ignoreTagsMap = parseTags(config.ignoreTags)
 
 	if len(errs) > 0 {
-		errs = append(errs, "Use -h / --help")
-		return errors.New(strings.Join(errs, "\n"))
+		errs = append(errs, fmt.Errorf("Use -h / --help"))
+		return errors.Join(errs...)
 	}
 	return nil
 }
