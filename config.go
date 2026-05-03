@@ -44,6 +44,54 @@ type NoclickopsConfig struct {
 	ignoreTagsMap              map[string][]string
 }
 
+func NewConfig(v *viper.Viper) NoclickopsConfig {
+	var config = NoclickopsConfig{}
+	config.stateFile = v.GetString(configValues[Statefile])
+	config.s3Bucket = v.GetString(configValues[S3Bucket])
+	config.s3BucketRegion = v.GetString(configValues[S3BucketRegion])
+	config.deleteDownloadedStatefiles = v.GetBool(configValues[DeleteDownloadedStateFiles])
+	config.forceDownload = v.GetBool(configValues[ForceDownload])
+	config.regionsList = v.GetStringSlice(configValues[Regions])
+
+	switch t := v.Get(configValues[Regions]).(type) {
+	// if received from flag, it will be a string
+	case string:
+		config.regions = t
+		config.regionsList = strings.Split(config.regions, ",")
+	// if read from file, it will be []interface{}
+	case []any:
+		for _, region := range t {
+			s, ok := region.(string)
+			if !ok {
+				fmt.Printf("could not convert '%v' to string for %v", region, configValues[Regions])
+			}
+			config.regionsList = append(config.regionsList, s)
+		}
+		config.regions = strings.Join(config.regionsList, ",")
+	default:
+		fmt.Printf("unexpected '%v' type %T", configValues[Regions], t)
+	}
+
+	switch t := v.Get(configValues[IgnoreTags]).(type) {
+	// if received from flag, it will be a []string
+	case []string:
+		config.ignoreTags = t
+		config.ignoreTagsMap = parseTags(t)
+	// if read from file, it will be []interface{}, so we use Unmarshalkey to
+	// cast into the structure we need
+	case []any:
+		v.UnmarshalKey(configValues[IgnoreTags], &config.ignoreTagsMap)
+		for k, v := range config.ignoreTagsMap {
+			tagString := fmt.Sprintf("%v=%v", k, strings.Join(v, ","))
+			config.ignoreTags = append(config.ignoreTags, tagString)
+		}
+	default:
+		fmt.Printf("unexpected '%v' type %T", configValues[IgnoreTags], t)
+	}
+
+	return config
+}
+
 func (config *NoclickopsConfig) validate() error {
 	var errs []error
 
