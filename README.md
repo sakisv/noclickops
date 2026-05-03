@@ -31,24 +31,23 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 
 ## Supported services and resources
 
-|    Service    	|                                          Resources                                           	|
-|:-------------:	|:--------------------------------------------------------------------------------------------:	|
-|    route53    	|                              route53_zone, route53_record                                    	|
-|      iam      	|                           iam_user, iam_group, iam_policy                                    	|
-|      ssm      	|                                      ssm_parameter                                           	|
-|      ec2      	|   security_group, security_group_rule, instance, eip, vpc, internet_gateway, nat_gateway,    	|
-|               	|                                   subnet, vpc_endpoint                                       	|
-|      eks      	|                             eks_cluster, eks_node_group                                      	|
-| identitystore 	|                        identitystore_group, identitystore_user                               	|
-|    ssoadmin   	|                                 ssoadmin_permission_set                                      	|
-|      rds      	|                                 db_instance, rds_cluster                                     	|
-|      sns      	|                              sns_topic, sns_subscription                                     	|
-|      s3       	|                                        s3_bucket                                             	|
-|  cloudfront   	|                                  cloudfront_distribution                                     	|
-|      elb      	|                                      elb_load_balancer                                       	|
-|     elbv2     	|                                     elbv2_load_balancer                                      	|
-| autoscaling   	|                                    autoscaling_group                                         	|
-|    lambda     	|                                   lambda_function                                            	|
+| Service       	| Resources                                                                                                    	|
+|---------------	|--------------------------------------------------------------------------------------------------------------	|
+| route53       	| route53_zone, route53_record                                                                                 	|
+| iam           	| iam_user, iam_group, iam_policy                                                                              	|
+| ssm           	| ssm_parameter                                                                                                	|
+| ec2           	| security_group, security_group_rule, instance, eip, vpc, internet_gateway, nat_gateway, subnet, vpc_endpoint 	|
+| eks           	| eks_cluster, eks_node_group                                                                                  	|
+| identitystore 	| identitystore_group, identitystore_user                                                                      	|
+| ssoadmin      	| ssoadmin_permission_set                                                                                      	|
+| rds           	| db_instance, rds_cluster                                                                                     	|
+| sns           	| sns_topic, sns_subscription                                                                                  	|
+| s3            	| s3_bucket                                                                                                    	|
+| cloudfront    	| cloudfront_distribution                                                                                      	|
+| elb           	| elb_load_balancer                                                                                            	|
+| elbv2         	| elbv2_load_balancer                                                                                          	|
+| autoscaling   	| autoscaling_group                                                                                            	|
+| lambda        	| lambda_function                                                                                              	|
 
 ## How to use
 
@@ -122,10 +121,10 @@ To exclude additional resources, pass their tags with `--ignore-tags`:
 noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox
 
 # Multiple tag filters (any match causes the resource to be ignored)
-noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,team=platform
+noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox --ignore-tags team=platform
 
 # Multiple values for the same key
-noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,environment=staging
+noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,staging
 ```
 
 ## Output format
