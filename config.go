@@ -11,7 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-type options struct {
+type NoclickopsConfig struct {
 	stateFile                  string
 	removeDownloadedStatefiles bool
 	forceDownload              bool
@@ -23,7 +23,7 @@ type options struct {
 	ignoreTagsMap              map[string][]string
 }
 
-func (opts *options) validate() error {
+func (opts *NoclickopsConfig) validate() error {
 	var errs []string
 
 	if opts.stateFile == "" && opts.s3Bucket == "" {
@@ -91,7 +91,7 @@ func isValidRegion(region string) bool {
 	return found
 }
 
-func parseFlags() options {
+func loadConfig() NoclickopsConfig {
 	viper.SetConfigName(".noclickops")
 	// paths are searched in the order they've been added
 	viper.AddConfigPath(".")
@@ -103,7 +103,7 @@ func parseFlags() options {
 		log.Fatal("Error when attempting to find and read the config file %w", err)
 	}
 
-	var opts options
+	var opts NoclickopsConfig
 
 	flag.StringVar(&opts.stateFile, "statefile", "", "The statefile to parse")
 	flag.StringVar(&opts.s3Bucket, "s3-bucket", "", "Download statefile(s) from this s3 bucket")

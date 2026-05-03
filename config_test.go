@@ -42,7 +42,7 @@ func TestOptionsValidate(t *testing.T) {
 
 	tests := []struct {
 		name              string
-		opts              options
+		opts              NoclickopsConfig
 		wantErr           bool
 		errContains       string
 		wantRegionsList   []string
@@ -50,97 +50,97 @@ func TestOptionsValidate(t *testing.T) {
 	}{
 		{
 			name:        "invalid with statefile only regions all",
-			opts:        options{stateFile: "state.tfstate", regions: "all"},
+			opts:        NoclickopsConfig{stateFile: "state.tfstate", regions: "all"},
 			wantErr:     true,
 			errContains: "'all' is not a valid region",
 		},
 		{
 			name:        "invalid with s3 bucket regions all",
-			opts:        options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
+			opts:        NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "all"},
 			wantErr:     true,
 			errContains: "'all' is not a valid region",
 		},
 		{
 			name:            "valid with s3 bucket and specific regions",
-			opts:            options{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "us-east-1,eu-west-1"},
+			opts:            NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "us-east-1", regions: "us-east-1,eu-west-1"},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:            "multiple valid regions populates regionsList",
-			opts:            options{stateFile: "state.tfstate", regions: "us-east-1,eu-west-1"},
+			opts:            NoclickopsConfig{stateFile: "state.tfstate", regions: "us-east-1,eu-west-1"},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:            "regions with extra whitespace are trimmed",
-			opts:            options{stateFile: "state.tfstate", regions: " us-east-1 , eu-west-1 "},
+			opts:            NoclickopsConfig{stateFile: "state.tfstate", regions: " us-east-1 , eu-west-1 "},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:            "regions are lowercased",
-			opts:            options{stateFile: "state.tfstate", regions: "US-EAST-1,EU-WEST-1"},
+			opts:            NoclickopsConfig{stateFile: "state.tfstate", regions: "US-EAST-1,EU-WEST-1"},
 			wantErr:         false,
 			wantRegionsList: []string{"us-east-1", "eu-west-1"},
 		},
 		{
 			name:              "single tag is parsed correctly",
-			opts:              options{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value"},
+			opts:              NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value"},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value"}},
 		},
 		{
 			name:              "multiple tags with special characters are parsed correctly",
-			opts:              options{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,another/tag=another.value/with-special-chars"},
+			opts:              NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,another/tag=another.value/with-special-chars"},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value"}, "another/tag": []string{"another.value/with-special-chars"}},
 		},
 		{
 			name:              "same key multiple times is parsed properly",
-			opts:              options{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,a-tag=b-value,b-tag=c-value"},
+			opts:              NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,a-tag=b-value,b-tag=c-value"},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value", "b-value"}, "b-tag": []string{"c-value"}},
 		},
 		{
 			name:        "neither statefile nor s3 bucket",
-			opts:        options{regions: "all"},
+			opts:        NoclickopsConfig{regions: "all"},
 			wantErr:     true,
 			errContains: "At least one of 's3-bucket' or 'statefile' must be provided",
 		},
 		{
 			name:        "s3 bucket without region",
-			opts:        options{s3Bucket: "my-bucket", regions: "all"},
+			opts:        NoclickopsConfig{s3Bucket: "my-bucket", regions: "all"},
 			wantErr:     true,
 			errContains: "s3-bucket-region must be provided if s3-bucket is defined",
 		},
 		{
 			name:        "s3 bucket region set to all",
-			opts:        options{s3Bucket: "my-bucket", s3BucketRegion: "all", regions: "all"},
+			opts:        NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "all", regions: "all"},
 			wantErr:     true,
 			errContains: "'all' is not a valid region",
 		},
 		{
 			name:        "invalid s3 bucket region",
-			opts:        options{s3Bucket: "my-bucket", s3BucketRegion: "not-a-region", regions: "all"},
+			opts:        NoclickopsConfig{s3Bucket: "my-bucket", s3BucketRegion: "not-a-region", regions: "all"},
 			wantErr:     true,
 			errContains: "'not-a-region' is not a valid region",
 		},
 		{
 			name:        "invalid region in regions list",
-			opts:        options{stateFile: "state.tfstate", regions: "us-east-1,bad-region"},
+			opts:        NoclickopsConfig{stateFile: "state.tfstate", regions: "us-east-1,bad-region"},
 			wantErr:     true,
 			errContains: "'bad-region' is not a valid region",
 		},
 		{
 			name:        "multiple errors reported together",
-			opts:        options{regions: "bad-region"},
+			opts:        NoclickopsConfig{regions: "bad-region"},
 			wantErr:     true,
 			errContains: "At least one of 's3-bucket' or 'statefile' must be provided",
 		},
 		{
 			name:        "error message includes help hint",
-			opts:        options{regions: "all"},
+			opts:        NoclickopsConfig{regions: "all"},
 			wantErr:     true,
 			errContains: "Use -h / --help",
 		},

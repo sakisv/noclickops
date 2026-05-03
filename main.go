@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	opts := parseFlags()
+	opts := loadConfig()
 
 	configs := generatePerRegionConfigs(opts.regionsList)
 
