@@ -39,7 +39,7 @@ type NoclickopsConfig struct {
 	regions                    string
 	s3Bucket                   string
 	s3BucketRegion             string
-	ignoreTags                 string
+	ignoreTags                 []string
 	regionsList                []string
 	ignoreTagsMap              map[string][]string
 }
@@ -83,25 +83,15 @@ func (config *NoclickopsConfig) validate() error {
 	return nil
 }
 
-func parseTags(tags string) map[string][]string {
+func parseTags(tags []string) map[string][]string {
 	parsedTags := make(map[string][]string)
 
-	for tag := range strings.SplitSeq(tags, ",") {
-		if !strings.Contains(tag, "=") {
+	for _, tag := range tags {
+		parts := strings.SplitN(tag, "=", 2)
+		if len(parts) != 2 {
 			continue
 		}
-
-		pair := strings.Split(tag, "=")
-		if len(pair) != 2 {
-			continue
-		}
-
-		valuesList, found := parsedTags[pair[0]]
-		if !found {
-			parsedTags[pair[0]] = make([]string, 0)
-		}
-		valuesList = append(valuesList, pair[1])
-		parsedTags[pair[0]] = valuesList
+		parsedTags[parts[0]] = strings.Split(parts[1], ",")
 	}
 
 	return parsedTags

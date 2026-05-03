@@ -86,19 +86,19 @@ func TestOptionsValidate(t *testing.T) {
 		},
 		{
 			name:              "single tag is parsed correctly",
-			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value"},
+			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: []string{"a-tag=a-value"}},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value"}},
 		},
 		{
 			name:              "multiple tags with special characters are parsed correctly",
-			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,another/tag=another.value/with-special-chars"},
+			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: []string{"a-tag=a-value", "another/tag=another.value/with-special-chars"}},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value"}, "another/tag": []string{"another.value/with-special-chars"}},
 		},
 		{
 			name:              "same key multiple times is parsed properly",
-			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: "a-tag=a-value,a-tag=b-value,b-tag=c-value"},
+			config:            NoclickopsConfig{stateFile: "state.tfstate", regions: "eu-west-1", ignoreTags: []string{"a-tag=a-value,b-value", "b-tag=c-value"}},
 			wantErr:           false,
 			wantIgnoreTagsMap: map[string][]string{"a-tag": []string{"a-value", "b-value"}, "b-tag": []string{"c-value"}},
 		},
