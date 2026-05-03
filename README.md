@@ -122,10 +122,10 @@ To exclude additional resources, pass their tags with `--ignore-tags`:
 noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox
 
 # Multiple tag filters (any match causes the resource to be ignored)
-noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,team=platform
+noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox --ignore-tags team=platform
 
 # Multiple values for the same key
-noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,environment=staging
+noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,staging
 ```
 
 ## Output format
