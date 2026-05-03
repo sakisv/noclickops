@@ -66,15 +66,44 @@ noclickops --s3-bucket example-s3-statefile-bucket --s3-bucket-region eu-west-2 
 
 ### All flags
 
-| Flag | Description |
-|---|---|
-| `--statefile` | Path to a local statefile to parse |
-| `--s3-bucket` | Download statefile(s) from this S3 bucket |
-| `--s3-bucket-region` | The region of the S3 bucket |
-| `--regions` | Comma-separated list of AWS regions to check |
-| `--ignore-tags` | Comma-separated list of `key=value` tag pairs — resources carrying any of these tags are excluded from results |
-| `--remove-downloaded-statefiles` | Delete any statefiles downloaded from S3 when done |
-| `--force-download` | Re-download all files from S3 even if they already exist locally |
+| Flag | Short | Description |
+|---|---|---|
+| `--statefile` | `-s` | Path to a local statefile to parse |
+| `--s3-bucket` | `-b` | Download statefile(s) from this S3 bucket |
+| `--s3-bucket-region` | `-k` | The region of the S3 bucket |
+| `--regions` | `-r` | Comma-separated list of AWS regions to check |
+| `--ignore-tags` | `-i` | Can be specified multiple times; each value is a `tagKey=value1,value2` pair - resources carrying any of these tags are excluded from results |
+| `--delete-downloaded-state-files` | `-d` | Delete any statefiles downloaded from S3 when done |
+| `--force-download` | `-f` | Re-download all files from S3 even if they already exist locally |
+
+### Using a config file
+
+Instead of passing flags every time, you can store your configuration in a `.noclickops.yml` file. Noclickops searches for this file in the following locations (in order):
+
+1. Current directory (`./.noclickops.yml`)
+2. `$HOME/.config/noclickops/.noclickops.yml`
+3. `/etc/noclickops/.noclickops.yml`
+
+Config file keys match the long flag names. The `regions` accepts a list of strings while
+`ignore-tags` accepts a list where each entry is a map of a tag key to its allowed values:
+
+```yaml
+s3-bucket: my-terraform-states-bucket
+s3-bucket-region: eu-west-2
+regions:
+  - eu-west-2
+  - eu-west-1
+  - eu-central-1
+
+ignore-tags:
+  - environment:
+      - sandbox
+      - staging
+  - team:
+      - platform
+```
+
+You can use the command line to override the configuration from the file.
 
 ## Ignoring resources by tag
 
