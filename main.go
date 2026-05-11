@@ -32,13 +32,13 @@ func main() {
 
 	accountId := getAccountId()
 	foundResources := make(map[string][]common.Resource)
-	for service := range claws.SERVICES {
+	for service, _ := range claws.SERVICES {
 		if service == common.ResourceGroupsTaggingAPI {
 			continue
 		}
-		client := claws.NewNoclickopsServiceFromConfigs(service, configs, accountId)
-		println("Fetching resources for " + client.GetServiceName())
-		foundResources[client.GetServiceName()] = client.GetAllResources()
+		serviceClient := claws.NewNoclickopsServiceFromConfigs(service, configs, accountId)
+		println("Fetching resources for " + serviceClient.GetServiceName())
+		foundResources[serviceClient.GetServiceName()] = serviceClient.GetAllResources()
 	}
 
 	s := claws.NewResourceGroupTaggingAPIServiceFromConfigs(configs, claws.SERVICES[common.ResourceGroupsTaggingAPI])
