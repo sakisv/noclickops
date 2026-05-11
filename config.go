@@ -158,10 +158,7 @@ func loadConfig() NoclickopsConfig {
 	viper.AddConfigPath("$HOME/.config/noclickops/")
 	viper.AddConfigPath("/etc/noclickops/")
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal("Error when attempting to find and read the config file %w", err)
-	}
+	viper.ReadInConfig()
 
 	pflag.StringP(configValues[Statefile], "s", "", "The statefile to parse")
 	pflag.StringP(configValues[S3Bucket], "b", "", "Download statefile(s) from this s3 bucket")
@@ -179,7 +176,7 @@ func loadConfig() NoclickopsConfig {
 
 	config := NewConfig(viper.GetViper())
 
-	err = config.validate()
+	err := config.validate()
 	if err != nil {
 		log.Fatal(err)
 	}
