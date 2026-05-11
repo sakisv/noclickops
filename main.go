@@ -47,5 +47,8 @@ func main() {
 	summary := calculateSummary(unmanagedResourceIds)
 	json, _ := json.Marshal(common.Output{Results: unmanagedResourceIds, Summary: summary})
 	fmt.Println(string(json))
-	generateReport(string(json))
+
+	if config.generateHTMLReport {
+		generateReport(string(json))
+	}
 }

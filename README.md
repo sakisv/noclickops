@@ -74,6 +74,7 @@ noclickops --s3-bucket example-s3-statefile-bucket --s3-bucket-region eu-west-2 
 | `--ignore-tags` | `-i` | Can be specified multiple times; each value is a `tagKey=value1,value2` pair - resources carrying any of these tags are excluded from results |
 | `--delete-downloaded-state-files` | `-d` | Delete any statefiles downloaded from S3 when done |
 | `--force-download` | `-f` | Re-download all files from S3 even if they already exist locally |
+| `--generate-html-report` | `-g` | Generate an HTML report in the current directory |
 
 ### Using a config file
 
