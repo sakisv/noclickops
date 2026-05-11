@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NoClickOps Report</title>
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"
+    integrity="sha384-vsrfeLOOY6KuIYKDlmVH5UiBmgIdB1oEf7p01YgWHuqmOHfZr374+odEv96n9tNC"
+    crossorigin="anonymous"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #f4f5f7;
+      --surface:         #ffffff;
+      --surface-alt:     #f9f9fb;
+      --border:          #e2e4e9;
+      --text:            #111318;
+      --text-muted:      #6b7280;
+      --accent:          #2563eb;
+      --accent-hover:    #1d4ed8;
+      --danger:          #dc2626;
+      --danger-bg:       rgba(220,38,38,0.08);
+      --success:         #16a34a;
+      --success-bg:      rgba(22,163,74,0.08);
+      --warning:         #d97706;
+      --row-hover:       #f0f4ff;
+      --row-active:      #dbeafe;
+      --shadow:          0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+      --radius:          8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg:          #0d0d0d;
+        --surface:     #171717;
+        --surface-alt: #1e1e1e;
+        --border:      #2a2a2a;
+        --text:        #e8e8e8;
+        --text-muted:  #7a7a7a;
+        --accent:      #3b82f6;
+        --accent-hover:#60a5fa;
+        --danger:      #f87171;
+        --danger-bg:   rgba(248,113,113,0.1);
+        --success:     #4ade80;
+        --success-bg:  rgba(74,222,128,0.1);
+        --warning:     #fbbf24;
+        --row-hover:   #1e1e2e;
+        --row-active:  #1e2a3e;
+        --shadow:      0 1px 3px rgba(0,0,0,0.4);
+      }
+    }
+
+    [data-theme="dark"] {
+      --bg:          #0d0d0d;
+      --surface:     #171717;
+      --surface-alt: #1e1e1e;
+      --border:      #2a2a2a;
+      --text:        #e8e8e8;
+      --text-muted:  #7a7a7a;
+      --accent:      #3b82f6;
+      --accent-hover:#60a5fa;
+      --danger:      #f87171;
+      --danger-bg:   rgba(248,113,113,0.1);
+      --success:     #4ade80;
+      --success-bg:  rgba(74,222,128,0.1);
+      --warning:     #fbbf24;
+      --row-hover:   #1e1e2e;
+      --row-active:  #1e2a3e;
+      --shadow:      0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      gap: 12px;
+    }
+
+    .header h1 { font-size: 1.35rem; font-weight: 700; }
+    .header .subtitle { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
+
+    .theme-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .theme-btn:hover { background: var(--row-hover); }
+
+    /* ── Stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 700px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .value { font-size: 1.75rem; font-weight: 700; line-height: 1.1; }
+    .stat-card .label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 6px;
+    }
+    .stat-card.danger  .value { color: var(--danger); }
+    .stat-card.success .value { color: var(--success); }
+    .stat-card.warning .value { color: var(--warning); }
+
+    /* ── Overview layout ── */
+    .overview-layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      align-items: start;
+    }
+    @media (max-width: 800px) { .overview-layout { grid-template-columns: 1fr; } }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+    }
+
+    .chart-container { padding: 16px; }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; }
+
+    th {
+      padding: 9px 14px;
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--surface-alt);
+      border-bottom: 1px solid var(--border);
+    }
+    th.r, td.r { text-align: right; }
+
+    td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+
+    tr.row-btn {
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    tr.row-btn:hover  { background: var(--row-hover); }
+    tr.row-btn.active { background: var(--row-active); }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.72rem;
+      font-weight: 600;
+    }
+    .badge-danger  { background: var(--danger-bg);  color: var(--danger); }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-neutral { background: var(--surface-alt); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* ── Progress bar ── */
+    .pct-wrap { display: flex; align-items: center; gap: 8px; }
+    .pct-track {
+      flex: 1;
+      min-width: 50px;
+      height: 5px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .pct-fill { height: 100%; border-radius: 3px; }
+    .pct-fill.low    { background: var(--success); }
+    .pct-fill.medium { background: var(--warning); }
+    .pct-fill.high   { background: var(--danger); }
+    .pct-label { font-size: 0.72rem; color: var(--text-muted); min-width: 38px; text-align: right; }
+
+    /* ── Drilldown ── */
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 18px;
+      font-size: 0.875rem;
+    }
+    .breadcrumb-link {
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .breadcrumb-link:hover { text-decoration: underline; }
+    .breadcrumb-sep { color: var(--text-muted); }
+    .breadcrumb-current { font-weight: 600; }
+
+    .drilldown-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 600px) { .drilldown-grid { grid-template-columns: 1fr; } }
+
+    .clear-link {
+      font-size: 0.72rem;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .clear-link:hover { text-decoration: underline; }
+
+    /* ── Resource list ── */
+    .resource-count { font-size: 0.75rem; color: var(--text-muted); }
+
+    .resource-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+    }
+    .resource-row:last-child { border-bottom: none; }
+
+    .resource-id {
+      font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", monospace;
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+    .resource-arn {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      word-break: break-all;
+    }
+
+    .resource-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 3px 9px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.7rem;
+      white-space: nowrap;
+      transition: all 0.12s;
+    }
+    .copy-btn:hover { background: var(--row-hover); color: var(--text); }
+    .copy-btn.ok    { color: var(--success); border-color: var(--success); }
+
+    code {
+      font-family: "SFMono-Regular", "Menlo", "Monaco", "Consolas", monospace;
+      font-size: 0.82em;
+      background: var(--surface-alt);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 36px;
+      font-size: 0.875rem;
+    }
+
+    /* ── Chevron toggle ── */
+    .chevron {
+      display: inline-block;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      margin-right: 8px;
+      transition: transform 0.15s;
+      user-select: none;
+    }
+    .chevron.open { transform: rotate(90deg); }
+
+    /* ── Expanded resource-type sub-row ── */
+    .expanded-row > td { padding: 0; background: var(--surface-alt); }
+
+    .type-breakdown {
+      border-top: 1px solid var(--border);
+      padding: 10px 16px 12px 40px;
+    }
+
+    .type-breakdown-table { width: auto; border-collapse: collapse; }
+
+    .type-breakdown-table th {
+      background: transparent;
+      font-size: 0.68rem;
+      padding: 4px 12px 6px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .type-sub-row td {
+      padding: 7px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+    }
+    .type-sub-row:last-child td { border-bottom: none; }
+    .type-sub-row:hover { background: var(--row-hover); cursor: pointer; }
+
+    .hidden { display: none !important; }
+    .mb-16  { margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h1>NoClickOps Report</h1>
+      <div class="subtitle" id="report-subtitle"></div>
+    </div>
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">☾ Dark</button>
+  </div>
+
+  <!-- Summary stats -->
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <!-- Overview: service table + chart -->
+  <div id="overview-section" class="overview-layout">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Services</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Service</th>
+            <th class="r">Found</th>
+            <th class="r">Managed</th>
+            <th class="r">Ignored</th>
+            <th class="r">Unmanaged</th>
+            <th>% Unmanaged</th>
+          </tr>
+        </thead>
+        <tbody id="services-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Unmanaged by service</span>
+      </div>
+      <div class="chart-container">
+        <canvas id="pie-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drilldown -->
+  <div id="drilldown-section" class="hidden">
+    <div class="breadcrumb">
+      <a class="breadcrumb-link" onclick="showOverview()">Overview</a>
+      <span class="breadcrumb-sep">›</span>
+      <span class="breadcrumb-current" id="drilldown-title"></span>
+    </div>
+
+    <div class="drilldown-grid">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">By Resource Type</span>
+          <a class="clear-link hidden" id="clear-type" onclick="setFilter('type', null)">Clear filter</a>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Resource Type</th><th class="r">Count</th></tr>
+          </thead>
+          <tbody id="type-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">By Region</span>
+          <a class="clear-link hidden" id="clear-region" onclick="setFilter('region', null)">Clear filter</a>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Region</th><th class="r">Count</th></tr>
+          </thead>
+          <tbody id="region-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Resources</span>
+        <span class="resource-count" id="resource-count"></span>
+      </div>
+      <div id="resource-list"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+// ── Sample data (replaced by generator) ──────────────────────────────────────
+const DATA = ;
+
+// ── State ────────────────────────────────────────────────────────────────────
+const expanded      = new Set();
+let selectedService = null;
+let filterType      = null;
+let filterRegion    = null;
+let pieChart        = null;
+
+// ── Palette (colorblind-friendly Tableau 10) ─────────────────────────────────
+const PALETTE = [
+  "#4e79a7","#f28e2b","#e15759","#76b7b2",
+  "#59a14f","#edc948","#b07aa1","#ff9da7","#9c755f","#bab0ac"
+];
+
+// ── Theme ────────────────────────────────────────────────────────────────────
+function storedTheme() { return localStorage.getItem("nco-theme") || "auto"; }
+
+function isDarkActive() {
+  const t = storedTheme();
+  if (t === "dark")  return true;
+  if (t === "light") return false;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === "auto") root.removeAttribute("data-theme");
+  else root.setAttribute("data-theme", theme);
+  document.getElementById("theme-btn").textContent = isDarkActive() ? "☀ Light" : "☾ Dark";
+  if (pieChart) syncChartColors();
+}
+
+function toggleTheme() {
+  const next = isDarkActive() ? "light" : "dark";
+  localStorage.setItem("nco-theme", next);
+  applyTheme(next);
+}
+
+function chartTextColor() {
+  return isDarkActive() ? "#e8e8e8" : "#111318";
+}
+
+function syncChartColors() {
+  pieChart.options.plugins.legend.labels.color = chartTextColor();
+  pieChart.update();
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function pctClass(p) {
+  if (p <= 20) return "low";
+  if (p <= 60) return "medium";
+  return "high";
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function dash(n) {
+  return n > 0 ? n : `<span style="color:var(--text-muted)">-</span>`;
+}
+
+// ── Render: stats ─────────────────────────────────────────────────────────────
+function renderStats() {
+  const s = DATA.summary;
+  const pClass = s.pct_unmanaged > 50 ? "danger" : s.pct_unmanaged > 20 ? "warning" : "success";
+  document.getElementById("stats-grid").innerHTML = `
+    <div class="stat-card">
+      <div class="value">${s.found_in_aws}</div>
+      <div class="label">Found in AWS</div>
+    </div>
+    <div class="stat-card success">
+      <div class="value">${s.found_in_terraform}</div>
+      <div class="label">Managed</div>
+    </div>
+    <div class="stat-card danger">
+      <div class="value">${s.not_found_in_terraform}</div>
+      <div class="label">Unmanaged</div>
+    </div>
+    <div class="stat-card warning">
+      <div class="value">${s.ignored}</div>
+      <div class="label">Ignored</div>
+    </div>
+    <div class="stat-card ${pClass}">
+      <div class="value">${s.pct_unmanaged.toFixed(1)}%</div>
+      <div class="label">% Unmanaged</div>
+    </div>
+  `;
+}
+
+// ── Render: pie chart ─────────────────────────────────────────────────────────
+function renderChart() {
+  const services = Object.entries(DATA.results)
+    .filter(([,v]) => v.meta.unmanaged > 0)
+    .sort((a,b) => b[1].meta.unmanaged - a[1].meta.unmanaged);
+
+  const ctx = document.getElementById("pie-chart").getContext("2d");
+  pieChart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: services.map(([k]) => k.toUpperCase()),
+      datasets: [{
+        data: services.map(([,v]) => v.meta.unmanaged),
+        backgroundColor: services.map((_,i) => PALETTE[i % PALETTE.length]),
+        borderWidth: 2,
+        borderColor: getComputedStyle(document.documentElement).getPropertyValue("--surface").trim() || "#fff",
+      }]
+    },
+    options: {
+      responsive: true,
+      onClick(_evt, elements) {
+        if (elements.length) selectService(services[elements[0].index][0]);
+      },
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: chartTextColor(), padding: 10, font: {size: 11} }
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const svcData = services[ctx.dataIndex][1];
+              const counts = {};
+              svcData.resources.forEach(r => {
+                counts[r.resource_type] = (counts[r.resource_type] || 0) + 1;
+              });
+              const total = svcData.resources.length;
+              return [
+                ` ${total} unmanaged`,
+                ...Object.entries(counts)
+                  .sort((a, b) => b[1] - a[1])
+                  .map(([type, n]) => `   ${type}: ${n}`)
+              ];
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── Render: services table ────────────────────────────────────────────────────
+function renderServicesTable() {
+  const rows = Object.entries(DATA.results)
+    .sort((a,b) => b[1].meta.unmanaged - a[1].meta.unmanaged)
+    .flatMap(([name, d]) => {
+      const m = d.meta;
+      const cls = pctClass(m.pct_unmanaged);
+      const isOpen = expanded.has(name);
+
+      const serviceRow = `
+        <tr class="row-btn${isOpen ? " active" : ""}" onclick="toggleRow('${name}')">
+          <td><span class="chevron${isOpen ? " open" : ""}">&#9658;</span><strong>${esc(name.toUpperCase())}</strong></td>
+          <td class="r">${m.found}</td>
+          <td class="r">${m.managed}</td>
+          <td class="r">${dash(m.ignored)}</td>
+          <td class="r"><span class="badge ${m.unmanaged > 0 ? "badge-danger" : "badge-success"}">${m.unmanaged}</span></td>
+          <td>
+            <div class="pct-wrap">
+              <div class="pct-track">
+                <div class="pct-fill ${cls}" style="width:${Math.min(m.pct_unmanaged,100).toFixed(1)}%"></div>
+              </div>
+              <span class="pct-label">${m.pct_unmanaged.toFixed(1)}%</span>
+            </div>
+          </td>
+        </tr>`;
+
+      if (!isOpen) return [serviceRow];
+
+      const counts = {};
+      d.resources.forEach(r => { counts[r.resource_type] = (counts[r.resource_type]||0)+1; });
+      const typeRows = Object.entries(counts)
+        .sort((a,b) => b[1]-a[1])
+        .map(([type, n]) => `
+          <tr class="type-sub-row" onclick="selectServiceType('${name}','${esc(type)}')">
+            <td><code>${esc(type)}</code></td>
+            <td class="r">${n}</td>
+          </tr>`).join("");
+
+      const expandedRow = `
+        <tr class="expanded-row">
+          <td colspan="6">
+            <div class="type-breakdown">
+              <table class="type-breakdown-table">
+                <thead><tr><th>Resource Type</th><th class="r">Count</th></tr></thead>
+                <tbody>${typeRows}</tbody>
+              </table>
+            </div>
+          </td>
+        </tr>`;
+
+      return [serviceRow, expandedRow];
+    });
+  document.getElementById("services-tbody").innerHTML = rows.join("");
+}
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function toggleRow(name) {
+  if (expanded.has(name)) expanded.delete(name);
+  else expanded.add(name);
+  renderServicesTable();
+}
+
+function selectService(name) {
+  selectedService = name;
+  filterType      = null;
+  filterRegion    = null;
+  document.getElementById("overview-section").classList.add("hidden");
+  document.getElementById("drilldown-section").classList.remove("hidden");
+  document.getElementById("drilldown-title").textContent = name.toUpperCase();
+  renderDrilldown();
+}
+
+function selectServiceType(name, type) {
+  selectedService = name;
+  filterType      = type;
+  filterRegion    = null;
+  document.getElementById("overview-section").classList.add("hidden");
+  document.getElementById("drilldown-section").classList.remove("hidden");
+  document.getElementById("drilldown-title").textContent = name.toUpperCase();
+  renderDrilldown();
+}
+
+function showOverview() {
+  selectedService = null;
+  filterType      = null;
+  filterRegion    = null;
+  document.getElementById("drilldown-section").classList.add("hidden");
+  document.getElementById("overview-section").classList.remove("hidden");
+}
+
+// ── Render: drilldown ─────────────────────────────────────────────────────────
+function renderDrilldown() {
+  renderBreakdown("type",   "type-tbody",   "clear-type",   r => r.resource_type, v => `<code>${esc(v)}</code>`);
+  renderBreakdown("region", "region-tbody", "clear-region", r => r.region,        v => esc(v));
+  renderResourceList();
+}
+
+function renderBreakdown(dim, tbodyId, clearId, keyFn, labelFn) {
+  const resources = DATA.results[selectedService].resources;
+  const active = dim === "type" ? filterType : filterRegion;
+
+  const counts = {};
+  resources.forEach(r => { const k = keyFn(r); counts[k] = (counts[k]||0)+1; });
+
+  const clearEl = document.getElementById(clearId);
+  clearEl.classList.toggle("hidden", !active);
+
+  document.getElementById(tbodyId).innerHTML = Object.entries(counts)
+    .sort((a,b) => b[1]-a[1])
+    .map(([val, n]) => `
+      <tr class="row-btn${active === val ? " active" : ""}" onclick="setFilter('${dim}','${esc(val)}')">
+        <td>${labelFn(val)}</td>
+        <td class="r">${n}</td>
+      </tr>`)
+    .join("");
+}
+
+function setFilter(dim, val) {
+  if (dim === "type") {
+    filterType = (filterType === val) ? null : val;
+  } else {
+    filterRegion = (filterRegion === val) ? null : val;
+  }
+  renderDrilldown();
+}
+
+function renderResourceList() {
+  const all = DATA.results[selectedService].resources;
+  const visible = all.filter(r =>
+    (!filterType   || r.resource_type === filterType) &&
+    (!filterRegion || r.region        === filterRegion)
+  );
+
+  document.getElementById("resource-count").textContent =
+    visible.length === all.length ? `${all.length}` : `${visible.length} of ${all.length}`;
+
+  if (!visible.length) {
+    document.getElementById("resource-list").innerHTML =
+      `<div class="empty-state">No resources match the current filters.</div>`;
+    return;
+  }
+
+  document.getElementById("resource-list").innerHTML = visible.map(r => `
+    <div class="resource-row">
+      <div style="min-width:0">
+        <div class="resource-id">${esc(r.terraform_id)}</div>
+        ${r.arn ? `<div class="resource-arn">${esc(r.arn)}</div>` : ""}
+      </div>
+      <div class="resource-actions">
+        <span class="badge badge-neutral">${esc(r.resource_type)}</span>
+        <span class="badge badge-neutral">${esc(r.region)}</span>
+        <button class="copy-btn" onclick='copyText(this,${JSON.stringify(r.terraform_id)})'>Copy ID</button>
+      </div>
+    </div>`).join("");
+}
+
+// ── Clipboard ────────────────────────────────────────────────────────────────
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = "Copied!";
+    btn.classList.add("ok");
+    setTimeout(() => { btn.textContent = "Copy ID"; btn.classList.remove("ok"); }, 1500);
+  });
+}
+
+// ── Boot ─────────────────────────────────────────────────────────────────────
+applyTheme(storedTheme());
+renderStats();
+renderChart();
+renderServicesTable();
+
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+  if (storedTheme() === "auto") applyTheme("auto");
+});
+</script>
+</body>
+</html>
