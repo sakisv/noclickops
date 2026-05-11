@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 
 	claws "github.com/noclickops/aws"
 	"github.com/noclickops/common"
@@ -15,7 +16,7 @@ func main() {
 
 	var downloaded_files []string
 	if config.s3Bucket != "" {
-		println("Downloading statefiles from s3")
+		slog.Info("Downloading statefiles from s3")
 		s3_cfg := getConfigForRegion(config.s3BucketRegion)
 		downloaded_files = download_statefiles_from_s3(config.s3Bucket, config.forceDownload, s3_cfg)
 
@@ -24,7 +25,7 @@ func main() {
 		downloaded_files = append(downloaded_files, config.stateFile)
 	}
 
-	println("Scanning statefiles for terraform ids")
+	slog.Info("Scanning statefiles for terraform ids")
 	managedIDs := getManagedIDs(downloaded_files)
 	if config.deleteDownloadedStatefiles {
 		defer delete_statefiles_dir()
@@ -37,7 +38,7 @@ func main() {
 			continue
 		}
 		serviceClient := claws.NewNoclickopsServiceFromConfigs(service, configs, accountId)
-		println("Fetching resources for " + serviceClient.GetServiceName())
+		slog.Info("Fetching resources for " + serviceClient.GetServiceName())
 		foundResources[serviceClient.GetServiceName()] = serviceClient.GetAllResources()
 	}
 

@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 	"time"
@@ -20,7 +21,7 @@ func generateReport(jsonData string) {
 	timestamp := time.Now().UTC().Format("20060102T150405Z")
 	filename := fmt.Sprintf("%v_%v.%v", reportFilenamePrefix, timestamp, reportFilenameExtension)
 
-	println("Saving html report to", filename)
+	slog.Info(fmt.Sprintf("Saving html report to %v", filename))
 	f, _ := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY, 0644)
 	defer f.Close()
 	f.WriteString(html)

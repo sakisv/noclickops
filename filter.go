@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log/slog"
 	"maps"
 	"slices"
 	"strings"
@@ -68,8 +69,7 @@ func getIgnoredTagResources(s claws.NoclickopsResourceGroupTaggingAPIService, ig
 	}
 
 	it := strings.Join(slices.Collect(maps.Keys(ignoredTags)), ",")
-	println("Ignoring resources tagged with these tags:")
-	println(it)
+	slog.Info("Ignoring resources tagged with these tags: ", "ignored_tags", it)
 
 	for k, v := range ignoredTags {
 		resources := s.GetResourcesWithTags(k, v)
