@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 
 	"github.com/spf13/pflag"
@@ -65,7 +66,9 @@ func NewConfig(v *viper.Viper) NoclickopsConfig {
 			if !ok {
 				fmt.Printf("could not convert '%v' to string for %v", region, configValues[Regions])
 			}
-			config.regionsList = append(config.regionsList, s)
+			if !slices.Contains(config.regionsList, s) {
+				config.regionsList = append(config.regionsList, s)
+			}
 		}
 		config.regions = strings.Join(config.regionsList, ",")
 	default:
@@ -118,8 +121,6 @@ func (config *NoclickopsConfig) validate() error {
 			errs = append(errs, fmt.Errorf("'%v' is not a valid region", r))
 			continue
 		}
-
-		config.regionsList = append(config.regionsList, r)
 	}
 
 	config.ignoreTagsMap = parseTags(config.ignoreTags)
