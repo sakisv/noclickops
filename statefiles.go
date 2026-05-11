@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -97,7 +96,6 @@ func getManagedIDs(statefile_paths []string) map[string]struct{} {
 		}
 		contents := string(contents_b[:])
 		finds := reg.FindAllString(contents, -1)
-		fmt.Println()
 
 		for _, el := range finds {
 			res := strings.Split(el, "\": ")
