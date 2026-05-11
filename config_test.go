@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/spf13/viper"
 )
 
 func TestIsValidRegion(t *testing.T) {
@@ -179,6 +180,69 @@ func TestOptionsValidate(t *testing.T) {
 			if tt.config.regions == "all" && !tt.wantErr {
 				if len(tt.config.regionsList) == 0 {
 					t.Errorf("regionsList should be populated when regions is 'all'")
+				}
+			}
+		})
+	}
+}
+
+func TestNewConfig(t *testing.T) {
+	tests := []struct {
+		name              string
+		setup             func(*viper.Viper)
+		wantRegions       string
+		wantRegionsList   []string
+		wantIgnoreTags    []string
+		wantIgnoreTagsMap map[string][]string
+	}{
+		{
+			name: "regions as string (flag) are split into regionsList",
+			setup: func(v *viper.Viper) {
+				v.Set("regions", "us-east-1,eu-west-1")
+			},
+			wantRegions:     "us-east-1,eu-west-1",
+			wantRegionsList: []string{"us-east-1", "eu-west-1"},
+		},
+		{
+			name: "regions as []any (file) are added to regionsList without duplicates",
+			setup: func(v *viper.Viper) {
+				v.Set("regions", []any{"us-east-1", "eu-west-1"})
+			},
+			wantRegions:     "us-east-1,eu-west-1",
+			wantRegionsList: []string{"us-east-1", "eu-west-1"},
+		},
+		{
+			name: "ignore-tags as []string (flag) are parsed into tags and map",
+			setup: func(v *viper.Viper) {
+				v.Set("ignore-tags", []string{"a-tag=a-value", "b-tag=b-value,c-value"})
+			},
+			wantIgnoreTags:    []string{"a-tag=a-value", "b-tag=b-value,c-value"},
+			wantIgnoreTagsMap: map[string][]string{"a-tag": {"a-value"}, "b-tag": {"b-value", "c-value"}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			v := viper.New()
+			tt.setup(v)
+			config := NewConfig(v)
+
+			if tt.wantRegions != "" && config.regions != tt.wantRegions {
+				t.Errorf("regions = %q, want %q", config.regions, tt.wantRegions)
+			}
+			if tt.wantRegionsList != nil {
+				if diff := cmp.Diff(tt.wantRegionsList, config.regionsList); diff != "" {
+					t.Errorf("regionsList mismatch (-want +got):\n%s", diff)
+				}
+			}
+			if tt.wantIgnoreTags != nil {
+				if diff := cmp.Diff(tt.wantIgnoreTags, config.ignoreTags); diff != "" {
+					t.Errorf("ignoreTags mismatch (-want +got):\n%s", diff)
+				}
+			}
+			if tt.wantIgnoreTagsMap != nil {
+				if diff := cmp.Diff(tt.wantIgnoreTagsMap, config.ignoreTagsMap); diff != "" {
+					t.Errorf("ignoreTagsMap mismatch (-want +got):\n%s", diff)
 				}
 			}
 		})
