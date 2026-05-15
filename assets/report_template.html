@@ -371,6 +371,13 @@
 
     .hidden { display: none !important; }
     .mb-16  { margin-bottom: 16px; }
+
+    /* ── Sortable column headers ── */
+    th.sortable { cursor: pointer; user-select: none; }
+    th.sortable:hover { color: var(--text); }
+    th.sortable::after { content: " ⇕"; font-size: 0.55rem; opacity: 0.35; }
+    th.sort-asc::after  { content: " ▲"; opacity: 0.9; }
+    th.sort-desc::after { content: " ▼"; opacity: 0.9; }
   </style>
 </head>
 <body>
@@ -397,12 +404,12 @@
       <table>
         <thead>
           <tr>
-            <th>Service</th>
-            <th class="r">Found</th>
-            <th class="r">Managed</th>
-            <th class="r">Ignored</th>
-            <th class="r">Unmanaged</th>
-            <th>% Unmanaged</th>
+            <th class="sortable" data-col="service" onclick="sortBy('service')">Service</th>
+            <th class="r sortable" data-col="found" onclick="sortBy('found')">Found</th>
+            <th class="r sortable" data-col="managed" onclick="sortBy('managed')">Managed</th>
+            <th class="r sortable" data-col="ignored" onclick="sortBy('ignored')">Ignored</th>
+            <th class="r sortable" data-col="unmanaged" onclick="sortBy('unmanaged')">Unmanaged</th>
+            <th class="sortable" data-col="pct" onclick="sortBy('pct')">% Unmanaged</th>
           </tr>
         </thead>
         <tbody id="services-tbody"></tbody>
@@ -475,6 +482,8 @@ let selectedService = null;
 let filterType      = null;
 let filterRegion    = null;
 let pieChart        = null;
+let sortCol         = "unmanaged";
+let sortDir         = "desc";
 
 // ── Palette (colorblind-friendly Tableau 10) ─────────────────────────────────
 const PALETTE = [
@@ -611,10 +620,45 @@ function renderChart() {
   });
 }
 
+// ── Sort ─────────────────────────────────────────────────────────────────────
+function sortBy(col) {
+  if (sortCol === col) {
+    sortDir = sortDir === "desc" ? "asc" : "desc";
+  } else {
+    sortCol = col;
+    sortDir = col === "service" ? "asc" : "desc";
+  }
+  renderServicesTable();
+}
+
+function updateSortHeaders() {
+  document.querySelectorAll("th.sortable").forEach(th => {
+    th.classList.remove("sort-asc", "sort-desc");
+    if (th.dataset.col === sortCol) th.classList.add("sort-" + sortDir);
+  });
+}
+
+function sortValue(name, meta) {
+  switch (sortCol) {
+    case "service":   return name.toLowerCase();
+    case "found":     return meta.found;
+    case "managed":   return meta.managed;
+    case "ignored":   return meta.ignored;
+    case "unmanaged": return meta.unmanaged;
+    case "pct":       return meta.pct_unmanaged;
+    default:          return meta.unmanaged;
+  }
+}
+
 // ── Render: services table ────────────────────────────────────────────────────
 function renderServicesTable() {
   const rows = Object.entries(DATA.results)
-    .sort((a,b) => b[1].meta.unmanaged - a[1].meta.unmanaged)
+    .sort((a, b) => {
+      const va = sortValue(a[0], a[1].meta);
+      const vb = sortValue(b[0], b[1].meta);
+      const cmp = typeof va === "string" ? va.localeCompare(vb) : va - vb;
+      return sortDir === "asc" ? cmp : -cmp;
+    })
     .flatMap(([name, d]) => {
       const m = d.meta;
       const cls = pctClass(m.pct_unmanaged);
@@ -664,6 +708,7 @@ function renderServicesTable() {
       return [serviceRow, expandedRow];
     });
   document.getElementById("services-tbody").innerHTML = rows.join("");
+  updateSortHeaders();
 }
 
 // ── Navigation ────────────────────────────────────────────────────────────────
