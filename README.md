@@ -130,6 +130,14 @@ noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags envir
 noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,staging
 ```
 
+## Generating an HTML report
+
+You can provide the `-g` or `--generate-html-report` flag to also generate an html report. This
+allows you to see per-service results and within each service to drill down per resource type and
+per region. For example you can see only security-groups in eu-west-2:
+
+![html-report-2](screenshots/html-report-2.png)
+
 ## Output format
 
 `noclickops` prints a JSON object with two top-level keys: `results` (per-service breakdown) and `summary` (account-wide totals).
