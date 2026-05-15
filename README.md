@@ -1,5 +1,7 @@
 # NoClickOps
 
+![html-report](screenshots/html-report-1.png)
+
 ## What it is
 
 Noclickops intents to be a simple tool to see which and how many of your AWS resources are captured
