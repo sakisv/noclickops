@@ -4,8 +4,8 @@
 
 ## What it is
 
-Noclickops intents to be a simple tool to see which and how many of your AWS resources are captured
-in terraform.
+Noclickops is a tool that allows you to see which and how many of your AWS resources are **not**
+captured in terraform.
 
 ## What it isn't
 
