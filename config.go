@@ -21,6 +21,7 @@ const (
 	ForceDownload
 	Regions
 	IgnoreTags
+	GenerateHTMLReport
 )
 
 var configValues = map[ConfigValues]string{
@@ -31,12 +32,14 @@ var configValues = map[ConfigValues]string{
 	ForceDownload:              "force-download",
 	Regions:                    "regions",
 	IgnoreTags:                 "ignore-tags",
+	GenerateHTMLReport:         "generate-html-report",
 }
 
 type NoclickopsConfig struct {
 	stateFile                  string
 	deleteDownloadedStatefiles bool
 	forceDownload              bool
+	generateHTMLReport         bool
 	regions                    string
 	s3Bucket                   string
 	s3BucketRegion             string
@@ -52,6 +55,7 @@ func NewConfig(v *viper.Viper) NoclickopsConfig {
 	config.s3BucketRegion = v.GetString(configValues[S3BucketRegion])
 	config.deleteDownloadedStatefiles = v.GetBool(configValues[DeleteDownloadedStateFiles])
 	config.forceDownload = v.GetBool(configValues[ForceDownload])
+	config.generateHTMLReport = v.GetBool(configValues[GenerateHTMLReport])
 	config.regionsList = v.GetStringSlice(configValues[Regions])
 
 	switch t := v.Get(configValues[Regions]).(type) {
@@ -168,6 +172,7 @@ func loadConfig() NoclickopsConfig {
 	pflag.StringArrayP(configValues[IgnoreTags], "i", []string{}, "Can be used multiple times to provide list of 'tagKey=value1,value2' tags to ignore")
 	pflag.BoolP(configValues[DeleteDownloadedStateFiles], "d", false, "If specified, any downloaded statefiles will be deleted at the end")
 	pflag.BoolP(configValues[ForceDownload], "f", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
+	pflag.BoolP(configValues[GenerateHTMLReport], "g", false, "If specified, it will generate an html report in the current directory")
 	pflag.Parse()
 
 	// use this to pass control to viper

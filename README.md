@@ -1,9 +1,11 @@
 # NoClickOps
 
+![html-report](screenshots/html-report-1.png)
+
 ## What it is
 
-Noclickops intents to be a simple tool to see which and how many of your AWS resources are captured
-in terraform.
+Noclickops is a tool that allows you to see which and how many of your AWS resources are **not**
+captured in terraform.
 
 ## What it isn't
 
@@ -74,6 +76,7 @@ noclickops --s3-bucket example-s3-statefile-bucket --s3-bucket-region eu-west-2 
 | `--ignore-tags` | `-i` | Can be specified multiple times; each value is a `tagKey=value1,value2` pair - resources carrying any of these tags are excluded from results |
 | `--delete-downloaded-state-files` | `-d` | Delete any statefiles downloaded from S3 when done |
 | `--force-download` | `-f` | Re-download all files from S3 even if they already exist locally |
+| `--generate-html-report` | `-g` | Generate an HTML report in the current directory |
 
 ### Using a config file
 
@@ -126,6 +129,14 @@ noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags envir
 # Multiple values for the same key
 noclickops --statefile ./example.tfstate --regions eu-west-1 --ignore-tags environment=sandbox,staging
 ```
+
+## Generating an HTML report
+
+You can provide the `-g` or `--generate-html-report` flag to also generate an html report. This
+allows you to see per-service results and within each service to drill down per resource type and
+per region. For example you can see only security-groups in eu-west-2:
+
+![html-report-2](screenshots/html-report-2.png)
 
 ## Output format
 
