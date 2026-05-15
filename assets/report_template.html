@@ -757,8 +757,13 @@ function renderBreakdown(dim, tbodyId, clearId, keyFn, labelFn) {
   const resources = DATA.results[selectedService].resources;
   const active = dim === "type" ? filterType : filterRegion;
 
+  // Count only resources that match the OTHER dimension's active filter
+  const crossFilter = dim === "type" ? filterRegion : filterType;
+  const crossKey    = dim === "type" ? (r => r.region) : (r => r.resource_type);
+  const scoped = crossFilter ? resources.filter(r => crossKey(r) === crossFilter) : resources;
+
   const counts = {};
-  resources.forEach(r => { const k = keyFn(r); counts[k] = (counts[k]||0)+1; });
+  scoped.forEach(r => { const k = keyFn(r); counts[k] = (counts[k]||0)+1; });
 
   const clearEl = document.getElementById(clearId);
   clearEl.classList.toggle("hidden", !active);
