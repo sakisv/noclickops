@@ -14,18 +14,19 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.Route53:    {Global: true, ServiceName: "route53"},
 	common.CloudFront: {Global: true, ServiceName: "cloudfront"},
 
-	common.EKS:           {Global: false, ServiceName: "eks"},
-	common.IdentityStore: {Global: false, ServiceName: "identitystore"},
-	common.SSM:           {Global: false, ServiceName: "ssm"},
-	common.SSOAdmin:      {Global: false, ServiceName: "ssoadmin"},
-	common.EC2:           {Global: false, ServiceName: "ec2"},
-	common.RDS:           {Global: false, ServiceName: "rds"},
-	common.SNS:           {Global: false, ServiceName: "sns"},
-	common.S3:            {Global: false, ServiceName: "s3"},
-	common.ELB:           {Global: false, ServiceName: "elb"},
-	common.ELBV2:         {Global: false, ServiceName: "elbv2"},
-	common.ASG:           {Global: false, ServiceName: "autoscaling"},
-	common.Lambda:        {Global: false, ServiceName: "lambda"},
+	common.EKS:            {Global: false, ServiceName: "eks"},
+	common.IdentityStore:  {Global: false, ServiceName: "identitystore"},
+	common.SSM:            {Global: false, ServiceName: "ssm"},
+	common.SSOAdmin:       {Global: false, ServiceName: "ssoadmin"},
+	common.EC2:            {Global: false, ServiceName: "ec2"},
+	common.RDS:            {Global: false, ServiceName: "rds"},
+	common.SNS:            {Global: false, ServiceName: "sns"},
+	common.S3:             {Global: false, ServiceName: "s3"},
+	common.ELB:            {Global: false, ServiceName: "elb"},
+	common.ELBV2:          {Global: false, ServiceName: "elbv2"},
+	common.ASG:            {Global: false, ServiceName: "autoscaling"},
+	common.Lambda:         {Global: false, ServiceName: "lambda"},
+	common.CloudwatchLogs: {Global: false, ServiceName: "cloudwatchlogs"},
 
 	// not included in the switch/case in `NewclickopsServiceFromConfigs`
 	// because it doesn't follow the same invocation pattern.
@@ -87,6 +88,9 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		return &c
 	case common.ASG:
 		c := NewAutoscalingServiceFromConfigs(configs, meta)
+		return &c
+	case common.CloudwatchLogs:
+		c := NewCloudwatchLogsServiceFromConfigs(configs, meta)
 		return &c
 	case common.Lambda:
 		c := NewLambdaServiceFromConfigs(configs, meta)
