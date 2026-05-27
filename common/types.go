@@ -38,6 +38,7 @@ const (
 	Autoscaling_group
 	Cloudwatchlogs_log_group
 	Dynamodb_table
+	Elasticache_cluster
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -66,6 +67,7 @@ const (
 	ResourceGroupsTaggingAPI
 	CloudwatchLogs
 	Dynamodb
+	Elasticache
 )
 
 type Resource struct {
