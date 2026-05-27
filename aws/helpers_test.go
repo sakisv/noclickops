@@ -5,6 +5,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
+	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancing"
 	"github.com/aws/aws-sdk-go-v2/service/elasticloadbalancingv2"
@@ -195,4 +196,12 @@ type mockLambdaClient struct {
 
 func (m *mockLambdaClient) ListFunctions(ctx context.Context, params *lambda.ListFunctionsInput, optFns ...func(*lambda.Options)) (*lambda.ListFunctionsOutput, error) {
 	return m.listFunctionsFn(ctx, params, optFns...)
+}
+
+type mockCloudwatchLogsClient struct {
+	listLogGroupsFn func(ctx context.Context, params *cloudwatchlogs.ListLogGroupsInput, optFns ...func(*cloudwatchlogs.Options)) (*cloudwatchlogs.ListLogGroupsOutput, error)
+}
+
+func (m *mockCloudwatchLogsClient) ListLogGroups(ctx context.Context, params *cloudwatchlogs.ListLogGroupsInput, optFns ...func(*cloudwatchlogs.Options)) (*cloudwatchlogs.ListLogGroupsOutput, error) {
+	return m.listLogGroupsFn(ctx, params, optFns...)
 }
