@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"slices"
 	"strings"
 
@@ -173,7 +174,15 @@ func loadConfig() NoclickopsConfig {
 	pflag.BoolP(configValues[DeleteDownloadedStateFiles], "d", false, "If specified, any downloaded statefiles will be deleted at the end")
 	pflag.BoolP(configValues[ForceDownload], "f", false, "If specified, it will download all the files from the bucket even they overwrite existing ones")
 	pflag.BoolP(configValues[GenerateHTMLReport], "g", false, "If specified, it will generate an html report in the current directory")
+
+	// this is different because we use it and exit straight away
+	versionFlag := pflag.BoolP("version", "V", false, "Print version and exit")
 	pflag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("noclickops %s\n", version)
+		os.Exit(0)
+	}
 
 	// use this to pass control to viper
 	// This means that any references to `statefile` will be resolved in the

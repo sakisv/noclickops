@@ -8,6 +8,8 @@ import (
 	"github.com/noclickops/common"
 )
 
+var version = "dev"
+
 func main() {
 	config := loadConfig()
 
