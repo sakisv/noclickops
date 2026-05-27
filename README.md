@@ -50,6 +50,8 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 | elbv2         	| elbv2_load_balancer                                                                                          	|
 | autoscaling   	| autoscaling_group                                                                                            	|
 | lambda        	| lambda_function                                                                                              	|
+| dynamodb      	| dynamodb_table                                                                                               	|
+| cloudwatchlogs	| cloudwatchlogs_log_group                                                                                     	|
 
 ## How to use
 
