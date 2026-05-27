@@ -26,11 +26,12 @@ func _() {
 	_ = x[ResourceGroupsTaggingAPI-15]
 	_ = x[CloudwatchLogs-16]
 	_ = x[Dynamodb-17]
+	_ = x[Elasticache-18]
 }
 
-const _AWSServiceName_name = "Route53IAMEKSSSMEC2RDSSSOAdminIdentityStoreSNSS3CloudFrontELBELBV2ASGLambdaResourceGroupsTaggingAPICloudwatchLogsDynamodb"
+const _AWSServiceName_name = "Route53IAMEKSSSMEC2RDSSSOAdminIdentityStoreSNSS3CloudFrontELBELBV2ASGLambdaResourceGroupsTaggingAPICloudwatchLogsDynamodbElasticache"
 
-var _AWSServiceName_index = [...]uint8{0, 7, 10, 13, 16, 19, 22, 30, 43, 46, 48, 58, 61, 66, 69, 75, 99, 113, 121}
+var _AWSServiceName_index = [...]uint8{0, 7, 10, 13, 16, 19, 22, 30, 43, 46, 48, 58, 61, 66, 69, 75, 99, 113, 121, 132}
 
 func (i AWSServiceName) String() string {
 	idx := int(i) - 0

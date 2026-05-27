@@ -52,6 +52,7 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 | lambda        	| lambda_function                                                                                              	|
 | dynamodb      	| dynamodb_table                                                                                               	|
 | cloudwatchlogs	| cloudwatchlogs_log_group                                                                                     	|
+| elasticache   	| elasticache_cluster                                                                                          	|
 
 ## How to use
 
