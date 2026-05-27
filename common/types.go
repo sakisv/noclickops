@@ -37,6 +37,7 @@ const (
 	Lambda_function
 	Autoscaling_group
 	Cloudwatchlogs_log_group
+	Dynamodb_table
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -64,6 +65,7 @@ const (
 	Lambda
 	ResourceGroupsTaggingAPI
 	CloudwatchLogs
+	Dynamodb
 )
 
 type Resource struct {

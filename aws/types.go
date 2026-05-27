@@ -27,6 +27,7 @@ var SERVICES = map[common.AWSServiceName]common.ServiceMeta{
 	common.ASG:            {Global: false, ServiceName: "autoscaling"},
 	common.Lambda:         {Global: false, ServiceName: "lambda"},
 	common.CloudwatchLogs: {Global: false, ServiceName: "cloudwatchlogs"},
+	common.Dynamodb:       {Global: false, ServiceName: "dynamodb"},
 
 	// not included in the switch/case in `NewclickopsServiceFromConfigs`
 	// because it doesn't follow the same invocation pattern.
@@ -91,6 +92,9 @@ func NewNoclickopsServiceFromConfigs(service common.AWSServiceName, configs []aw
 		return &c
 	case common.CloudwatchLogs:
 		c := NewCloudwatchLogsServiceFromConfigs(configs, meta)
+		return &c
+	case common.Dynamodb:
+		c := NewDynamodbServiceFromConfigs(configs, meta)
 		return &c
 	case common.Lambda:
 		c := NewLambdaServiceFromConfigs(configs, meta)
