@@ -36,6 +36,7 @@ const (
 	VPC_endpoint
 	Lambda_function
 	Autoscaling_group
+	Cloudwatchlogs_log_group
 )
 
 func (r ResourceType) MarshalJSON() ([]byte, error) {
@@ -62,6 +63,7 @@ const (
 	ASG
 	Lambda
 	ResourceGroupsTaggingAPI
+	CloudwatchLogs
 )
 
 type Resource struct {
