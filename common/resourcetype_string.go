@@ -39,11 +39,12 @@ func _() {
 	_ = x[Lambda_function-28]
 	_ = x[Autoscaling_group-29]
 	_ = x[Cloudwatchlogs_log_group-30]
+	_ = x[Dynamodb_table-31]
 }
 
-const _ResourceType_name = "Route53_zoneRoute53_recordIAM_policyIAM_userIAM_groupSSM_parameterSecurity_groupSecurity_group_ruleEKS_clusterEKS_node_groupSSOAdmin_permission_setIdentitystore_userIdentitystore_groupInstanceEipDB_instanceRDS_clusterSNS_topicSNS_subscriptionS3_bucketCloudFront_distributionELB_load_balancerELBV2_load_balancerVPCInternet_gatewayNAT_gatewaySubnetVPC_endpointLambda_functionAutoscaling_groupCloudwatchlogs_log_group"
+const _ResourceType_name = "Route53_zoneRoute53_recordIAM_policyIAM_userIAM_groupSSM_parameterSecurity_groupSecurity_group_ruleEKS_clusterEKS_node_groupSSOAdmin_permission_setIdentitystore_userIdentitystore_groupInstanceEipDB_instanceRDS_clusterSNS_topicSNS_subscriptionS3_bucketCloudFront_distributionELB_load_balancerELBV2_load_balancerVPCInternet_gatewayNAT_gatewaySubnetVPC_endpointLambda_functionAutoscaling_groupCloudwatchlogs_log_groupDynamodb_table"
 
-var _ResourceType_index = [...]uint16{0, 12, 26, 36, 44, 53, 66, 80, 99, 110, 124, 147, 165, 184, 192, 195, 206, 217, 226, 242, 251, 274, 291, 310, 313, 329, 340, 346, 358, 373, 390, 414}
+var _ResourceType_index = [...]uint16{0, 12, 26, 36, 44, 53, 66, 80, 99, 110, 124, 147, 165, 184, 192, 195, 206, 217, 226, 242, 251, 274, 291, 310, 313, 329, 340, 346, 358, 373, 390, 414, 428}
 
 func (i ResourceType) String() string {
 	idx := int(i) - 0
