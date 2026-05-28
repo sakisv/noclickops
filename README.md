@@ -51,8 +51,9 @@ exist in your statefiles, and prints the missing ones in a json format for ease 
 | autoscaling   	| autoscaling_group                                                                                            	|
 | lambda        	| lambda_function                                                                                              	|
 | dynamodb      	| dynamodb_table                                                                                               	|
-| cloudwatchlogs	| cloudwatchlogs_log_group                                                                                     	|
+| cloudwatchlogs	| cloudwatch_log_group                                                                                     	    |
 | elasticache   	| elasticache_cluster                                                                                          	|
+| ecs           	| ecs_cluster, ecs_service                                                                                     	|
 
 ## How to use
 
